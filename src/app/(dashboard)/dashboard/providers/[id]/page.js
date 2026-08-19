@@ -1454,6 +1454,7 @@ function ProviderDetailContent() {
             {importingQoderModels ? translate("Fetching...") : translate("Fetch Qoder Models")}
           </button>
         )}
+        </div>
 
         {/* Suggested models from provider API — show only models not yet added */}
         {suggestedModels.length > 0 && (() => {
