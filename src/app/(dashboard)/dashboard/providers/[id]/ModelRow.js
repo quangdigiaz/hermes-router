@@ -62,6 +62,11 @@ export default function ModelRow({
                 FREE
               </span>
             )}
+            {model.tier === "pro" && !isFree && (
+              <span className="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold text-[9px] leading-none border border-purple-500/20 shrink-0">
+                PRO ONLY
+              </span>
+            )}
             {isDisabled && (
               <span className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 text-text-muted text-[9px] leading-none shrink-0">
                 Disabled

@@ -82,6 +82,7 @@ function ProviderDetailContent() {
   const [disabledModelIds, setDisabledModelIds] = useState([]);
   const [selectedModelIds, setSelectedModelIds] = useState([]);
   const [hiddenModelIds, setHiddenModelIds] = useState(() => new Set());
+  const [kiroTierFilter, setKiroTierFilter] = useState("all");
   const [confirmState, setConfirmState] = useState(null);
   const [showAgRiskModal, setShowAgRiskModal] = useState(false);
   const [showUniversalImportModal, setShowUniversalImportModal] = useState(false);
@@ -1245,11 +1246,78 @@ function ProviderDetailContent() {
     });
 
     const visibleCustomRows = customModelRows.filter((m) => !hiddenModelIds.has(m.id));
-    const visibleDisplayModels = displayModels.filter((m) => !hiddenModelIds.has(m.id));
+    let visibleDisplayModels = displayModels.filter((m) => !hiddenModelIds.has(m.id));
+
+    // For Kiro AI: support filtering by Tier (Free vs Pro)
+    if (providerId === "kiro") {
+      if (kiroTierFilter === "free") {
+        visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "free");
+      } else if (kiroTierFilter === "pro") {
+        visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "pro");
+      }
+    }
+
     const allVisibleIds = [...visibleCustomRows.map((m) => m.id), ...visibleDisplayModels.map((m) => m.id)];
 
     return (
       <div className="flex flex-col gap-3">
+        {/* Kiro Tier Switcher & Quick Pro-Disable Safety */}
+        {providerId === "kiro" && (
+          <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-2.5 text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold text-primary">Kiro Tier:</span>
+              <div className="inline-flex rounded-lg border border-border bg-surface p-0.5 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setKiroTierFilter("all")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    kiroTierFilter === "all"
+                      ? "bg-primary text-white"
+                      : "text-text-muted hover:text-text-main"
+                  }`}
+                >
+                  Tất cả (19)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setKiroTierFilter("free")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    kiroTierFilter === "free"
+                      ? "bg-green-600 text-white shadow-xs"
+                      : "text-text-muted hover:text-green-600"
+                  }`}
+                >
+                  🟢 Free Tier (8)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setKiroTierFilter("pro")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    kiroTierFilter === "pro"
+                      ? "bg-purple-600 text-white shadow-xs"
+                      : "text-text-muted hover:text-purple-600"
+                  }`}
+                >
+                  ⭐ Pro Tier (11)
+                </button>
+              </div>
+            </div>
+
+            <Button
+              size="xs"
+              variant="secondary"
+              icon="security"
+              onClick={async () => {
+                const proModelIds = models.filter((m) => m.tier === "pro").map((m) => m.id);
+                await handleDisableAll(proModelIds);
+              }}
+              title="Tắt toàn bộ model Pro để tránh lỗi 400 cho tài khoản Free"
+            >
+              🛡️ Tắt tất cả model Pro (Tránh 400)
+            </Button>
+          </div>
+        )}
+
         {/* Model Selection & Batch Actions Toolbar */}
         {allVisibleIds.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] px-3 py-2 text-xs">

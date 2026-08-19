@@ -24,6 +24,43 @@ export const KIRO_TOOL_NAME_MAX_LENGTH = 64;
 export const KIRO_TOOL_DESCRIPTION_MAX_LENGTH = 10237;
 export const KIRO_TOOL_ID_MAX_LENGTH = 64;
 
+export const KIRO_FREE_MODEL_IDS = new Set([
+  "auto",
+  "claude-sonnet-4.5",
+  "claude-sonnet-4",
+  "deepseek-3.2",
+  "qwen3-coder-next",
+  "glm-5",
+  "minimax-m2.5",
+  "minimax-m2.1",
+]);
+
+export const KIRO_PRO_MODEL_IDS = new Set([
+  "gpt-5.6-sol",
+  "gpt-5.6-terra",
+  "gpt-5.6-luna",
+  "claude-opus-5",
+  "claude-opus-4.8",
+  "claude-opus-4.7",
+  "claude-opus-4.6",
+  "claude-opus-4.5",
+  "claude-sonnet-5",
+  "claude-sonnet-4.6",
+  "claude-haiku-4.5",
+]);
+
+export function isKiroFreeModel(modelId) {
+  if (!modelId) return false;
+  const clean = String(modelId).replace(/^kr\//, "").replace(/^kiro\//, "").replace(/-thinking$/, "").replace(/-agentic$/, "");
+  return KIRO_FREE_MODEL_IDS.has(clean);
+}
+
+export function isKiroProModel(modelId) {
+  if (!modelId) return false;
+  const clean = String(modelId).replace(/^kr\//, "").replace(/^kiro\//, "").replace(/-thinking$/, "").replace(/-agentic$/, "");
+  return KIRO_PRO_MODEL_IDS.has(clean);
+}
+
 /** Resolve a Kiro model after consuming the generic model(level) suffix. */
 export function resolveKiroModelIntent(model) {
   const { cleanModel, override } = parseSuffix(model);

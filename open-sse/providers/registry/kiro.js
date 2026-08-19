@@ -42,31 +42,31 @@ export default {
     },
   },
   models: [
-    // Auto
-    { id: "auto", name: "Auto (Kiro Router)" },
-    // GPT-5.6 (OpenAI) — 272K context, Experimental
-    { id: "gpt-5.6-sol", name: "GPT 5.6 Sol", contextLength: 272000, rateMultiplier: 2.4, upstreamModelId: "gpt-5.6-sol", description: "Flagship GPT-5.6 tier for hardest multi-step work" },
-    { id: "gpt-5.6-terra", name: "GPT 5.6 Terra", contextLength: 272000, rateMultiplier: 1.0, upstreamModelId: "gpt-5.6-terra", description: "Balanced tier for routine multi-step development" },
-    { id: "gpt-5.6-luna", name: "GPT 5.6 Luna", contextLength: 272000, rateMultiplier: 0.1, upstreamModelId: "gpt-5.6-luna", description: "Fastest, lowest-cost GPT-5.6 tier" },
-    // Claude Opus — 1M context
-    { id: "claude-opus-5", name: "Claude Opus 5", contextLength: 1000000, rateMultiplier: 2.2, upstreamModelId: "claude-opus-5", description: "Strongest agentic coding model, state-of-the-art" },
-    { id: "claude-opus-4.8", name: "Claude Opus 4.8", contextLength: 1000000, rateMultiplier: 2.2, upstreamModelId: "claude-opus-4.8", description: "Most honest Opus, 4x less likely to let flaws pass" },
-    { id: "claude-opus-4.7", name: "Claude Opus 4.7", contextLength: 1000000, rateMultiplier: 2.2, upstreamModelId: "claude-opus-4.7", description: "Adaptive thinking, scales reasoning by task complexity" },
-    { id: "claude-opus-4.6", name: "Claude Opus 4.6", contextLength: 1000000, rateMultiplier: 2.2, upstreamModelId: "claude-opus-4.6", description: "Top scores on Terminal-Bench 2.0 and SWE-bench" },
-    { id: "claude-opus-4.5", name: "Claude Opus 4.5", contextLength: 200000, rateMultiplier: 2.2, upstreamModelId: "claude-opus-4.5", description: "Handles tradeoffs and ambiguity well" },
+    // Auto (Free)
+    { id: "auto", name: "Auto (Kiro Router)", tier: "free" },
+    // GPT-5.6 (OpenAI) — 272K context, Pro Only
+    { id: "gpt-5.6-sol", name: "GPT 5.6 Sol", tier: "pro", contextLength: 272000, rateMultiplier: 2.4, upstreamModelId: "gpt-5.6-sol", description: "Flagship GPT-5.6 tier for hardest multi-step work" },
+    { id: "gpt-5.6-terra", name: "GPT 5.6 Terra", tier: "pro", contextLength: 272000, rateMultiplier: 1.0, upstreamModelId: "gpt-5.6-terra", description: "Balanced tier for routine multi-step development" },
+    { id: "gpt-5.6-luna", name: "GPT 5.6 Luna", tier: "pro", contextLength: 272000, rateMultiplier: 0.1, upstreamModelId: "gpt-5.6-luna", description: "Fastest, lowest-cost GPT-5.6 tier" },
+    // Claude Opus — 1M context, Pro Only
+    { id: "claude-opus-5", name: "Claude Opus 5", tier: "pro", contextLength: 1000000, rateMultiplier: 2.2, upstreamModelId: "claude-opus-5", description: "Strongest agentic coding model, state-of-the-art" },
+    { id: "claude-opus-4.8", name: "Claude Opus 4.8", tier: "pro", contextLength: 1000000, rateMultiplier: 2.2, upstreamModelId: "claude-opus-4.8", description: "Most honest Opus, 4x less likely to let flaws pass" },
+    { id: "claude-opus-4.7", name: "Claude Opus 4.7", tier: "pro", contextLength: 1000000, rateMultiplier: 2.2, upstreamModelId: "claude-opus-4.7", description: "Adaptive thinking, scales reasoning by task complexity" },
+    { id: "claude-opus-4.6", name: "Claude Opus 4.6", tier: "pro", contextLength: 1000000, rateMultiplier: 2.2, upstreamModelId: "claude-opus-4.6", description: "Top scores on Terminal-Bench 2.0 and SWE-bench" },
+    { id: "claude-opus-4.5", name: "Claude Opus 4.5", tier: "pro", contextLength: 200000, rateMultiplier: 2.2, upstreamModelId: "claude-opus-4.5", description: "Handles tradeoffs and ambiguity well" },
     // Claude Sonnet
-    { id: "claude-sonnet-5", name: "Claude Sonnet 5", contextLength: 1000000, rateMultiplier: 1.3, upstreamModelId: "claude-sonnet-5", description: "Most agentic Sonnet, approaches Opus 4.8" },
-    { id: "claude-sonnet-4.6", name: "Claude Sonnet 4.6", contextLength: 1000000, rateMultiplier: 1.3, upstreamModelId: "claude-sonnet-4.6", description: "Full upgrade from Sonnet 4.5, approaches Opus 4.6" },
-    { id: "claude-sonnet-4.5", name: "Claude Sonnet 4.5", contextLength: 200000, rateMultiplier: 1.3, upstreamModelId: "claude-sonnet-4.5", description: "Strong agentic coding with extended autonomous operation" },
-    { id: "claude-sonnet-4", name: "Claude Sonnet 4.0", contextLength: 200000, rateMultiplier: 1.3, upstreamModelId: "claude-sonnet-4", description: "Direct access, predictable behavior" },
-    // Claude Haiku
-    { id: "claude-haiku-4.5", name: "Claude Haiku 4.5", contextLength: 200000, rateMultiplier: 0.4, upstreamModelId: "claude-haiku-4.5", description: "Fastest model with near-frontier performance" },
-    // Non-Anthropic
-    { id: "deepseek-3.2", name: "DeepSeek 3.2", contextLength: 128000, rateMultiplier: 0.25, upstreamModelId: "deepseek-3.2", strip: ["image", "audio"], description: "Best for agentic workflows and code generation" },
-    { id: "qwen3-coder-next", name: "Qwen3 Coder Next", contextLength: 256000, rateMultiplier: 0.05, upstreamModelId: "qwen3-coder-next", strip: ["image", "audio"], description: "Purpose-built for coding agents, most cost-effective" },
-    { id: "glm-5", name: "GLM 5", contextLength: 200000, rateMultiplier: 0.5, upstreamModelId: "glm-5", description: "Sparse MoE for complex systems engineering" },
-    { id: "minimax-m2.5", name: "MiniMax M2.5", contextLength: 200000, rateMultiplier: 0.25, upstreamModelId: "minimax-m2.5", description: "Open weight, near frontier-class coding" },
-    { id: "minimax-m2.1", name: "MiniMax M2.1", contextLength: 200000, rateMultiplier: 0.15, upstreamModelId: "minimax-m2.1", description: "Best for multilingual programming and UI generation" },
+    { id: "claude-sonnet-5", name: "Claude Sonnet 5", tier: "pro", contextLength: 1000000, rateMultiplier: 1.3, upstreamModelId: "claude-sonnet-5", description: "Most agentic Sonnet, approaches Opus 4.8" },
+    { id: "claude-sonnet-4.6", name: "Claude Sonnet 4.6", tier: "pro", contextLength: 1000000, rateMultiplier: 1.3, upstreamModelId: "claude-sonnet-4.6", description: "Full upgrade from Sonnet 4.5, approaches Opus 4.6" },
+    { id: "claude-sonnet-4.5", name: "Claude Sonnet 4.5", tier: "free", contextLength: 200000, rateMultiplier: 1.3, upstreamModelId: "claude-sonnet-4.5", description: "Strong agentic coding with extended autonomous operation" },
+    { id: "claude-sonnet-4", name: "Claude Sonnet 4.0", tier: "free", contextLength: 200000, rateMultiplier: 1.3, upstreamModelId: "claude-sonnet-4", description: "Direct access, predictable behavior" },
+    // Claude Haiku (Pro Only)
+    { id: "claude-haiku-4.5", name: "Claude Haiku 4.5", tier: "pro", contextLength: 200000, rateMultiplier: 0.4, upstreamModelId: "claude-haiku-4.5", description: "Fastest model with near-frontier performance" },
+    // Non-Anthropic (Free Tier)
+    { id: "deepseek-3.2", name: "DeepSeek 3.2", tier: "free", contextLength: 128000, rateMultiplier: 0.25, upstreamModelId: "deepseek-3.2", strip: ["image", "audio"], description: "Best for agentic workflows and code generation" },
+    { id: "qwen3-coder-next", name: "Qwen3 Coder Next", tier: "free", contextLength: 256000, rateMultiplier: 0.05, upstreamModelId: "qwen3-coder-next", strip: ["image", "audio"], description: "Purpose-built for coding agents, most cost-effective" },
+    { id: "glm-5", name: "GLM 5", tier: "free", contextLength: 200000, rateMultiplier: 0.5, upstreamModelId: "glm-5", description: "Sparse MoE for complex systems engineering" },
+    { id: "minimax-m2.5", name: "MiniMax M2.5", tier: "free", contextLength: 200000, rateMultiplier: 0.25, upstreamModelId: "minimax-m2.5", description: "Open weight, near frontier-class coding" },
+    { id: "minimax-m2.1", name: "MiniMax M2.1", tier: "free", contextLength: 200000, rateMultiplier: 0.15, upstreamModelId: "minimax-m2.1", description: "Best for multilingual programming and UI generation" },
   ],
   oauth: {
     ssoOidcEndpoint: "https://oidc.us-east-1.amazonaws.com",
