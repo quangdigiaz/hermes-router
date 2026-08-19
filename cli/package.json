@@ -1,6 +1,6 @@
 {
   "name": "hermes-router",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Hermes Router CLI - Start and manage Hermes Router server",
   "repository": "https://github.com/quangdigiaz/hermes-router",
   "bin": {

@@ -1,6 +1,6 @@
 {
   "name": "hermes-router-app",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Hermes Router web dashboard",
   "private": true,
   "engines": {

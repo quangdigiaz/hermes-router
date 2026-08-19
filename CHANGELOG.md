@@ -1,3 +1,17 @@
+# v1.4.2 (2026-08-19)
+
+Hermes Router 1.4.2 introduces Multi-Lingual 402 Paywall Detection & Account Lock, Dual-Mode Studio Pro UI, ZenMux `/api/v1` Base URL integration, Kiro AI Model Tier classification, and comprehensive Model Management with Batch Actions.
+
+## Key Features & Highlights
+
+- **Multi-Lingual 402 Paywall Detection** — Intercepts wallet exhaustion patterns across English, Chinese (`钱包余额不足`), and Indonesian (`Token tidak mencukupi`), extracts recharge URLs, locks depleted accounts with bright red badges, and fast-skips them during request routing.
+- **Dual-Mode Studio Pro UI** — Added interactive `[✨ Studio Pro | 🖥️ Classic]` mode switcher featuring glassmorphism, ambient lighting, brand-colored glow cards, and a modern Model Catalog.
+- **Provider UI Layout Hardening** — Separated provider titles into full-width top rows, preventing name truncation for `Kiro AI`, `Gemini CLI`, `NVIDIA NIM`, `OpenRouter`, and `Google Gemini`.
+- **ZenMux Integration** — Corrected official OpenAI Base URL to `https://zenmux.ai/api/v1` and added centralized curation with free tier indicators.
+- **Kiro AI Tier Classification & Safety Guard** — Classified Kiro models into Free (8 models) and Pro (11 models), added visual `PRO ONLY` badges, tier filter tabs, and a 1-click button to disable all Pro models for Free accounts to prevent 400 errors.
+- **Model Management & Batch Actions** — Added multi-select checkboxes, batch action toolbar (Select All, Active Selected, Disable Selected, Delete Selected), and universal Delete/Hide buttons on all model cards.
+- **Auto-Healing Connections** — Testing connections or models automatically clears stale `lastError`, `errorCode`, and `rechargeUrl` upon successful ping, returning connections to `active` state.
+
 # v0.9.99 (2026-08-09)
 
 Hermes Router 0.9.99 hardens Qoder authentication, proxy-pool batch operations, OAuth callback handling, and SQLite fallback compatibility.
