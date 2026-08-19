@@ -152,6 +152,7 @@ export default function Sidebar({ onClose }) {
                   </code>
                 </button>
               </div>
+            </div>
           )}
         </div>
 
