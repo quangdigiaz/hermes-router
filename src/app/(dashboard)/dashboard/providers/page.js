@@ -402,15 +402,6 @@ export default function ProvidersPage() {
       : apikeyEntries.slice(0, APIKEY_INITIAL_VISIBLE);
   const hiddenApikeyCount = apikeyEntries.length - APIKEY_INITIAL_VISIBLE;
 
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-8">
-        <CardSkeleton />
-        <CardSkeleton />
-      </div>
-    );
-  }
-
   const hasAnyResult =
     oauthEntries.length > 0 ||
     freeEntries.length > 0 ||
@@ -420,25 +411,24 @@ export default function ProvidersPage() {
     compatibleProviders.length > 0 ||
     anthropicCompatibleProviders.length > 0;
 
-  const allDisplayProviders = useMemo(() => {
-    return [
-      ...oauthEntries,
-      ...freeEntries,
-      ...freeTierEntries,
-      ...apikeyEntries,
-      ...webCookieEntries,
-      ...compatibleProviders.map((p) => [p.id, p]),
-      ...anthropicCompatibleProviders.map((p) => [p.id, p]),
-    ];
-  }, [
-    oauthEntries,
-    freeEntries,
-    freeTierEntries,
-    apikeyEntries,
-    webCookieEntries,
-    compatibleProviders,
-    anthropicCompatibleProviders,
-  ]);
+  const allDisplayProviders = [
+    ...oauthEntries,
+    ...freeEntries,
+    ...freeTierEntries,
+    ...apikeyEntries,
+    ...webCookieEntries,
+    ...compatibleProviders.map((p) => [p.id, p]),
+    ...anthropicCompatibleProviders.map((p) => [p.id, p]),
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-8">
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-w-0 flex-col gap-6 px-1 sm:px-0">
