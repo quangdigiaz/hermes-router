@@ -98,6 +98,73 @@ const QUOTA_EXHAUSTED_PATTERNS = [
 ];
 
 /**
+ * Universal payment required / wallet balance exhausted patterns across languages.
+ * Covers English, Chinese (TeamoRouter), and Indonesian (HalloRouter).
+ */
+export const PAYMENT_REQUIRED_PATTERNS = [
+  // Chinese
+  /钱包余额不足/i,
+  /余额不足/i,
+  /充值后继续使用/i,
+  /请前往.*充值/i,
+  // Indonesian / Malay
+  /token tidak mencukupi/i,
+  /saldo tidak cukup/i,
+  /kuota habis/i,
+  // English
+  /insufficient.?balance/i,
+  /insufficient.?funds/i,
+  /insufficient.?tokens?/i,
+  /insufficient.?quota/i,
+  /insufficient balance for billable/i,
+  /available_quota/i,
+  /min_required_credit/i,
+  /min_required_quota/i,
+  /payment.?required/i,
+  /recharge.?required/i,
+  /out of credits?/i,
+  /balance.?zero/i,
+  /enterprise_wallet/i,
+];
+
+/**
+ * Returns true if the status or body indicates an account-level payment/balance exhaustion error.
+ * @param {number|undefined} status
+ * @param {unknown} body
+ * @returns {boolean}
+ */
+export function isPaymentRequiredError(status, body) {
+  if (status === 402) return true;
+  const text = bodyToText(body);
+  if (!text) return false;
+  return PAYMENT_REQUIRED_PATTERNS.some((pat) => pat.test(text));
+}
+
+/**
+ * Extracts a recharge / top-up URL from error JSON or message text.
+ * @param {unknown} body
+ * @param {string} [providerWebsite=""]
+ * @returns {string|null}
+ */
+export function extractRechargeUrl(body, providerWebsite = "") {
+  if (!body) return providerWebsite || null;
+  // (a) Check JSON properties
+  try {
+    const data = typeof body === "string" ? JSON.parse(body) : body;
+    if (data?.error?.details?.recharge_url) return data.error.details.recharge_url;
+    if (data?.details?.recharge_url) return data.details.recharge_url;
+    if (data?.recharge_url) return data.recharge_url;
+  } catch {}
+
+  // (b) Check embedded URL in message text (e.g. Orca / Teamo)
+  const text = bodyToText(body);
+  const urlMatch = text.match(/https?:\/\/[^\s"'<>\\]*(?:buy|billing|recharge|dashboard\?buy|topup|wallet|console\/billing)[^\s"'<>\\]*/i);
+  if (urlMatch) return urlMatch[0];
+
+  return providerWebsite || null;
+}
+
+/**
  * Coerce a body of unknown shape to a string for keyword scanning.
  * - string: returned as-is
  * - object: JSON-stringified (so nested error.message gets scanned)
@@ -212,6 +279,11 @@ export function classify429(response) {
     isGeminiGenericRateLimit(response.body)
   ) {
     return { kind: "rate_limit", cooldownMs: RATE_LIMIT_COOLDOWN_MS };
+  }
+  // Check Retry-After header: if present and valid, honor the upstream duration
+  const retrySec = retryAfterFromResponse(response);
+  if (retrySec !== null && retrySec > 0) {
+    return { kind: "rate_limit", cooldownMs: retrySec * 1000 };
   }
   // HTTP 402 Payment Required is unambiguously a billing/quota signal.
   if (response.status === 402) {

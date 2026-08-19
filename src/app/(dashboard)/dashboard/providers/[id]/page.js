@@ -674,10 +674,11 @@ function ProviderDetailContent() {
   };
 
   const handleRunOneByOneTest = async () => {
-    if (oneByOneRunning || connections.length === 0) return;
+    const activeConnections = connections.filter((conn) => conn.isActive !== false);
+    if (oneByOneRunning || activeConnections.length === 0) return;
 
     const queuedState = Object.fromEntries(
-      connections.map((connection) => [connection.id, { state: "queued", error: null }]),
+      activeConnections.map((connection) => [connection.id, { state: "queued", error: null }]),
     );
 
     stopOneByOneRef.current = false;
@@ -685,16 +686,16 @@ function ProviderDetailContent() {
     setOneByOneStopping(false);
     setOneByOneCurrentConnectionId(null);
     setOneByOneResults(queuedState);
-    setOneByOneSummary({ total: connections.length, completed: 0, passed: 0, failed: 0, stopped: false });
+    setOneByOneSummary({ total: activeConnections.length, completed: 0, passed: 0, failed: 0, stopped: false });
 
     let passed = 0;
     let failed = 0;
 
     try {
-      for (let index = 0; index < connections.length; index += 1) {
+      for (let index = 0; index < activeConnections.length; index += 1) {
         if (stopOneByOneRef.current) {
           setOneByOneSummary({
-            total: connections.length,
+            total: activeConnections.length,
             completed: index,
             passed,
             failed,
@@ -703,7 +704,7 @@ function ProviderDetailContent() {
           break;
         }
 
-        const connection = connections[index];
+        const connection = activeConnections[index];
         setOneByOneCurrentConnectionId(connection.id);
         setOneByOneResults((prev) => ({
           ...prev,
@@ -740,14 +741,14 @@ function ProviderDetailContent() {
         }
 
         setOneByOneSummary({
-          total: connections.length,
+          total: activeConnections.length,
           completed: index + 1,
           passed,
           failed,
           stopped: false,
         });
 
-        if (index < connections.length - 1) {
+        if (index < activeConnections.length - 1) {
           await sleep(ONE_BY_ONE_DELAY_MS);
         }
       }
@@ -1147,14 +1148,23 @@ function ProviderDetailContent() {
     if (testingModelIds.has(modelId)) return;
     setTestingModelIds((prev) => new Set(prev).add(modelId));
     try {
+      // Pass first active connectionId for auto-heal (clear stale lastError on success)
+      const activeConn = connections.find((c) => c.isActive !== false);
       const res = await fetch("/api/models/test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: `${providerStorageAlias}/${modelId}` }),
+        body: JSON.stringify({
+          model: `${providerStorageAlias}/${modelId}`,
+          ...(activeConn ? { connectionId: activeConn.id } : {}),
+        }),
       });
       const data = await res.json();
       setModelTestResults((prev) => ({ ...prev, [modelId]: data.ok ? "ok" : "error" }));
       setModelsTestError(data.ok ? "" : (data.error || "Model not reachable"));
+      // Auto-heal: refresh connections to reflect cleared lastError
+      if (data.ok && activeConn) {
+        fetchConnections();
+      }
     } catch {
       setModelTestResults((prev) => ({ ...prev, [modelId]: "error" }));
       setModelsTestError("Network error");

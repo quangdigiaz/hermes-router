@@ -30,6 +30,9 @@ import { useCircuitBreakers } from "@/shared/hooks/useCircuitBreakers";
 import CircuitBreakerBadge from "./components/CircuitBreakerBadge";
 import SegmentedControl from "@/shared/components/SegmentedControl";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
+import { useUiMode } from "@/shared/hooks/useUiMode";
+import UiModeSwitcher from "@/shared/components/UiModeSwitcher";
+import StudioProvidersView from "./StudioProvidersView";
 
 function getStatusDisplay(connected, error, errorCode) {
   const parts = [];
@@ -138,6 +141,7 @@ export default function ProvidersPage() {
     useState(false);
   const [testingMode, setTestingMode] = useState(null);
   const [testResults, setTestResults] = useState(null);
+  const { isStudio } = useUiMode();
   const notify = useNotificationStore();
   const searchQuery = useHeaderSearchStore((s) => s.query);
   const registerSearch = useHeaderSearchStore((s) => s.register);
@@ -416,26 +420,65 @@ export default function ProvidersPage() {
     compatibleProviders.length > 0 ||
     anthropicCompatibleProviders.length > 0;
 
+  const allDisplayProviders = useMemo(() => {
+    return [
+      ...oauthEntries,
+      ...freeEntries,
+      ...freeTierEntries,
+      ...apikeyEntries,
+      ...webCookieEntries,
+      ...compatibleProviders.map((p) => [p.id, p]),
+      ...anthropicCompatibleProviders.map((p) => [p.id, p]),
+    ];
+  }, [
+    oauthEntries,
+    freeEntries,
+    freeTierEntries,
+    apikeyEntries,
+    webCookieEntries,
+    compatibleProviders,
+    anthropicCompatibleProviders,
+  ]);
+
   return (
     <div className="flex min-w-0 flex-col gap-6 px-1 sm:px-0">
-      {/* Tier Filter Tabs */}
-      <div className="flex items-center justify-between gap-4">
+      {/* Tier Filter Tabs & Mode Switcher */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <SegmentedControl
           options={dynamicTierOptions}
           value={filterTier}
           onChange={setFilterTier}
           size="sm"
         />
+        <UiModeSwitcher />
       </div>
 
-      {!hasAnyResult && (
-        <div className="text-center py-8 border border-dashed border-border rounded-xl">
-          <span className="material-symbols-outlined text-[32px] text-text-muted mb-2">
-            search_off
-          </span>
-          <p className="text-text-muted text-sm">No providers match your search</p>
-        </div>
-      )}
+      {isStudio ? (
+        <StudioProvidersView
+          providers={allDisplayProviders}
+          connections={connections}
+          providerNodes={providerNodes}
+          getProviderStats={getProviderStats}
+          handleToggleProvider={handleToggleProvider}
+          handleBatchTest={handleBatchTest}
+          testingMode={testingMode}
+          searchQuery={searchQuery}
+          filterTier={filterTier}
+          setFilterTier={setFilterTier}
+          tierFilters={tierFilters}
+          setShowAddCompatibleModal={setShowAddCompatibleModal}
+          setShowAddAnthropicCompatibleModal={setShowAddAnthropicCompatibleModal}
+        />
+      ) : (
+        <>
+          {!hasAnyResult && (
+            <div className="text-center py-8 border border-dashed border-border rounded-xl">
+              <span className="material-symbols-outlined text-[32px] text-text-muted mb-2">
+                search_off
+              </span>
+              <p className="text-text-muted text-sm">No providers match your search</p>
+            </div>
+          )}
 
       {/* Custom Providers (OpenAI/Anthropic Compatible) — dynamic */}
       {(isCustomFilter || filterTier === "all") && (
@@ -696,6 +739,8 @@ export default function ProvidersPage() {
           setShowAddAnthropicCompatibleModal(false);
         }}
       />
+      </>
+      )}
 
       {/* Test Results Modal */}
       {testResults && (
@@ -770,9 +815,13 @@ function ProviderCard({ providerId, provider, stats, authType, onToggle, circuit
                 fallbackColor={provider.color}
               />
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h3 className="truncate font-semibold">{provider.name}</h3>
+            <div className="min-w-0 flex-1">
+              <div className="min-w-0">
+                <h3 className="truncate font-semibold text-sm leading-snug" title={provider.name}>
+                  {provider.name}
+                </h3>
+              </div>
+              <div className="flex min-w-0 items-center gap-1.5 text-xs flex-wrap mt-0.5">
                 {provider.curatedTier && provider.curatedTier !== "community" && (
                   <Badge variant={TIER_VARIANT[provider.curatedTier] || "default"} size="sm" icon={provider.curatedTier === "official" ? "verified" : undefined}>
                     {provider.curatedTier}
@@ -783,8 +832,6 @@ function ProviderCard({ providerId, provider, stats, authType, onToggle, circuit
                     {badge}
                   </Badge>
                 ))}
-              </div>
-              <div className="flex min-w-0 items-center gap-1.5 text-xs flex-wrap">
                 {allDisabled ? (
                   <Badge variant="default" size="sm">
                     <span className="flex items-center gap-1">
@@ -899,9 +946,13 @@ function ApiKeyProviderCard({
                 fallbackColor={provider.color}
               />
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h3 className="truncate font-semibold">{provider.name}</h3>
+            <div className="min-w-0 flex-1">
+              <div className="min-w-0">
+                <h3 className="truncate font-semibold text-sm leading-snug" title={provider.name}>
+                  {provider.name}
+                </h3>
+              </div>
+              <div className="flex min-w-0 items-center gap-1.5 text-xs flex-wrap mt-0.5">
                 {provider.curatedTier && provider.curatedTier !== "community" && (
                   <Badge variant={TIER_VARIANT[provider.curatedTier] || "default"} size="sm">
                     {provider.curatedTier}
@@ -912,8 +963,6 @@ function ApiKeyProviderCard({
                     {badge}
                   </Badge>
                 ))}
-              </div>
-              <div className="flex min-w-0 items-center gap-1.5 text-xs flex-wrap">
                 {allDisabled ? (
                   <Badge variant="default" size="sm">
                     <span className="flex items-center gap-1">

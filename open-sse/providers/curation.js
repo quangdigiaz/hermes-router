@@ -42,6 +42,7 @@ export const CURATION_DATA = {
   "cloudflare-ai": { curatedTier: "free", curatedPriority: 85,  badges: ["free"] },
   sambanova:       { curatedTier: "free", curatedPriority: 80,  badges: ["free"] },
   deepinfra:       { curatedTier: "free", curatedPriority: 75,  badges: ["free"] },
+  zenmux:          { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular"] },
 
   // Experimental
   antigravity:      { curatedTier: "experimental", curatedPriority: 50, badges: ["new"] },

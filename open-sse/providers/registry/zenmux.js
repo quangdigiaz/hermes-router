@@ -15,17 +15,17 @@ export default {
   },
   category: "apikey",
   transport: {
-    baseUrl: "https://zenmux.ai/v1/chat/completions",
-    validateUrl: "https://zenmux.ai/v1/models",
+    baseUrl: "https://zenmux.ai/api/v1/chat/completions",
+    validateUrl: "https://zenmux.ai/api/v1/models",
   },
   serviceKinds: ["llm", "embedding", "image"],
   embeddingConfig: {
-    baseUrl: "https://zenmux.ai/v1/embeddings",
+    baseUrl: "https://zenmux.ai/api/v1/embeddings",
     authType: "apikey",
     authHeader: "bearer",
   },
   imageConfig: {
-    baseUrl: "https://zenmux.ai/v1/images/generations",
+    baseUrl: "https://zenmux.ai/api/v1/images/generations",
   },
   models: [
     { id: "gpt-5.6-sol", name: "GPT-5.6 Sol" },
@@ -47,6 +47,6 @@ export default {
     { id: "glm-5.2", name: "GLM 5.2" },
     { id: "minimax-m3", name: "MiniMax M3" },
   ],
-  modelsFetcher: { url: "https://zenmux.ai/v1/models", type: "openai" },
+  modelsFetcher: { url: "https://zenmux.ai/api/v1/models", type: "openai" },
   passthroughModels: true,
 };

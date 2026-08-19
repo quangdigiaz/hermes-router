@@ -193,7 +193,11 @@ export default function ConnectionRow({ connection, proxyPools, isOAuth, isFirst
           )}
           <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
             <Badge variant={getStatusVariant()} size="sm" dot>
-              {connection.isActive === false ? "disabled" : (effectiveStatus || "Unknown")}
+              {connection.isActive === false
+                ? "disabled"
+                : (effectiveStatus === "payment_required" || connection.lastErrorType === "payment_required")
+                  ? "💳 Cần nạp tiền"
+                  : (effectiveStatus || "Unknown")}
             </Badge>
             <Badge variant="default" size="sm">
               {authLabel}
@@ -202,6 +206,19 @@ export default function ConnectionRow({ connection, proxyPools, isOAuth, isFirst
               <Badge variant={proxyBadgeVariant} size="sm">
                 Proxy
               </Badge>
+            )}
+            {connection.rechargeUrl && connection.isActive !== false && (
+              <a
+                href={connection.rechargeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 rounded bg-red-500/10 px-2 py-0.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-colors"
+                title="Truy cập trang nạp tiền của nhà cung cấp"
+              >
+                <span className="material-symbols-outlined text-[13px]">open_in_new</span>
+                <span>Nạp tiền ngay</span>
+              </a>
             )}
             {isCooldown && connection.isActive !== false && <CooldownTimer until={modelLockUntil} />}
             {connection.lastError && connection.isActive !== false && (

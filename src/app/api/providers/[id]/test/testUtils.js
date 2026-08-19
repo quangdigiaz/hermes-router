@@ -893,6 +893,9 @@ export async function testSingleConnection(id, overrides = null) {
   const updateData = {
     testStatus: result.valid ? "active" : "error",
     lastError: result.valid ? (softWarning || null) : result.error,
+    lastErrorType: result.valid ? null : (result.errorType || null),
+    errorCode: result.valid ? null : (result.statusCode || result.errorCode || null),
+    rechargeUrl: result.valid ? null : undefined,
     lastErrorAt: result.valid
       ? softWarning
         ? new Date().toISOString()

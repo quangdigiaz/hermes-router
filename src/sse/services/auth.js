@@ -1,7 +1,7 @@
 import { getProviderConnections, validateApiKey, updateProviderConnection, getSettings, getProviderNodeById, getProxyPools } from "@/lib/localDb";
 import { resolveConnectionProxyConfig, pickProxyPoolId } from "@/lib/network/connectionProxy";
 import { formatRetryAfter, checkFallbackError, isModelLockActive, buildModelLockUpdate, getEarliestModelLockUntil } from "open-sse/services/accountFallback.js";
-import { classify429 } from "open-sse/utils/classify429.js";
+import { classify429, isPaymentRequiredError, extractRechargeUrl } from "open-sse/utils/classify429.js";
 import { MAX_RATE_LIMIT_COOLDOWN_MS } from "open-sse/config/errorConfig.js";
 import { resolveProviderId, FREE_PROVIDERS, AI_PROVIDERS, getProviderAlias, isOpenAICompatibleProvider, isAnthropicCompatibleProvider, isCustomEmbeddingProvider } from "@/shared/constants/providers.js";
 import * as log from "../utils/logger.js";
@@ -90,8 +90,9 @@ export async function getProviderCredentials(provider, excludeConnectionIds = nu
       return null;
     }
 
-    // Filter out model-locked and excluded connections
+    // Filter out payment_required, model-locked and excluded connections
     const availableConnections = connections.filter(c => {
+      if (c.testStatus === "payment_required") return false;
       if (excludeSet.has(c.id)) return false;
       if (isModelLockActive(c, model)) return false;
       return true;
@@ -253,6 +254,23 @@ export async function markAccountUnavailable(connectionId, status, errorText, pr
     shouldFallback = true;
     cooldownMs = Math.min(resetsAtMs - Date.now(), MAX_RATE_LIMIT_COOLDOWN_MS);
     newBackoffLevel = 0;
+  } else if (isPaymentRequiredError(status, errorText)) {
+    const rechargeUrl = extractRechargeUrl(errorText, "");
+    const reason = typeof errorText === "string" ? errorText.slice(0, 300) : "Payment required (insufficient balance)";
+    await updateProviderConnection(connectionId, {
+      testStatus: "payment_required",
+      lastErrorType: "payment_required",
+      lastError: reason,
+      errorCode: status || 402,
+      rechargeUrl: rechargeUrl || undefined,
+      lastErrorAt: new Date().toISOString(),
+    });
+    const connName = conn?.displayName || conn?.name || conn?.email || connectionId.slice(0, 8);
+    log.warn("AUTH", `${connName} account-locked [PAYMENT_REQUIRED] (needs top-up)`);
+    if (provider && status && reason) {
+      console.error(`❌ ${provider} [${status}]: ${reason}`);
+    }
+    return { shouldFallback: true, cooldownMs: 0 };
   } else if (status === 429) {
     // Use classify429 for all 429 responses so rate_limit, quota_exhausted,
     // and daily_quota get deterministic, semantically correct cooldowns
@@ -287,12 +305,15 @@ export async function markAccountUnavailable(connectionId, status, errorText, pr
   // These are request format errors, not auth errors — token may still be valid.
   const isNonAuth4xx = status >= 400 && status < 500 && status !== 401 && status !== 403;
 
+  // Model-specific 400 errors (e.g. INVALID_MODEL_ID on free tier): lock the
+  // model but don't pollute connection error state — the token is still valid.
+  const isModel400 = status === 400;
   await updateProviderConnection(connectionId, {
     ...lockUpdate,
     testStatus: isNonAuth4xx ? conn?.testStatus : "unavailable",
-    lastError: reason,
-    errorCode: status,
-    lastErrorAt: new Date().toISOString(),
+    lastError: isModel400 ? null : reason,
+    errorCode: isModel400 ? null : status,
+    lastErrorAt: isModel400 ? null : new Date().toISOString(),
     backoffLevel: newBackoffLevel ?? backoffLevel
   });
 

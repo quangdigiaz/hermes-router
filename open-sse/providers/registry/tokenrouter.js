@@ -31,7 +31,6 @@ export default {
     { id: "minimax-m3", name: "MiniMax M3" },
     { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash" },
     { id: "glm-5.2", name: "GLM 5.2" },
-    { id: "glm-5.2-free", name: "GLM 5.2 Free" },
     { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro Preview" },
     { id: "deepseek-v4-pro", name: "DeepSeek V4 Pro" },
     { id: "deepseek-v4-flash", name: "DeepSeek V4 Flash" },
