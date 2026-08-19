@@ -1,0 +1,37 @@
+import { NextResponse } from "next/server";
+import { FILTERS } from "./filters.js";
+import { assertPublicUrl } from "@/shared/utils/ssrfGuard.js";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const url = searchParams.get("url");
+  const type = searchParams.get("type");
+
+  if (!url || !type) {
+    return NextResponse.json({ error: "Missing url or type" }, { status: 400 });
+  }
+
+  const filter = FILTERS[type];
+  if (!filter) {
+    return NextResponse.json({ error: "Unknown filter type" }, { status: 400 });
+  }
+
+  try {
+    await assertPublicUrl(url);
+    const res = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(5000) });
+    if (!res.ok) {
+      return NextResponse.json({ data: [] });
+    }
+    const json = await res.json();
+    const raw = json.data ?? json.models ?? json;
+    // Resolve registry entry by provider name so filters can use the registry as source of truth.
+    // Convention: <provider>-free key → strip suffix to find registry id (e.g. "nvidia-free" → "nvidia").
+    const providerId = type.endsWith("-free") ? type.slice(0, -"-free".length) : type;
+    const data = filter(Array.isArray(raw) ? raw : []);
+    return NextResponse.json({ data });
+  } catch {
+    return NextResponse.json({ data: [] });
+  }
+}

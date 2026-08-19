@@ -1,0 +1,4 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "small_model": "cx/gpt-5.4"
+}

@@ -1,0 +1,14 @@
+# Ignore everything except what's in package.json "files"
+*
+!cli.js
+!hooks/
+!app/
+!package.json
+!README.md
+!LICENSE
+
+!app/_nm/@swc/helpers/_
+!app/_nm/@swc/helpers/_/**
+!app/_nm/@swc/helpers/cjs
+!app/_nm/@swc/helpers/cjs/**
+

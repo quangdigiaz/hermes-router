@@ -1,0 +1,142 @@
+# =============================================================================
+# Dependencies
+# =============================================================================
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+package-lock.json
+
+# =============================================================================
+# Build output
+# =============================================================================
+/.next/
+/.next-cli-build/
+/out/
+/build
+cli/.build-home/
+
+# =============================================================================
+# Environment & secrets (NEVER commit)
+# =============================================================================
+.env
+.env.*
+!.env.example
+.kiro/steering/secrets.md
+.kilo/
+.npmrc
+
+# =============================================================================
+# IDE & editor
+# =============================================================================
+.idea/
+.vscode/
+.cursor/
+.DS_Store
+
+# =============================================================================
+# Logs & temp files
+# =============================================================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dev.out.log
+nohup.out
+logs/*
+*.pem
+
+# =============================================================================
+# Test artifacts & debug scripts
+# =============================================================================
+/coverage
+test-*.mjs
+solve-captcha.mjs
+.playwright-mcp/
+.tmp/
+tests/__baseline__/current.json
+
+# =============================================================================
+# Temp notes & scratch docs
+# =============================================================================
+plan.md
+OAUTH_*.md
+ZCODE_KNOWLEDGE.md
+PR/*
+RM.md
+RM.vn.md
+PUBLIC.md
+PUBLIC.en.md
+Thanks.md
+README1.md
+
+# =============================================================================
+# Database (runtime)
+# =============================================================================
+*.db
+data/
+
+# =============================================================================
+# External research repos (code reading only, never commit)
+# =============================================================================
+/_external/
+
+# =============================================================================
+# Internal docs, playbooks, research & agent guides (never commit)
+# =============================================================================
+/playbooks/
+/_tasks/
+/WORKSPACE-STATUS.md
+/project-tracker.yaml
+/AGENTS.md
+/agent.md
+/CLAUDE.md
+
+# =============================================================================
+# Misc exclusions
+# =============================================================================
+nul
+chrome/
+product
+source/*
+.bin/*
+test/*
+open-sse/test/*
+open-sse.old/
+ecosystem.config.*
+deploy*.sh
+scripts/agSniffer/*
+gitbooks/*
+gitbook/README.md
+.github/instructions/codacy.instructions.md
+
+# =============================================================================
+# TypeScript
+# =============================================================================
+*.tsbuildinfo
+next-env.d.ts
+
+# =============================================================================
+# Vercel
+# =============================================================================
+.vercel
+.fakehome/
+
+# =============================================================================
+# Tooling-generated artifacts (kimchi / understand-anything)
+# =============================================================================
+# .kimchi/ contains generated audit and lighthouse reports; .understand-anything/
+# contains generated knowledge-graph data. These are produced by the project
+# tooling and regenerated on demand — do not commit fresh generations.
+/.kimchi/
+/.understand-anything/
+
+# Refactor backup reference / graphify output (do not bundle/lint)
+.graphifyignore
+graphify-out/*
+.next-analyze/*

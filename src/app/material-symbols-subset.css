@@ -1,0 +1,40 @@
+/* Material Symbols Outlined — self-hosted.
+ *
+ * Font file: public/fonts/material-symbols-outlined.woff2 (from the
+ * `material-symbols` npm package). Self-hosted so icons never wait on
+ * fonts.googleapis.com (slow/unreliable in some regions — icons needed
+ * multiple F5s to appear).
+ *
+ * The npm package ships the full font (3.8MB, ~3500 icons). If page weight
+ * matters later, subset it to only the icons used in JSX.
+ */
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/material-symbols-outlined.woff2') format('woff2');
+  /* block: never flash raw ligature text (e.g. "home") while loading */
+  font-display: block;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}

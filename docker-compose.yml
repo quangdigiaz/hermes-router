@@ -1,0 +1,48 @@
+# Hermes Router Docker Compose
+# Usage:
+#   1. cp .env.example .env && nano .env
+#   2. docker compose up -d
+#   3. Open http://localhost:20128
+
+services:
+  hermes-router:
+    image: ghcr.io/quangdigiaz/hermes-router:latest
+    container_name: hermes-router
+    restart: unless-stopped
+    ports:
+      - "${PORT:-20128}:20128"
+    volumes:
+      - hermes-router-data:/app/data
+      # Optional: use the host's Tailscale daemon instead of the bundled one.
+      # Uncomment the line below and set TAILSCALE_USE_HOST_SOCKET=true in .env
+      # - /var/run/tailscale/tailscaled.sock:/var/run/tailscale/tailscaled.sock
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /app/data
+      PORT: "20128"
+      HOSTNAME: "0.0.0.0"
+      NODE_ENV: production
+      HEADROOM_URL: http://headroom:8787
+      # Set TAILSCALE_USE_HOST_SOCKET=true to reuse the host Tailscale daemon.
+      # TAILSCALE_USE_HOST_SOCKET: "true"
+    depends_on:
+      headroom:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:20128/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  headroom:
+    image: ghcr.io/chopratejas/headroom:latest
+    container_name: headroom
+    restart: unless-stopped
+    ports:
+      - "${HEADROOM_PORT:-8787}:8787"
+
+volumes:
+  hermes-router-data:
+    name: hermes-router-data
