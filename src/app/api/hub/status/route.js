@@ -172,7 +172,11 @@ export async function GET() {
           enableModels(provider, orphanedModels).catch(() => {});
         }
 
-        if (validModels.length > 0) {
+        // Only report an incident if ALL models for an active provider are disabled
+        const totalModelsCount = builtInIds.size + customIds.size;
+        const isAllDisabled = totalModelsCount > 0 && validModels.length >= totalModelsCount;
+
+        if (isAllDisabled) {
           const pInfo = resolveProviderInfo(provider, nodesMap);
           incidents.push({
             severity: "warning",
@@ -182,7 +186,7 @@ export async function GET() {
             providerIcon: pInfo.icon,
             providerColor: pInfo.color,
             models: validModels,
-            message: `${validModels.length} model(s) disabled: ${validModels.join(", ")}`,
+            message: `All ${totalModelsCount} models disabled for ${pInfo.name}`,
             link: `/dashboard/providers/${encodeURIComponent(provider)}?tab=models`,
             actionLabel: "Manage Models →",
           });
