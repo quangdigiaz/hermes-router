@@ -1,6 +1,24 @@
 import { CapacityBadges, Toggle } from "@/shared/components";
 
-export default function ModelRow({ model, fullModel, alias, copied, onCopy, testStatus, isCustom, isFree, onDeleteAlias, onTest, isTesting, onToggle, isDisabled, caps }) {
+export default function ModelRow({
+  model,
+  fullModel,
+  alias,
+  copied,
+  onCopy,
+  testStatus,
+  isCustom,
+  isFree,
+  onDeleteAlias,
+  onDelete,
+  onTest,
+  isTesting,
+  onToggle,
+  isDisabled,
+  caps,
+  isSelected,
+  onSelectToggle,
+}) {
   const borderColor = testStatus === "ok"
     ? "border-green-500/40"
     : testStatus === "error"
@@ -17,9 +35,19 @@ export default function ModelRow({ model, fullModel, alias, copied, onCopy, test
     ? "opacity-60 bg-sidebar/20 border-dashed border-border/60"
     : `${borderColor} hover:bg-sidebar/50`;
 
+  const handleDelete = onDelete || onDeleteAlias;
+
   return (
     <div className={`group min-w-0 max-w-full rounded-lg border px-3 py-2 ${containerStyle}`}>
       <div className="flex min-w-0 items-start gap-2 sm:items-center">
+        {onSelectToggle && (
+          <input
+            type="checkbox"
+            checked={!!isSelected}
+            onChange={onSelectToggle}
+            className="h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary shrink-0 self-center"
+          />
+        )}
         <span
           className="material-symbols-outlined shrink-0 text-base"
           style={{ color: isDisabled ? "var(--color-text-muted)" : iconColor }}
@@ -74,16 +102,8 @@ export default function ModelRow({ model, fullModel, alias, copied, onCopy, test
             {copied === `model-${model.id}` ? "Copied!" : "Copy"}
           </span>
         </div>
-        {isCustom ? (
-          <button
-            onClick={onDeleteAlias}
-            className="ml-auto rounded p-1 text-text-muted opacity-100 transition-all duration-150 hover:bg-red-500/10 hover:text-red-500"
-            title="Remove custom model"
-          >
-            <span className="material-symbols-outlined text-sm">close</span>
-          </button>
-        ) : onToggle ? (
-          <div className="ml-auto shrink-0">
+        {onToggle && (
+          <div className="shrink-0">
             <Toggle
               size="sm"
               checked={!isDisabled}
@@ -91,7 +111,16 @@ export default function ModelRow({ model, fullModel, alias, copied, onCopy, test
               title={isDisabled ? "Enable this model" : "Disable this model"}
             />
           </div>
-        ) : null}
+        )}
+        {handleDelete && (
+          <button
+            onClick={handleDelete}
+            className="rounded p-1 text-text-muted opacity-80 transition-all duration-150 hover:bg-red-500/10 hover:text-red-500 shrink-0"
+            title={isCustom ? "Remove custom model" : "Hide / Remove model"}
+          >
+            <span className="material-symbols-outlined text-sm">close</span>
+          </button>
+        )}
       </div>
     </div>
   );

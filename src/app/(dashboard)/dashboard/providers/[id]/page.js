@@ -80,6 +80,8 @@ function ProviderDetailContent() {
   const [liveModels, setLiveModels] = useState([]);
   const [kiloFreeModels, setKiloFreeModels] = useState([]);
   const [disabledModelIds, setDisabledModelIds] = useState([]);
+  const [selectedModelIds, setSelectedModelIds] = useState([]);
+  const [hiddenModelIds, setHiddenModelIds] = useState(() => new Set());
   const [confirmState, setConfirmState] = useState(null);
   const [showAgRiskModal, setShowAgRiskModal] = useState(false);
   const [showUniversalImportModal, setShowUniversalImportModal] = useState(false);
@@ -273,6 +275,39 @@ function ProviderDetailContent() {
     } catch (error) {
       console.log("Error enabling all models:", error);
     }
+  };
+
+  const handleToggleSelectModel = (modelId) => {
+    setSelectedModelIds((prev) =>
+      prev.includes(modelId) ? prev.filter((id) => id !== modelId) : [...prev, modelId]
+    );
+  };
+
+  const handleSelectAllModels = (modelIds) => {
+    if (selectedModelIds.length === modelIds.length) {
+      setSelectedModelIds([]);
+    } else {
+      setSelectedModelIds([...modelIds]);
+    }
+  };
+
+  const handleDeleteModel = async (modelId, isCustom, alias) => {
+    if (isCustom) {
+      await handleDeleteCustomModel(modelId, "llm", providerStorageAlias);
+      return;
+    }
+    if (alias) {
+      await handleDeleteAlias(alias);
+      return;
+    }
+    try {
+      await fetch(`/api/models/disabled?providerAlias=${encodeURIComponent(providerStorageAlias)}&id=${encodeURIComponent(modelId)}`, { method: "DELETE" });
+      await fetch(`/api/models/custom?providerAlias=${encodeURIComponent(providerStorageAlias)}&id=${encodeURIComponent(modelId)}`, { method: "DELETE" });
+    } catch {}
+    setHiddenModelIds((prev) => new Set(prev).add(modelId));
+    setSelectedModelIds((prev) => prev.filter((id) => id !== modelId));
+    await fetchDisabledModels();
+    await fetchCustomModels();
   };
 
   // Define callbacks BEFORE the useEffect that uses them
@@ -1209,62 +1244,125 @@ function ProviderDetailContent() {
       type: "llm",
     });
 
-    return (
-      <div className="flex flex-wrap gap-3">
-        {/* Custom models first */}
-        {customModelRows.map((model) => (
-          <ModelRow
-            key={`${model.source}-${model.fullModel}`}
-            model={{ id: model.id, name: model.name }}
-            fullModel={`${providerDisplayAlias}/${model.id}`}
-            alias={model.alias}
-            copied={copied}
-            onCopy={copy}
-            onSetAlias={() => {}}
-            onDeleteAlias={() => {
-              if (model.source === "custom") {
-                handleDeleteCustomModel(model.id, "llm", providerStorageAlias);
-              } else {
-                handleDeleteAlias(model.alias);
-              }
-            }}
-            testStatus={modelTestResults[model.id]}
-            onTest={connections.length > 0 || isFreeNoAuth ? () => handleTestModel(model.id) : undefined}
-            isTesting={testingModelIds.has(model.id)}
-            isCustom
-            isFree={model.isFree || isFreeModel(model.id, providerId, AI_PROVIDERS)}
-            caps={getCaps(`${providerId}/${model.id}`)}
-            thinkingSuffix={resolveThinkingSuffix(model.id)}
-          />
-        ))}
+    const visibleCustomRows = customModelRows.filter((m) => !hiddenModelIds.has(m.id));
+    const visibleDisplayModels = displayModels.filter((m) => !hiddenModelIds.has(m.id));
+    const allVisibleIds = [...visibleCustomRows.map((m) => m.id), ...visibleDisplayModels.map((m) => m.id)];
 
-        {displayModels.map((model) => {
-          const fullModel = `${providerStorageAlias}/${model.id}`;
-          const oldFormatModel = `${providerId}/${model.id}`;
-          const existingAlias = Object.entries(modelAliases).find(
-            ([, m]) => m === fullModel || m === oldFormatModel
-          )?.[0];
-          return (
+    return (
+      <div className="flex flex-col gap-3">
+        {/* Model Selection & Batch Actions Toolbar */}
+        {allVisibleIds.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] px-3 py-2 text-xs">
+            <label className="flex cursor-pointer items-center gap-1.5 font-medium text-text-muted hover:text-primary">
+              <input
+                type="checkbox"
+                checked={selectedModelIds.length > 0 && selectedModelIds.length === allVisibleIds.length}
+                onChange={() => handleSelectAllModels(allVisibleIds)}
+                className="h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <span>Select All ({allVisibleIds.length})</span>
+            </label>
+
+            {selectedModelIds.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-semibold text-primary">
+                  {selectedModelIds.length} selected:
+                </span>
+                <Button
+                  size="xs"
+                  variant="secondary"
+                  icon="check_circle"
+                  onClick={async () => {
+                    for (const id of selectedModelIds) {
+                      await handleEnableModel(id);
+                    }
+                    setSelectedModelIds([]);
+                  }}
+                >
+                  Active Selected
+                </Button>
+                <Button
+                  size="xs"
+                  variant="secondary"
+                  icon="block"
+                  onClick={async () => {
+                    await handleDisableAll(selectedModelIds);
+                    setSelectedModelIds([]);
+                  }}
+                >
+                  Disable Selected
+                </Button>
+                <Button
+                  size="xs"
+                  variant="danger"
+                  icon="delete"
+                  onClick={async () => {
+                    for (const id of selectedModelIds) {
+                      await handleDeleteModel(id, false, null);
+                    }
+                    setSelectedModelIds([]);
+                  }}
+                >
+                  Delete / Hide Selected
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-3">
+          {/* Custom models first */}
+          {visibleCustomRows.map((model) => (
             <ModelRow
-              key={model.id}
-              model={model}
+              key={`${model.source}-${model.fullModel}`}
+              model={{ id: model.id, name: model.name }}
               fullModel={`${providerDisplayAlias}/${model.id}`}
-              alias={existingAlias}
+              alias={model.alias}
               copied={copied}
               onCopy={copy}
-              onSetAlias={(alias) => handleSetAlias(model.id, alias, providerStorageAlias)}
-              onDeleteAlias={() => handleDeleteAlias(existingAlias)}
+              onSetAlias={() => {}}
+              onDelete={() => handleDeleteModel(model.id, model.source === "custom", model.alias)}
               testStatus={modelTestResults[model.id]}
               onTest={connections.length > 0 || isFreeNoAuth ? () => handleTestModel(model.id) : undefined}
               isTesting={testingModelIds.has(model.id)}
-              isFree={model.isFree || isFreeModel(model.id, providerId, AI_PROVIDERS, model)}
-              isDisabled={disabledSet.has(model.id)}
-              onToggle={() => handleToggleModel(model.id)}
+              isCustom
+              isFree={model.isFree || isFreeModel(model.id, providerId, AI_PROVIDERS)}
               caps={getCaps(`${providerId}/${model.id}`)}
               thinkingSuffix={resolveThinkingSuffix(model.id)}
+              isSelected={selectedModelIds.includes(model.id)}
+              onSelectToggle={() => handleToggleSelectModel(model.id)}
             />
-          );
-        })}
+          ))}
+
+          {visibleDisplayModels.map((model) => {
+            const fullModel = `${providerStorageAlias}/${model.id}`;
+            const oldFormatModel = `${providerId}/${model.id}`;
+            const existingAlias = Object.entries(modelAliases).find(
+              ([, m]) => m === fullModel || m === oldFormatModel
+            )?.[0];
+            return (
+              <ModelRow
+                key={model.id}
+                model={model}
+                fullModel={`${providerDisplayAlias}/${model.id}`}
+                alias={existingAlias}
+                copied={copied}
+                onCopy={copy}
+                onSetAlias={(alias) => handleSetAlias(model.id, alias, providerStorageAlias)}
+                onDelete={() => handleDeleteModel(model.id, false, existingAlias)}
+                testStatus={modelTestResults[model.id]}
+                onTest={connections.length > 0 || isFreeNoAuth ? () => handleTestModel(model.id) : undefined}
+                isTesting={testingModelIds.has(model.id)}
+                isFree={model.isFree || isFreeModel(model.id, providerId, AI_PROVIDERS, model)}
+                isDisabled={disabledSet.has(model.id)}
+                onToggle={() => handleToggleModel(model.id)}
+                caps={getCaps(`${providerId}/${model.id}`)}
+                thinkingSuffix={resolveThinkingSuffix(model.id)}
+                isSelected={selectedModelIds.includes(model.id)}
+                onSelectToggle={() => handleToggleSelectModel(model.id)}
+              />
+            );
+          })}
 
         {/* Add model button — inline, same style as model chips */}
         <button

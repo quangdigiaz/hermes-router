@@ -23,14 +23,17 @@ export function getProviderCustomModelRows({
     const fullModel = `${providerAlias}/${model.id}`;
     if (seenFullModels.has(fullModel)) continue;
     seenFullModels.add(fullModel);
-    rows.push({
+    const row = {
       id: model.id,
       name: model.name || model.id,
       fullModel,
       source: "custom",
       type: rowType,
-      isFree: !!model.isFree,
-    });
+    };
+    if (model.isFree !== undefined) {
+      row.isFree = !!model.isFree;
+    }
+    rows.push(row);
   }
 
   if (!includeLegacyAliases) return rows;
