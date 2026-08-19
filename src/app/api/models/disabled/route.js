@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDisabledModels, disableModels, enableModels } from "@/lib/disabledModelsDb";
+import { getCustomModels } from "@/lib/db";
+import { getProviderModels } from "open-sse/config/providerModels.js";
 import { invalidateAllowedModelsCache } from "@/sse/services/allowedModels";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +12,19 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const providerAlias = searchParams.get("providerAlias");
     const all = await getDisabledModels();
-    if (providerAlias) return NextResponse.json({ ids: all[providerAlias] || [] });
+    const custom = await getCustomModels().catch(() => []);
+
+    if (providerAlias) {
+      const rawIds = all[providerAlias] || [];
+      const builtInIds = new Set((getProviderModels(providerAlias) || []).map((m) => m.id));
+      const customIds = new Set(custom.filter((m) => m.providerAlias === providerAlias).map((m) => m.id));
+      const validIds = rawIds.filter((id) => builtInIds.has(id) || customIds.has(id));
+      const orphaned = rawIds.filter((id) => !builtInIds.has(id) && !customIds.has(id));
+      if (orphaned.length > 0) {
+        enableModels(providerAlias, orphaned).catch(() => {});
+      }
+      return NextResponse.json({ ids: validIds });
+    }
     return NextResponse.json({ disabled: all });
   } catch (error) {
     console.log("Error fetching disabled models:", error);

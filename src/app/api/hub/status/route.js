@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getProviderConnections, getProviderNodes } from "@/models";
-import { getDisabledModels } from "@/lib/disabledModelsDb";
+import { getDisabledModels, enableModels } from "@/lib/disabledModelsDb";
+import { getCustomModels } from "@/lib/db";
+import { getProviderModels } from "open-sse/config/providerModels.js";
 import { poolFitnessSnapshot } from "open-sse/services/proxyPoolFitness.js";
 import { sessionStateSize } from "open-sse/executors/freebuff.js";
 import { getConsoleLogs } from "@/lib/consoleLogBuffer.js";
@@ -78,11 +80,12 @@ export async function GET() {
   }
 
   try {
-    const [connections, providerNodes, disabledModels, proxyFitness, freebuffState, stats] =
+    const [connections, providerNodes, disabledModels, customModels, proxyFitness, freebuffState, stats] =
       await Promise.all([
         getProviderConnections().catch(() => []),
         getProviderNodes().catch(() => []),
         getDisabledModels().catch(() => ({})),
+        getCustomModels().catch(() => []),
         poolFitnessSnapshot().catch(() => ({ pools: [] })),
         Promise.resolve(sessionStateSize()).catch(() => ({})),
         getUsageStats("today").catch(() => null),
@@ -154,21 +157,36 @@ export async function GET() {
       }
     }
 
-    for (const [provider, models] of Object.entries(disabledModels)) {
-      if (Array.isArray(models) && models.length > 0) {
-        const pInfo = resolveProviderInfo(provider, nodesMap);
-        incidents.push({
-          severity: "warning",
-          type: "model_disabled",
-          provider,
-          providerName: pInfo.name,
-          providerIcon: pInfo.icon,
-          providerColor: pInfo.color,
-          models,
-          message: `${models.length} model(s) disabled: ${models.join(", ")}`,
-          link: `/dashboard/providers/${encodeURIComponent(provider)}?tab=models`,
-          actionLabel: "Manage Models →",
-        });
+    for (const [provider, rawModels] of Object.entries(disabledModels)) {
+      if (Array.isArray(rawModels) && rawModels.length > 0) {
+        const builtIn = getProviderModels(provider) || [];
+        const builtInIds = new Set(builtIn.map((m) => m.id));
+        const providerCustom = (customModels || []).filter((m) => m.providerAlias === provider);
+        const customIds = new Set(providerCustom.map((m) => m.id));
+
+        const validModels = rawModels.filter((id) => builtInIds.has(id) || customIds.has(id));
+        const orphanedModels = rawModels.filter((id) => !builtInIds.has(id) && !customIds.has(id));
+
+        // Auto-clean orphaned disabled models from SQLite
+        if (orphanedModels.length > 0) {
+          enableModels(provider, orphanedModels).catch(() => {});
+        }
+
+        if (validModels.length > 0) {
+          const pInfo = resolveProviderInfo(provider, nodesMap);
+          incidents.push({
+            severity: "warning",
+            type: "model_disabled",
+            provider,
+            providerName: pInfo.name,
+            providerIcon: pInfo.icon,
+            providerColor: pInfo.color,
+            models: validModels,
+            message: `${validModels.length} model(s) disabled: ${validModels.join(", ")}`,
+            link: `/dashboard/providers/${encodeURIComponent(provider)}?tab=models`,
+            actionLabel: "Manage Models →",
+          });
+        }
       }
     }
 
