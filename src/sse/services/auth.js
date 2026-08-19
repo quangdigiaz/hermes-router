@@ -307,7 +307,13 @@ export async function markAccountUnavailable(connectionId, status, errorText, pr
 
   // Model-specific 400 errors (e.g. INVALID_MODEL_ID on free tier): lock the
   // model but don't pollute connection error state — the token is still valid.
-  const isModel400 = status === 400;
+  const isModel400 = status === 400 && (
+    /invalid.?model/i.test(reason) ||
+    /model.?not.?found/i.test(reason) ||
+    /unknown.?model/i.test(reason) ||
+    /model.?not.?supported/i.test(reason) ||
+    /unsupported.?model/i.test(reason)
+  );
   await updateProviderConnection(connectionId, {
     ...lockUpdate,
     testStatus: isNonAuth4xx ? conn?.testStatus : "unavailable",

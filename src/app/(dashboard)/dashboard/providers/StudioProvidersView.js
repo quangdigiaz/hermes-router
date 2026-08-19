@@ -5,13 +5,11 @@ import Link from "next/link";
 import Badge from "@/shared/components/Badge";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import Toggle from "@/shared/components/Toggle";
-import { getStatusDisplay } from "@/shared/utils/providerStatus";
+import { getStatusDisplay, TIER_VARIANT, BADGE_ICON } from "@/shared/constants/providerUi";
+import { getProviderIconSrc } from "@/shared/utils/providerIcon";
 import {
-  TIER_VARIANT,
-  BADGE_ICON,
   OPENAI_COMPATIBLE_PREFIX,
   ANTHROPIC_COMPATIBLE_PREFIX,
-  getProviderIconSrc,
 } from "@/shared/constants/providers";
 
 export default function StudioProvidersView({
