@@ -28,12 +28,12 @@ describe("buildProviderList (ACL provider list)", () => {
   it("includes registered noAuth providers with zero connections", () => {
     const list = buildProviderList([], [], [
       { id: "opencode", alias: "oc", noAuth: true, displayName: "OpenCode Free" },
-      { id: "mimo-free", alias: "mmf", noAuth: true, displayName: "MiMo Code Free" },
+      { id: "mock-free", alias: "mf", noAuth: true, displayName: "Mock Free" },
     ]);
     expect(list.find((p) => p.id === "opencode")).toMatchObject({
       id: "opencode", alias: "oc", count: 0,
     });
-    expect(list.find((p) => p.id === "mimo-free").count).toBe(0);
+    expect(list.find((p) => p.id === "mock-free").count).toBe(0);
   });
 
   it("excludes auth-requiring registered providers with zero connections", () => {

@@ -58,7 +58,6 @@ import p56 from "./kiro.js";
 import p57 from "./linkup.js";
 import p58 from "./llamagate.js";
 import p59 from "./local-device.js";
-import p60 from "./mimo-free.js";
 import p61 from "./minimax-cn.js";
 import p62 from "./minimax.js";
 import p63 from "./mistral.js";
@@ -184,7 +183,6 @@ export default [
   p57,
   p58,
   p59,
-  p60,
   p61,
   p62,
   p63,

@@ -33,12 +33,6 @@ export const FILTERS = {
       .filter((m) => m.id?.endsWith("-free") || KNOWN_FREE_OPENCODE_MODELS.includes(m.id))
       .map((m) => ({ id: m.id, name: m.id })),
 
-  // models.dev returns a large catalog; keep only mimo models
-  "mimo-free": (models) =>
-    (Array.isArray(models) ? models : [])
-      .filter((m) => m.id?.startsWith("mimo") || m.name?.toLowerCase().includes("mimo"))
-      .map((m) => ({ id: m.id, name: m.name || m.id })),
-
   // NVIDIA NIM: filter only free-tier models by ID whitelist.
   // The NVIDIA /v1/models endpoint does not expose pricing/is_free fields,
   // so we cannot filter server-side. Whitelist is the source of truth.

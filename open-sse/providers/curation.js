@@ -35,7 +35,6 @@ export const CURATION_DATA = {
   freebuff:     { curatedTier: "bridge", curatedPriority: 70,  badges: ["free"] },
 
   // Free tier / no-auth
-  "mimo-free":     { curatedTier: "free", curatedPriority: 100, badges: ["free", "new"] },
   ollama:          { curatedTier: "free", curatedPriority: 95,  badges: ["free", "local"] },
   groq:            { curatedTier: "free", curatedPriority: 90,  badges: ["free", "fast", "popular"] },
   openrouter:      { curatedTier: "free", curatedPriority: 90,  badges: ["free", "popular"] },
