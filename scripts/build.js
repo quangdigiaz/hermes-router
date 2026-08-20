@@ -66,27 +66,31 @@ execFileSync(process.execPath, [path.join(appDir, "scripts", "lint-undef.cjs")],
   cwd: appDir,
 });
 
-// Empty, junction-free HOME for the build.
-fs.mkdirSync(path.join(fakeHome, "AppData", "Roaming"), { recursive: true });
-fs.mkdirSync(path.join(fakeHome, "AppData", "Local"), { recursive: true });
+// Empty, junction-free HOME for the build (Windows only to prevent junction EPERM).
+const isWin = process.platform === "win32";
+let env = process.env;
 
-const env = {
-  ...process.env,
-  HOME: fakeHome,
-  USERPROFILE: fakeHome,
-  APPDATA: path.join(fakeHome, "AppData", "Roaming"),
-  LOCALAPPDATA: path.join(fakeHome, "AppData", "Local"),
-  // Windows: Next.js traces into TMP/TEMP too. Point them at .fakehome
-  // so Cookies / Application Data junctions are never scanned (#EPERM).
-  TMP: fakeHome,
-  TEMP: fakeHome,
-};
+if (isWin) {
+  fs.mkdirSync(path.join(fakeHome, "AppData", "Roaming"), { recursive: true });
+  fs.mkdirSync(path.join(fakeHome, "AppData", "Local"), { recursive: true });
+  env = {
+    ...process.env,
+    HOME: fakeHome,
+    USERPROFILE: fakeHome,
+    APPDATA: path.join(fakeHome, "AppData", "Roaming"),
+    LOCALAPPDATA: path.join(fakeHome, "AppData", "Local"),
+    // Windows: Next.js traces into TMP/TEMP too. Point them at .fakehome
+    // so Cookies / Application Data junctions are never scanned (#EPERM).
+    TMP: fakeHome,
+    TEMP: fakeHome,
+  };
+}
 
 // Resolve Next's CLI entry and run it via the current Node binary (avoids
 // .cmd/shell quoting differences across platforms).
 const nextBin = require.resolve("next/dist/bin/next");
 
-console.log(`▶ next build --webpack  (HOME=${fakeHome})`);
+console.log(`▶ next build --webpack ${isWin ? ` (HOME=${fakeHome})` : ""}`);
 // execFileSync throws on a non-zero exit, which propagates build failure correctly.
 execFileSync(process.execPath, [nextBin, "build", "--webpack"], {
   stdio: "inherit",
@@ -98,8 +102,14 @@ execFileSync(process.execPath, [nextBin, "build", "--webpack"], {
 // Respect NEXT_DIST_DIR like next.config.mjs does (used by CLI builds).
 const distDir = process.env.NEXT_DIST_DIR || ".next";
 console.log(`▶ copying public/ + ${distDir}/static into ${distDir}/standalone`);
-fs.cpSync(path.join(appDir, "public"), path.join(appDir, distDir, "standalone", "public"), { recursive: true });
-fs.cpSync(path.join(appDir, distDir, "static"), path.join(appDir, distDir, "standalone", distDir, "static"), { recursive: true });
+if (fs.existsSync(path.join(appDir, "public"))) {
+  fs.mkdirSync(path.join(appDir, distDir, "standalone", "public"), { recursive: true });
+  fs.cpSync(path.join(appDir, "public"), path.join(appDir, distDir, "standalone", "public"), { recursive: true });
+}
+if (fs.existsSync(path.join(appDir, distDir, "static"))) {
+  fs.mkdirSync(path.join(appDir, distDir, "standalone", distDir, "static"), { recursive: true });
+  fs.cpSync(path.join(appDir, distDir, "static"), path.join(appDir, distDir, "standalone", distDir, "static"), { recursive: true });
+}
 
 fixStandaloneSymlinks(path.resolve(__dirname, "..", ".next", "standalone"));
 
