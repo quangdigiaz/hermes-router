@@ -80,12 +80,15 @@ export default function SystemPulse({ data: propData, loading: propLoading }) {
   const proxyColor = proxy.percent >= 80 ? "green" : proxy.percent >= 50 ? "amber" : "red";
   const activityColor = pulse.errorsToday > 10 ? "amber" : pulse.errorsToday > 0 ? "amber" : "green";
 
-  let providerSub = translate("All online");
+  const accounts = providers.accounts || {};
+  const accInfo = accounts.total ? ` • ${accounts.active || 0}/${accounts.total || 0} accs` : "";
+
+  let providerSub = `${translate("All online")}${accInfo}`;
   if (providers.error > 0) {
-    providerSub = `${providers.error} ${translate("with errors")}`;
+    providerSub = `${providers.error} ${translate("with errors")}${accInfo}`;
   } else if (hasProviders && providers.active < providers.total) {
     const inactive = providers.total - providers.active;
-    providerSub = `${inactive} ${translate("inactive")}`;
+    providerSub = `${inactive} ${translate("inactive")}${accInfo}`;
   }
 
   return (

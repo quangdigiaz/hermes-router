@@ -126,11 +126,11 @@ export default function LiveQuotaTracker({ data: propData, loading: propLoading 
         max={providers.total || 1}
         sub={
           providers.error > 0
-            ? `${providers.error} ${translate("with errors")}`
+            ? `${providers.error} ${translate("with errors")}${providers.accounts?.total ? ` (${providers.accounts.active}/${providers.accounts.total} accs)` : ""}`
             : isAllHealthy
-            ? translate("All healthy")
+            ? `${translate("All healthy")}${providers.accounts?.total ? ` (${providers.accounts.active}/${providers.accounts.total} accs)` : ""}`
             : hasProviders
-            ? `${providers.total - providers.active} ${translate("inactive")}`
+            ? `${providers.total - providers.active} ${translate("inactive")}${providers.accounts?.total ? ` (${providers.accounts.active}/${providers.accounts.total} accs)` : ""}`
             : ""
         }
         color="green"

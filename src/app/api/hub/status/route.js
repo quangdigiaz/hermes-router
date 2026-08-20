@@ -280,15 +280,42 @@ export async function GET() {
       });
     }
 
-    // --- System Pulse ---
-    const totalProviders = connections.length;
-    const activeProviders = connections.filter((c) => c.isActive && (c.testStatus === "active" || c.testStatus === "success")).length;
-    const errorProviders = connections.filter((c) =>
+    // --- System Pulse: Provider & Account Aggregation ---
+    const totalAccounts = connections.length;
+    const activeAccounts = connections.filter((c) => c.isActive && (c.testStatus === "active" || c.testStatus === "success")).length;
+    const errorAccounts = connections.filter((c) =>
       c.isActive && (
         ["error", "auth_failed", "unavailable", "payment_required", "expired"].includes(c.testStatus) ||
         Boolean(c.lastError && c.testStatus !== "active" && c.testStatus !== "success")
       )
     ).length;
+
+    const providerGroups = new Map();
+    for (const conn of connections) {
+      if (!conn.provider) continue;
+      if (!providerGroups.has(conn.provider)) {
+        providerGroups.set(conn.provider, []);
+      }
+      providerGroups.get(conn.provider).push(conn);
+    }
+
+    const uniqueProvidersTotal = providerGroups.size;
+    let uniqueProvidersActive = 0;
+    let uniqueProvidersError = 0;
+
+    for (const [, conns] of providerGroups) {
+      const hasActive = conns.some((c) => c.isActive && (c.testStatus === "active" || c.testStatus === "success"));
+      const isAllError = conns.filter((c) => c.isActive).length > 0 && conns.filter((c) => c.isActive).every((c) =>
+        ["error", "auth_failed", "unavailable", "payment_required", "expired"].includes(c.testStatus) ||
+        Boolean(c.lastError && c.testStatus !== "active" && c.testStatus !== "success")
+      );
+
+      if (hasActive) {
+        uniqueProvidersActive++;
+      } else if (isAllError) {
+        uniqueProvidersError++;
+      }
+    }
 
     const totalPools = proxyFitness.pools?.length || 0;
     const healthyPools = proxyFitness.pools?.filter((p) => !p.unfit?.length).length || 0;
@@ -327,7 +354,12 @@ export async function GET() {
       incidentSummary,
       summary: incidentSummary,
       systemPulse: {
-        providers: { total: totalProviders, active: activeProviders, error: errorProviders },
+        providers: {
+          total: uniqueProvidersTotal,
+          active: uniqueProvidersActive,
+          error: uniqueProvidersError,
+          accounts: { total: totalAccounts, active: activeAccounts, error: errorAccounts },
+        },
         proxyHealth: { total: totalPools, healthy: healthyPools, percent: proxyHealthPercent },
         activeCooldowns,
         requestsToday,
