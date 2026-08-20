@@ -326,7 +326,7 @@ export default function UsageStats({ period: periodProp, setPeriod: setPeriodPro
       .catch(() => {});
     return () => controller.abort();
   }, []);
-  // Fetch filtered stats via REST when period changes
+  // Fetch filtered stats via REST when period changes + background fallback polling
   useEffect(() => {
     // First load: show full spinner; subsequent: show subtle fetching indicator
     if (isInitialLoad.current) {
@@ -336,22 +336,41 @@ export default function UsageStats({ period: periodProp, setPeriod: setPeriodPro
       setLoadState({ loading: false, fetching: true });
     }
 
-    const controller = new AbortController();
-    fetch(`/api/usage/stats?period=${period}`, { signal: controller.signal })
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => {
-        if (controller.signal.aborted) return;
-        if (data) {
-          hasLoadedStats.current = true;
-          setStats((prev) => ({ ...prev, ...data }));
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!controller.signal.aborted) setLoadState({ loading: false, fetching: false });
-      });
-    return () => controller.abort();
+    const fetchStats = (isBackground = false) => {
+      const controller = new AbortController();
+      if (!isBackground) {
+        setLoadState(prev => ({ ...prev, fetching: true }));
+      }
+      fetch(`/api/usage/stats?period=${period}`, { signal: controller.signal })
+        .then((r) => r.ok ? r.json() : null)
+        .then((data) => {
+          if (controller.signal.aborted) return;
+          if (data) {
+            hasLoadedStats.current = true;
+            setStats((prev) => ({ ...prev, ...data }));
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!controller.signal.aborted) setLoadState({ loading: false, fetching: false });
+        });
+      return controller;
+    };
+
+    const initialController = fetchStats(false);
+
+    // Background fallback polling every 10s to keep UI updated even if SSE is interrupted/buffered
+    const pollInterval = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      fetchStats(true);
+    }, 10000);
+
+    return () => {
+      initialController.abort();
+      clearInterval(pollInterval);
+    };
   }, [period]);
+
   // SSE connection - real-time updates for activeRequests + recentRequests only
   useEffect(() => {
     const es = new EventSource("/api/usage/stream");
@@ -359,9 +378,28 @@ export default function UsageStats({ period: periodProp, setPeriod: setPeriodPro
     es.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data);
-        // Always merge only real-time fields, never overwrite full stats from REST
+        // Merge real-time fields
         setStats((prev) => {
-          if (!prev) return prev;
+          if (!prev) {
+            return {
+              totalRequests: data.totalRequests || 0,
+              totalPromptTokens: data.totalPromptTokens || 0,
+              totalCompletionTokens: data.totalCompletionTokens || 0,
+              totalCachedTokens: data.totalCachedTokens || 0,
+              totalCost: data.totalCost || 0,
+              byProvider: data.byProvider || {},
+              byModel: data.byModel || {},
+              byAccount: data.byAccount || {},
+              byApiKey: data.byApiKey || {},
+              byEndpoint: data.byEndpoint || {},
+              byCombo: data.byCombo || {},
+              last10Minutes: data.last10Minutes || [],
+              activeRequests: data.activeRequests || [],
+              recentRequests: data.recentRequests || [],
+              errorProvider: data.errorProvider || "",
+              pending: data.pending || { byModel: {}, byAccount: {} },
+            };
+          }
           return {
             ...prev,
             activeRequests: data.activeRequests,

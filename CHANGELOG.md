@@ -1,3 +1,13 @@
+# v1.4.4 (2026-08-21)
+
+Hermes Router 1.4.4 fixes real-time usage stats streaming stability under reverse proxies (Nginx/Cloudflare), adds background fallback polling, and improves recent requests deduplication accuracy.
+
+## Fixes & Improvements
+
+- **SSE Reverse Proxy Hardening** — Added `X-Accel-Buffering: no` and `Cache-Control: no-cache, no-transform` headers to `/api/usage/stream`, preventing Nginx and Cloudflare reverse proxies from buffering SSE chunks and freezing the real-time dashboard.
+- **Usage Stats Resilient Polling** — Added periodic background fallback polling (every 10s) in `UsageStats.js` to ensure the dashboard automatically synchronizes even if SSE connections are interrupted.
+- **Accurate Request Deduplication** — Updated `recentRequests` deduplication in `usageRepo.js` from minute-level truncation to millisecond ISO timestamps, ensuring sequential requests within the same minute are accurately captured.
+
 # v1.4.2 (2026-08-19)
 
 Hermes Router 1.4.2 introduces Multi-Lingual 402 Paywall Detection & Account Lock, Dual-Mode Studio Pro UI, ZenMux `/api/v1` Base URL integration, Kiro AI Model Tier classification, and comprehensive Model Management with Batch Actions.
