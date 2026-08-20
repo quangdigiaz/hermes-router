@@ -73,3 +73,51 @@ export async function deleteCombo(id) {
   const res = db.run(`DELETE FROM combos WHERE id = ?`, [id]);
   return (res?.changes ?? 0) > 0;
 }
+
+export async function removeModelFromAllCombos({ providerAlias, providerId, modelId }) {
+  if (!modelId) return { affectedCount: 0, affectedCombos: [] };
+
+  const targets = new Set();
+  if (providerAlias) targets.add(`${providerAlias}/${modelId}`);
+  if (providerId) targets.add(`${providerId}/${modelId}`);
+  targets.add(modelId);
+
+  const db = await getAdapter();
+  const rows = db.all(`SELECT * FROM combos`);
+  const affectedCombos = [];
+
+  db.transaction(() => {
+    for (const row of rows) {
+      const combo = rowToCombo(row);
+      if (!combo || !Array.isArray(combo.models) || combo.models.length === 0) continue;
+
+      const filtered = combo.models.filter((m) => {
+        if (typeof m === "string") {
+          return !targets.has(m);
+        }
+        if (m && typeof m === "object" && typeof m.id === "string") {
+          return !targets.has(m.id);
+        }
+        return true;
+      });
+
+      if (filtered.length !== combo.models.length) {
+        const updatedAt = new Date().toISOString();
+        db.run(
+          `UPDATE combos SET models = ?, updatedAt = ? WHERE id = ?`,
+          [stringifyJson(filtered), updatedAt, combo.id]
+        );
+        affectedCombos.push({
+          id: combo.id,
+          name: combo.name,
+          removedCount: combo.models.length - filtered.length,
+        });
+      }
+    }
+  });
+
+  return {
+    affectedCount: affectedCombos.length,
+    affectedCombos,
+  };
+}

@@ -27,6 +27,7 @@ export {
   createCombo,
   updateCombo,
   deleteCombo,
+  removeModelFromAllCombos,
   getModelAliases,
   setModelAlias,
   deleteModelAlias,

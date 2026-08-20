@@ -156,7 +156,10 @@ export default function ModelsCard({ providerId, kindFilter, providerAliasOverri
       const res = await fetch(`/api/models/custom?${params}`, { method: "DELETE" });
       if (res.ok) {
         await fetchData();
-        window.dispatchEvent(new CustomEvent("customModelChanged"));
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("customModelChanged"));
+          window.dispatchEvent(new CustomEvent("combosChanged"));
+        }
       }
     } catch (e) { console.log("delete custom model error:", e); }
   };

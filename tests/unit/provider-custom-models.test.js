@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getProviderCustomModelRows } from "@/shared/utils/providerCustomModels.js";
+import { getProviderCustomModelRows } from "../../src/shared/utils/providerCustomModels.js";
 
 describe("provider custom model rows", () => {
   it("keeps identical model IDs separate per provider", () => {

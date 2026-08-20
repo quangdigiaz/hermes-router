@@ -1,5 +1,4 @@
-import { NextResponse } from "next/server";
-import { getCustomModels, addCustomModel, deleteCustomModel, updateCustomModelIsFree } from "@/models";
+import { getCustomModels, addCustomModel, deleteCustomModel, updateCustomModelIsFree, removeModelFromAllCombos } from "@/models";
 import { invalidateCustomModelFreeCache } from "@/lib/customModelFreeCache";
 
 export const dynamic = "force-dynamic";
@@ -58,8 +57,13 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "providerAlias and id required" }, { status: 400 });
     }
     await deleteCustomModel({ providerAlias, id, type });
+    const cascadeResult = await removeModelFromAllCombos({ providerAlias, modelId: id });
     invalidateCustomModelFreeCache();
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      affectedCombosCount: cascadeResult.affectedCount,
+      affectedCombos: cascadeResult.affectedCombos,
+    });
   } catch (error) {
     console.log("Error deleting custom model:", error);
     return NextResponse.json({ error: "Failed to delete custom model" }, { status: 500 });

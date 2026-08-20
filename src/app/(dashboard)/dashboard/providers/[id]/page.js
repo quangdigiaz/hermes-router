@@ -648,7 +648,10 @@ function ProviderDetailContent() {
       const res = await fetch(`/api/models/custom?${params}`, { method: "DELETE" });
       if (res.ok) {
         await fetchCustomModels();
-        if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("customModelChanged"));
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("customModelChanged"));
+          window.dispatchEvent(new CustomEvent("combosChanged"));
+        }
       }
     } catch (error) {
       console.log("Error deleting custom model:", error);

@@ -14,7 +14,7 @@ export {
   deleteProxyPoolFitness, clearProxyPoolFitness, deleteProxyPoolFitnessByPool,
   getApiKeys, getApiKeyById, createApiKey, updateApiKey, deleteApiKey, validateApiKey,
   getCombos, getComboById, getComboByName,
-  createCombo, updateCombo, deleteCombo,
+  createCombo, updateCombo, deleteCombo, removeModelFromAllCombos,
   getModelAliases, setModelAlias, deleteModelAlias,
   getCustomModels, addCustomModel, deleteCustomModel, updateCustomModelIsFree,
   getMitmAlias, setMitmAliasAll,
