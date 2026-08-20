@@ -69,7 +69,11 @@ export default {
     { id: "deepseek/deepseek-v4-flash", name: "DeepSeek V4 Flash" },
     { id: "deepseek/deepseek-v4-pro", name: "DeepSeek V4 Pro" },
     { id: "mimo/mimo-v2.5", name: "MiMo 2.5" },
+    { id: "minimax/minimax-m2.7", name: "MiniMax M2.7" },
     { id: "minimax/minimax-m3", name: "MiniMax M3" },
+    { id: "z-ai/glm-5.1", name: "GLM 5.1" },
+    { id: "google/gemini-3.1-pro-preview", name: "Gemini 3.1 Pro Preview" },
+    { id: "moonshotai/kimi-k2.6", name: "Kimi K2.6" },
     { id: "openai/gpt-5.6-luna", name: "GPT-5.6 Luna" },
   ],
   // Login-flow host — the CLI in freebuff mode logs in via freebuff.com, and

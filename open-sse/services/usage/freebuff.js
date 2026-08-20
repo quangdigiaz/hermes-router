@@ -42,7 +42,7 @@ export async function getFreebuffUsage(accessToken, providerSpecificData, proxyO
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "User-Agent": "codebuff-cli/0.0.138",
+          "User-Agent": "Freebuff-CLI/0.0.150",
           Accept: "application/json",
         },
       },

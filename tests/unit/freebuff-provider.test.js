@@ -198,7 +198,8 @@ describe("freebuff executor wire shape", () => {
     // run_id is the registered runId and is attached by execute(), not here.
     expect(out.codebuff_metadata.run_id).toBeUndefined();
     expect(out.codebuff).toBeUndefined();
-    expect(out.provider.allow_fallbacks).toBe(false);
+    expect(out.provider.data_collection).toBe("deny");
+    expect(out.stop).toEqual(["cb_easp"]);
     // Free-tier marker is prepended so the first message opens with the CLI root prompt.
     expect(out.messages[0].content).toBe(FREEBUFF_SYSTEM_MARKER);
   });
@@ -303,8 +304,12 @@ describe("freebuff run registration", () => {
   it("maps freebuff models to their root free agent ids", () => {
     expect(rootAgentIdForModel("deepseek/deepseek-v4-flash")).toBe("base2-free-deepseek-flash");
     expect(rootAgentIdForModel("deepseek/deepseek-v4-pro")).toBe("base2-free-deepseek");
-    expect(rootAgentIdForModel("mimo/mimo-v2.5")).toBe("base2-free-mimo");
+    expect(rootAgentIdForModel("mimo/mimo-v2.5")).toBe("base2-free");
+    expect(rootAgentIdForModel("minimax/minimax-m2.7")).toBe("base2-free");
     expect(rootAgentIdForModel("minimax/minimax-m3")).toBe("base2-free-minimax-m3");
+    expect(rootAgentIdForModel("z-ai/glm-5.1")).toBe("base2-free");
+    expect(rootAgentIdForModel("google/gemini-3.1-pro-preview")).toBe("base2-free");
+    expect(rootAgentIdForModel("moonshotai/kimi-k2.6")).toBe("base2-free-kimi");
     expect(rootAgentIdForModel("openai/gpt-5.6-luna")).toBe("base2-free-luna");
     expect(rootAgentIdForModel("some/unknown-model")).toBe("base2-free");
   });

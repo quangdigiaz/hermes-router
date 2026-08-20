@@ -35,6 +35,7 @@ import { markPoolUnfit, clearPoolUnfit } from "../services/proxyPoolFitness.js";
 const SESSION_PATH = "/api/v1/freebuff/session";
 const RUN_PATH = "/api/v1/agent-runs";
 const SESSION_DEFAULT_TTL_MS = 60 * 60 * 1000; // active sessions live ~1h
+const FREEBUFF_USER_AGENT = "Freebuff-CLI/0.0.150";
 
 // Chat statuses that mean our claimed session is stale and must be re-claimed
 // before retrying (mirrors the CLI's FreebuffGateErrorKind statuses).
@@ -44,14 +45,15 @@ const SESSION_STALE_CODES = new Set([428, 409, 410]);
 // the canonical Freebuff CLI root prompt (server gate
 // requestHasFreebuffSystemMarker → 403 free_mode_cli_required). The check is a
 // byte-exact prefix test on position 0, so we prepend the canonical opening.
-// Same anti-abuse pattern as mimo-free's MIMO_SYSTEM_MARKER injection.
-const FREEBUFF_SYSTEM_MARKER = "You are Buffy, the strategic coding assistant.";
+const FREEBUFF_SYSTEM_MARKER =
+  "You are Buffy, the strategic coding assistant. You are the AI agent behind the product, Freebuff, a tool where users can chat with you to code with AI for free.";
 
 // Canonical openings accepted by the server gate (mirrors the CLI's
 // FREEBUFF_ROOT_SYSTEM_PROMPT_OPENINGS). The check is a byte-exact prefix on
 // the first message, so our injected marker must be one of these verbatim.
 const FREEBUFF_ROOT_SYSTEM_OPENINGS = [
   "You are Buffy, the strategic coding assistant.",
+  "You are Buffy, the strategic coding assistant. You are the AI agent behind the product, Freebuff, a tool where users can chat with you to code with AI for free.",
   "You are Buffy, the Freebuff Cloud project planner.",
   "You are Buffy, a strategic assistant that orchestrates complex coding tasks through specialized sub-agents.",
 ];
@@ -79,8 +81,12 @@ function injectFreebuffMarker(body) {
 const FREE_ROOT_AGENT_BY_MODEL = {
   "deepseek/deepseek-v4-flash": "base2-free-deepseek-flash",
   "deepseek/deepseek-v4-pro": "base2-free-deepseek",
-  "mimo/mimo-v2.5": "base2-free-mimo",
+  "mimo/mimo-v2.5": "base2-free",
+  "minimax/minimax-m2.7": "base2-free",
   "minimax/minimax-m3": "base2-free-minimax-m3",
+  "z-ai/glm-5.1": "base2-free",
+  "google/gemini-3.1-pro-preview": "base2-free",
+  "moonshotai/kimi-k2.6": "base2-free-kimi",
   "openai/gpt-5.6-luna": "base2-free-luna",
 };
 
@@ -235,15 +241,27 @@ async function fetchWithNetworkRetry(url, options, proxyOptions, attempts = 3, t
   throw lastError;
 }
 
+function generateSessionPayload() {
+  const randomStr = Math.random().toString(36).slice(2, 14);
+  return {
+    provider: "gravity",
+    messages: [],
+    sessionId: `ad-${randomStr}`,
+    device: { os: "linux", timezone: "UTC", locale: "en-US" },
+    surface: "cli",
+  };
+}
+
 async function requestSession(token, model, proxyOptions) {
   const response = await fetchWithNetworkRetry(`${sessionOrigin()}${SESSION_PATH}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
-      "User-Agent": "codebuff-cli/0.0.138",
+      "User-Agent": FREEBUFF_USER_AGENT,
       "x-freebuff-model": model,
     },
+    body: JSON.stringify(generateSessionPayload()),
   }, proxyOptions);
 
   let data = {};
@@ -323,7 +341,7 @@ async function startRun(token, model, proxyOptions) {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
-      "User-Agent": "codebuff-cli/0.0.138",
+      "User-Agent": FREEBUFF_USER_AGENT,
     },
     body: JSON.stringify({
       action: "START",
@@ -361,7 +379,7 @@ async function finishRun(token, runId, status, proxyOptions) {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
-        "User-Agent": "codebuff-cli/0.0.138",
+        "User-Agent": FREEBUFF_USER_AGENT,
       },
       body: JSON.stringify({ action: "FINISH", runId, status }),
       signal: AbortSignal.timeout(10_000),
@@ -431,7 +449,8 @@ export class FreebuffExecutor extends BaseExecutor {
         `hermes-router-${crypto.randomUUID()}`,
       cost_mode: "free",
     };
-    body.provider = { allow_fallbacks: false };
+    body.provider = { data_collection: "deny" };
+    body.stop = ["cb_easp"];
     // Freebuff agents (base2-free-*) own reasoning: the backend applies the
     // agent's reasoningOptions.effort server-side, so a client-sent
     // reasoning_effort / reasoning.effort collides with that default →
@@ -647,12 +666,14 @@ export class FreebuffExecutor extends BaseExecutor {
 export const __test__ = {
   ensureSession,
   requestSession,
+  generateSessionPayload,
   startRun,
   resetSessionCache,
   rootAgentIdForModel,
   injectFreebuffMarker,
   fetchWithNetworkRetry,
   FREEBUFF_SYSTEM_MARKER,
+  FREEBUFF_USER_AGENT,
   SESSION_STALE_CODES,
 };
 

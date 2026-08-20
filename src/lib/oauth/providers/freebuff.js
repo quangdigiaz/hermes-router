@@ -38,7 +38,7 @@ const freebuff = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "User-Agent": "codebuff-cli/0.0.138",
+          "User-Agent": "Freebuff-CLI/0.0.150",
         },
         body: JSON.stringify({ fingerprintId }),
       },
@@ -99,7 +99,7 @@ const freebuff = {
         method: "GET",
         headers: {
           Accept: "application/json",
-          "User-Agent": "codebuff-cli/0.0.138",
+          "User-Agent": "Freebuff-CLI/0.0.150",
         },
       },
     );
