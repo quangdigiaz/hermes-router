@@ -7,6 +7,7 @@ import { resolveSessionId } from "../utils/sessionManager.js";
 import { proxyAwareFetch } from "../utils/proxyFetch.js";
 import { scrubProxyAndFingerprintHeaders } from "../services/antigravityHeaderScrub.js";
 import { cleanJSONSchemaForAntigravity } from "../translator/formats/gemini.js";
+import { stripCompetitivePrompts } from "../utils/stripCompetitivePrompts.js";
 import { DEFAULT_THINKING_AG_SIGNATURE } from "../config/defaultThinkingSignature.js";
 
 // Sanitize function name: Gemini requires [a-zA-Z_][a-zA-Z0-9_.:\-]{0,63}
@@ -292,6 +293,14 @@ export class AntigravityExecutor extends BaseExecutor {
       safetySettings: undefined,
       ...(tools?.length > 0 && { toolConfig: { functionCallingConfig: { mode: "VALIDATED" } } })
     };
+
+    // Strip competitive prompt phrases to prevent synthetic 429 from Antigravity
+    // (e.g. "Anthropic Claude Agent SDK" in system prompt triggers competitor detection)
+    const strippedRequest = stripCompetitivePrompts(transformedRequest);
+    if (strippedRequest !== transformedRequest) {
+      // Reassign if changes were made
+      Object.assign(transformedRequest, strippedRequest);
+    }
 
     // Strip blacklisted thinking fields from top-level body (set by thinkingUnified.js at root, not body.request)
     stripBlacklisted(body);
