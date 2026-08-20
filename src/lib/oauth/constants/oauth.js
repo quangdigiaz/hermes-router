@@ -117,6 +117,9 @@ export const GITLAB_CONFIG = { ...PROVIDER_OAUTH["gitlab"] };
 // CodeBuddy (Tencent) OAuth Configuration (Browser OAuth Polling Flow)
 export const CODEBUDDY_CONFIG = { ...PROVIDER_OAUTH["codebuddy-cn"] };
 
+// CodeBuddy International — same shape as CN, .ai domain (mirror of codebuddy-cn).
+export const CODEBUDDY_INTL_CONFIG = { ...PROVIDER_OAUTH["codebuddy-intl"] };
+
 // Z.ai (ZCode) OAuth Configuration (Manual paste flow via zcode:// custom scheme)
 export const ZAI_CONFIG = { ...PROVIDER_OAUTH["zcode"] };
 
@@ -151,6 +154,7 @@ export const PROVIDERS = {
   CLINEPASS: "clinepass",
   GITLAB: "gitlab",
   CODEBUDDY: "codebuddy-cn",
+  CODEBUDDY_INTL: "codebuddy-intl",
   ZCODE: "zcode",
 
   GROK_CLI: "grok-cli",
