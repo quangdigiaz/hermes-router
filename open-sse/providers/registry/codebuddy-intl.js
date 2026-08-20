@@ -67,6 +67,7 @@ export default {
     userAgent: "IDE/2.108.1 CodeBuddy/2.108.1",
     platform: "ide",
     pollInterval: 5000,
+    refreshLeadMs: 5 * 60 * 1000, // 5 minutes — proactive refresh before expiry
   },
   features: {
     usage: false,

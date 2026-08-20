@@ -144,6 +144,28 @@ export async function handleChatCore({ body, modelInfo, credentials, log, onCred
   if (bypassResponse) return bypassResponse;
 
   const alias = PROVIDER_ID_TO_ALIAS[provider] || provider;
+
+  // ── Codex tier gating: skip models requiring a higher account tier ──────────
+  if (provider === "codex" && credentials?.providerSpecificData?.chatgptPlanType) {
+    const { PROVIDER_MODELS } = await import("../providers/index.js");
+    const models = PROVIDER_MODELS[alias] || PROVIDER_MODELS[provider] || [];
+    const modelEntry = models.find((m) => m.id === model);
+    if (modelEntry?.tier) {
+      const TIER_RANK = { free: 0, plus: 1, pro: 2 };
+      const accountTier = credentials.providerSpecificData.chatgptPlanType;
+      const accountRank = TIER_RANK[accountTier] ?? 0;
+      const modelRank = TIER_RANK[modelEntry.tier] ?? 0;
+      if (modelRank > accountRank) {
+        const err = createErrorResult(
+          HTTP_STATUS.BAD_REQUEST,
+          `[400]: Model \"${model}\" requires a ChatGPT ${modelEntry.tier} account (your account: ${accountTier})`,
+        );
+        log?.warn?.("TIER", `${provider}/${model} | blocked — requires ${modelEntry.tier}, account is ${accountTier}`);
+        return err;
+      }
+    }
+  }
+
   const modelTargetFormat = getModelTargetFormat(alias, model);
   // Multi-endpoint providers: pick transport matching sourceFormat → zero translation
   const runtimeTransport = resolveTransport(provider, sourceFormat);
