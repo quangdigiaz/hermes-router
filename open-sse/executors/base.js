@@ -2,6 +2,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { HTTP_STATUS, RETRY_CONFIG, DEFAULT_RETRY_CONFIG, resolveRetryEntry, FETCH_CONNECT_TIMEOUT_MS, capRetryAttemptsByAccountCount } from "../config/runtimeConfig.js";
 import { shouldRefreshCredentials } from "../services/oauthCredentialManager.js";
 import { proxyAwareFetch } from "../utils/proxyFetch.js";
+import { pickEgressProxy, cooldownEgressProxy } from "../services/egressPool.js";
 import { dbg } from "../utils/debugLog.js";
 import { ANTHROPIC_API_VERSION, OPENAI_COMPAT_BASE, ANTHROPIC_COMPAT_BASE } from "../providers/shared.js";
 
@@ -144,13 +145,17 @@ export class BaseExecutor {
       try {
         const bodyStr = JSON.stringify(transformedBody);
         const fetchT0 = Date.now();
+        // EgressPool: pick per-provider egress proxy (port Cline-proxy proxy_pool.go) — fallback to proxyOptions if no egress
+        const egressProxy = proxyOptions?.proxyPoolId ? pickEgressProxy(proxyOptions.proxyPoolId) : null;
+        const effectiveProxyOptions = egressProxy ? { ...proxyOptions, connectionProxyEnabled: true, connectionProxyUrl: egressProxy } : proxyOptions;
+        if (egressProxy) dbg("EGRESS", `${this.provider} egress → ${egressProxy.slice(0, 28)}...`);
         dbg("FETCH", `${this.provider.toUpperCase()} → ${url} | body=${bodyStr.length}B | connectTimeout=${timeoutMs}ms`);
         const response = await proxyAwareFetch(url, {
           method: "POST",
           headers,
           body: bodyStr,
           signal: mergedSignal
-        }, proxyOptions);
+        }, effectiveProxyOptions);
         clearTimeout(connectTimer);
         const ct = response.headers?.get?.("content-type") || "";
         const cl = response.headers?.get?.("content-length") || "?";

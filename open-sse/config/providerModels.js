@@ -70,6 +70,10 @@ export function getModelUpstreamId(aliasOrId, modelId) {
   if (aliasOrId === "cx" && typeof modelId === "string" && modelId.endsWith(CODEX_REVIEW_SUFFIX)) {
     return modelId.slice(0, -CODEX_REVIEW_SUFFIX.length);
   }
+  // Poolside free alias: laguna-s-2.1:free → laguna-s-2.1 (upstream không có :free)
+  if ((aliasOrId === "poolside" || aliasOrId === "ps") && typeof modelId === "string" && modelId.toLowerCase().endsWith(":free")) {
+    return modelId.slice(0, -5);
+  }
   return modelId;
 }
 

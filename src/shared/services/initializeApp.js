@@ -112,6 +112,11 @@ async function runHeavyStartup() {
       .then(({ startQuotaAutoPing }) => startQuotaAutoPing())
       .catch((e) => console.log("[AutoPing] scheduler start failed:", e.message));
   }
+
+  // Opencode free models sync — port Cline-proxy zen.go syncZenModels ticker 10m
+  import("open-sse/services/opencodeModels.js")
+    .then(({ startZenModelsRefresher }) => startZenModelsRefresher())
+    .catch((e) => console.log("[Opencode] sync start failed:", e.message));
 }
 
 function hasQuotaAutoPingEnabled(settings) {

@@ -54,6 +54,9 @@ const DAILY_QUOTA_PATTERNS = [
   // Resets at 00:00 UTC — treat as daily_quota, not a 60s rate_limit.
   /free.*usage.*exhaust/i,
   /used all.*free usage/i,
+  // Cline INFERENCE_CAP_ERROR — port from YuJunZhiXue/Cline-proxy pool.go
+  /INFERENCE_CAP_ERROR/i,
+  /Try again in \d+h/i,
 ];
 
 /**
@@ -232,6 +235,23 @@ export function isGeminiGenericRateLimit(errorText) {
 }
 
 /**
+ * Parse Cline INFERENCE_CAP duration — "Try again in 17h 59m" → ms
+ * Port from YuJunZhiXue/Cline-proxy pool.go parseInferenceCapDuration
+ * Default 18h if no duration found.
+ */
+export function parseInferenceCapDuration(text) {
+  if (!text) return null;
+  const str = String(text);
+  if (!/INFERENCE_CAP_ERROR/i.test(str) && !/Try again in/i.test(str)) return null;
+  const hMatch = str.match(/(\d+)\s*h/i);
+  const mMatch = str.match(/(\d+)\s*m/i);
+  const h = hMatch ? parseInt(hMatch[1], 10) : 0;
+  const m = mMatch ? parseInt(mMatch[1], 10) : 0;
+  if (h === 0 && m === 0) return 18 * 60 * 60 * 1000; // default 18h
+  return (h * 60 * 60 + m * 60) * 1000;
+}
+
+/**
  * Compute the millisecond offset until the next UTC midnight (tomorrow 00:00 UTC).
  * Used as the cooldown for `daily_quota` classification.
  *
@@ -296,6 +316,11 @@ export function classify429(response) {
     if (text && QUOTA_EXHAUSTED_PATTERNS.some((pat) => pat.test(text))) {
       return { kind: "quota_exhausted", cooldownMs: QUOTA_EXHAUSTED_COOLDOWN_MS };
     }
+  }
+  // Cline INFERENCE_CAP — precise duration (e.g. 17h 59m) → daily_quota with exact ms
+  const inferenceMs = parseInferenceCapDuration(bodyToText(response.body));
+  if (inferenceMs !== null) {
+    return { kind: "daily_quota", cooldownMs: inferenceMs };
   }
   // Daily quota checked first — it's the most specific (daily implies a
   // midnight reset, which is shorter than the 1h quota_exhausted cooldown

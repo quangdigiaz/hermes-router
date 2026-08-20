@@ -58,6 +58,22 @@ async function getInternalHeaders() {
 }
 
 async function pingModelByKindImpl(model, kind, baseUrl = `http://127.0.0.1:${process.env.PORT || UPDATER_CONFIG.appPort}`) {
+  // Cline không phục vụ :free trực tiếp — phải qua opencode zen (như Cline-proxy README: dual upstream)
+  // Nếu test cline/*:free → trả lỗi nhanh, tránh timeout 30s oan
+  if (typeof model === "string" && /:free/i.test(model)) {
+    const lower = model.toLowerCase();
+    const isClineProvider = lower.startsWith("cline/") || lower.startsWith("cl/") || lower.includes("/cline/") || lower === "cline";
+    // poolside/laguna-s-2.1:free qua cline là sai routing — phải qua opencode
+    if (isClineProvider) {
+      return {
+        ok: false,
+        latencyMs: 0,
+        status: 400,
+        error: "Free model :free không chạy trên provider Cline trực tiếp. Theo Cline-proxy README, :free phải qua opencode (zen) gateway. Hãy thêm model này vào provider OpenCode (opencode/laguna-s-2.1:free hoặc opencode/laguna-s-2.1-free) thay vì Cline.",
+      };
+    }
+  }
+
   const headers = await getInternalHeaders();
   const start = Date.now();
 

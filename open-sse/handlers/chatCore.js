@@ -34,6 +34,7 @@ import { getCapabilitiesForModel } from "../providers/capabilities.js";
 import { stripUnsupportedModalities } from "../translator/concerns/modality.js";
 import { prefetchRemoteImages } from "../translator/concerns/prefetch.js";
 import { markPoolUnfit } from "../services/proxyPoolFitness.js";
+import { maybeCompact } from "../rtk/compact.js";
 
 const MAX_POOL_RETRIES = 2;
 const TOOL_PROTOCOL_PROMPT_PROVIDERS = new Set(["nvidia"]);
@@ -294,6 +295,13 @@ export async function handleChatCore({ body, modelInfo, credentials, log, onCred
 
   // Per-request opt-out: client can bypass all token savers via header
   const tokenSaverEnabled = clientRawRequest?.headers?.[TOKEN_SAVER_HEADER]?.toLowerCase() !== "off";
+
+  // Compact: official summary compression (port Cline-proxy compact.go) — fail-open
+  try {
+    const sid = clientRawRequest?.headers?.["x-opencode-session"] || clientRawRequest?.headers?.["x-session-id"] || connectionId || `sess_${Date.now()}`;
+    const compactRes = await maybeCompact({ body: translatedBody, model: upstreamModel, sessionId: sid, config: { buffer: 20000, keepTokens: 8000 } });
+    if (compactRes.changed) log?.info?.("COMPACT", `session ${sid.slice(0, 8)} compacted ${compactRes.compactTokens} tokens`);
+  } catch (e) { log?.warn?.("COMPACT", `skip: ${e.message}`); }
 
   // RTK: compress tool_result content
   const rtkStats = compressMessages(translatedBody, tokenSaverEnabled && rtkEnabled);

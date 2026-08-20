@@ -27,5 +27,9 @@ export default {
     { id: "poolside/laguna-s-2.1", name: "Laguna S 2.1" },
     { id: "poolside/laguna-xs-2.1", name: "Laguna XS 2.1" },
     { id: "poolside/laguna-m.1", name: "Laguna M.1" },
+    // Alias free variants (routed via same upstream without :free suffix)
+    { id: "poolside/laguna-s-2.1:free", name: "Laguna S 2.1 (Free)", upstreamModelId: "poolside/laguna-s-2.1" },
+    { id: "poolside/laguna-xs-2.1:free", name: "Laguna XS 2.1 (Free)", upstreamModelId: "poolside/laguna-xs-2.1" },
+    { id: "poolside/laguna-m.1:free", name: "Laguna M.1 (Free)", upstreamModelId: "poolside/laguna-m.1" },
   ],
 };

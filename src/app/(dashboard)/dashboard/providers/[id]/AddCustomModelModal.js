@@ -35,6 +35,9 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
     return id.startsWith(prefix) ? id.slice(prefix.length) : id;
   };
 
+  // Auto-detect :free suffix — many free variants are ":free" but should be saved as isFree
+  const isFreeSuffix = (id) => id.toLowerCase().endsWith(":free") || id.toLowerCase().endsWith("-free");
+
   const handleTest = async () => {
     const cleanId = stripAlias(modelId.trim());
     if (!cleanId) return;
@@ -46,6 +49,11 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
         body: JSON.stringify({ model: `${providerAlias}/${cleanId}` }),
       });
       const data = await res.json();
+      // Timeout is not a hard block — proxy/relay slowness, allow save anyway
+      if (!data.ok && String(data.error || "").toLowerCase().includes("timed out after")) {
+        dispatch({ type: "TEST_RESULT", ok: false, error: `${data.error} — bạn vẫn có thể bấm Add Model để lưu, model sẽ chạy khi proxy ổn định.` });
+        return;
+      }
       dispatch({ type: "TEST_RESULT", ok: data.ok, error: data.error });
     } catch (err) {
       dispatch({ type: "TEST_RESULT", ok: false, error: err.message });
@@ -55,9 +63,11 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
   const handleSave = async () => {
     const cleanId = stripAlias(modelId.trim());
     if (!cleanId || saving) return;
+    // Auto-mark free if suffix is :free / -free
+    const effectiveIsFree = isFree || isFreeSuffix(cleanId);
     dispatch({ type: "SAVE_START" });
     try {
-      await onSave(cleanId, isFree);
+      await onSave(cleanId, effectiveIsFree);
     } finally {
       dispatch({ type: "SAVE_DONE" });
     }
@@ -107,7 +117,19 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
         {testStatus === "error" && (
           <div className="flex items-start gap-2 text-sm text-red-500">
             <span className="material-symbols-outlined text-base shrink-0">cancel</span>
-            <span>{testError || "Model not reachable"}</span>
+            <span>
+              {testError || "Model not reachable"}
+              {String(testError || "").toLowerCase().includes("opencode") && (
+                <span className="block text-xs text-text-muted mt-1">
+                  Gợi ý: Free :free nên thêm ở <b>OpenCode</b> provider (opencode/laguna-s-2.1:free), không phải Cline.
+                </span>
+              )}
+            </span>
+          </div>
+        )}
+        {providerAlias === "cline" && isFreeSuffix(modelId.trim()) && (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-700">
+            ⚠️ Model :free không chạy trên Cline trực tiếp (theo Cline-proxy README: dual upstream — :free qua zen gateway). Hãy thêm vào <b>OpenCode</b> thay vì Cline.
           </div>
         )}
 
