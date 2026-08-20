@@ -11,7 +11,7 @@ export default function HealthBadge() {
     let mounted = true;
     const check = async () => {
       try {
-        const res = await fetch("/api/hub/status");
+        const res = await fetch("/api/hub/status", { cache: "no-store" });
         if (res.ok && mounted) {
           const data = await res.json();
           const summary = data.incidentSummary || data.summary || {};
@@ -22,9 +22,40 @@ export default function HealthBadge() {
         // ignore
       }
     };
+
+    const handleStatusEvent = (e) => {
+      if (!mounted) return;
+      if (e?.detail?.incidentSummary || e?.detail?.summary) {
+        const summary = e.detail.incidentSummary || e.detail.summary || {};
+        setCount(summary.total || 0);
+        setCritical(summary.critical || 0);
+      } else {
+        check();
+      }
+    };
+
     check();
-    const interval = setInterval(check, 30_000);
-    return () => { mounted = false; clearInterval(interval); };
+    const interval = setInterval(check, 15_000);
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("hubStatusChanged", handleStatusEvent);
+      window.addEventListener("connectionChanged", check);
+      window.addEventListener("customModelChanged", check);
+      window.addEventListener("focus", check);
+      document.addEventListener("visibilitychange", check);
+    }
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("hubStatusChanged", handleStatusEvent);
+        window.removeEventListener("connectionChanged", check);
+        window.removeEventListener("customModelChanged", check);
+        window.removeEventListener("focus", check);
+        document.removeEventListener("visibilitychange", check);
+      }
+    };
   }, []);
 
   if (count === 0) return null;

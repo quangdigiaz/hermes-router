@@ -73,6 +73,11 @@ let cachedResponse = null;
 let cachedTime = 0;
 const CACHE_TTL_MS = 5_000;
 
+export function invalidateHubStatusCache() {
+  cachedResponse = null;
+  cachedTime = 0;
+}
+
 export async function GET() {
   const now = Date.now();
   if (cachedResponse && now - cachedTime < CACHE_TTL_MS) {

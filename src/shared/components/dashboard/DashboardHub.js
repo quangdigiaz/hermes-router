@@ -12,10 +12,13 @@ export default function DashboardHub({ machineId }) {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/hub/status");
+      const res = await fetch("/api/hub/status", { cache: "no-store" });
       if (res.ok) {
         const json = await res.json();
         setData(json);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("hubStatusChanged", { detail: json }));
+        }
       }
     } catch {
       // ignore
@@ -27,7 +30,19 @@ export default function DashboardHub({ machineId }) {
   useEffect(() => {
     fetchStatus();
     const interval = setInterval(fetchStatus, 30_000);
-    return () => clearInterval(interval);
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("connectionChanged", fetchStatus);
+      window.addEventListener("customModelChanged", fetchStatus);
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("connectionChanged", fetchStatus);
+        window.removeEventListener("customModelChanged", fetchStatus);
+      }
+    };
   }, [fetchStatus]);
 
   return (
