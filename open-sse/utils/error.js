@@ -64,6 +64,19 @@ export async function parseUpstreamError(response, executor = null) {
     bodyText = "";
   }
 
+  // 403 HTML Cloudflare WAF — map to 502 transient trước khi mọi parser khác
+  // Dấu hiệu: <html> + Unable to load site / Ray ID / cdn-cgi/challenge
+  // Gốc: open-sse/providers/registry/codex.js → chatgpt.com bị Warp 2a06:... flag
+  if (response.status === 403 && /<html/i.test(bodyText) && /Unable to load site|Ray ID|cdn-cgi\/challenge/i.test(bodyText)) {
+    const rayMatch = bodyText.match(/Ray ID[:\s]*([a-z0-9]+)/i);
+    const ray = rayMatch ? ` [Ray ID:${rayMatch[1].slice(0, 16)}]` : "";
+    return {
+      statusCode: 502,
+      message: `Codex blocked by Cloudflare WAF (IP/proxy flagged)${ray}. Fix: set No Proxy for chatgpt.com or use residential proxy per account. Original 403 HTML sanitized.`,
+      // transient 30s — không lock 2m như 403 auth
+    };
+  }
+
   // Let executor-specific parser extract provider-specific fields (e.g. codex resetsAtMs)
   if (executor && typeof executor.parseError === "function") {
     try {
@@ -91,6 +104,11 @@ export async function parseUpstreamError(response, executor = null) {
     }
   } catch {
     message = bodyText;
+  }
+
+  // Sanitize HTML leak: nếu message vẫn chứa <html thì thay bằng text ngắn
+  if (/<html/i.test(message) && /Unable to load site|Ray ID/i.test(message)) {
+    message = "Codex upstream blocked by Cloudflare (403). IP/proxy flagged — Ray ID present. Fix: Dashboard → Connection → No Proxy = chatgpt.com, auth.openai.com hoặc gán residential proxy riêng mỗi Codex account.";
   }
 
   const messageStr = typeof message === "string" ? message : JSON.stringify(message);

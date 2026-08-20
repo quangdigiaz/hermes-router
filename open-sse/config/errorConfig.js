@@ -62,6 +62,11 @@ export const ERROR_RULES = [
   { text: "client disconnected",      shouldFallback: false },
   { text: "content-blocked",          shouldFallback: false },
   { text: "content_blocked",          shouldFallback: false },
+  // CKEY/Codex WAF — 403 HTML đã map sang 502 nhưng giữ text rule để fallback 30s nếu còn sót
+  { text: "unable to load site",      cooldownMs: TRANSIENT_COOLDOWN_MS },
+  { text: "ray id",                   cooldownMs: TRANSIENT_COOLDOWN_MS },
+  { text: "cloudflare waf",           cooldownMs: TRANSIENT_COOLDOWN_MS },
+  { text: "codex blocked by cloudflare", cooldownMs: TRANSIENT_COOLDOWN_MS },
   { text: "no credentials",           cooldownMs: COOLDOWN.long },
   { text: "request not allowed",      cooldownMs: COOLDOWN.short },
   { text: "improperly formed request", cooldownMs: COOLDOWN.long },

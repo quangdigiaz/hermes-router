@@ -173,14 +173,23 @@ async function pingModelByKindImpl(model, kind, baseUrl = `http://127.0.0.1:${pr
     }
   }
 
-  // Debug: log response shape for troubleshooting
+  // Sanitize WAF HTML trước khi log/helper
+  const isWafHtml = /<html/i.test(rawText) && /Unable to load site|Ray ID/i.test(rawText);
+  const sanitizedWafDetail = "Codex upstream blocked by Cloudflare (403). IP/proxy flagged — Ray ID present. Fix: set No Proxy for chatgpt.com or use residential proxy per account.";
+
+  // Debug: log response shape for troubleshooting (sanitize HTML)
   if (!parsed?.choices && rawText) {
-    console.log("[ping] No choices found. parsed:", JSON.stringify(parsed).slice(0, 300));
-    console.log("[ping] rawText preview:", rawText.slice(0, 500));
+    const logParsed = isWafHtml ? sanitizedWafDetail : JSON.stringify(parsed).slice(0, 300);
+    const logRaw = isWafHtml ? sanitizedWafDetail : rawText.slice(0, 500);
+    console.log("[ping] No choices found. parsed:", logParsed);
+    console.log("[ping] rawText preview:", logRaw);
   }
 
   if (!res.ok) {
-    const detail = parsed?.error?.message || parsed?.msg || parsed?.message || parsed?.error || rawText;
+    let detail = parsed?.error?.message || parsed?.msg || parsed?.message || parsed?.error || rawText;
+    if (isWafHtml || (typeof detail === "string" && /<html/i.test(detail))) {
+      detail = sanitizedWafDetail;
+    }
     return { ok: false, latencyMs, error: `HTTP ${res.status}${detail ? `: ${String(detail).slice(0, 240)}` : ""}`, status: res.status };
   }
 

@@ -45,6 +45,11 @@ const DEFAULT_SETTINGS = {
   cavemanLevel: "full",
   ponytailEnabled: false,
   ponytailLevel: "full",
+  // CKEY
+  ckeyApiKey: "",
+  ckeyKeyproxy: "",
+  ckeyAutoRotateEnabled: true,
+  ckeyAutoRotateOnWaf: true,
 };
 
 async function readRaw() {

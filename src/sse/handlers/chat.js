@@ -31,6 +31,7 @@ import {
 import { getProxyHash, resolveConnectionProxyConfig } from "@/lib/network/connectionProxy.js";
 import { updateProviderConnection, getProviderConnections } from "@/lib/localDb";
 import { isModelAllowed } from "../services/allowedModels.js";
+import { autoRotateCkeyProxy, shouldAutoRotateOnError } from "@/lib/ckey/autoRotate.js";
 import { getDisabledModels } from "@/lib/disabledModelsDb";
 import { cacheClaudeHeaders } from "open-sse/utils/claudeHeaderCache.js";
 import { getSettings } from "@/lib/localDb";
@@ -565,6 +566,23 @@ handleSingleModel: (b, m, opts) => handleSingleModelChat(b, m, clientRawRequest,
         source: "chat",
       });
     }
+
+    // Auto-rotate CKEY proxy khi gặp WAF/5xx — đỡ vất vả cho anh
+    try {
+      const chatSettings = await getSettings();
+      const canAutoRotate = chatSettings.ckeyAutoRotateEnabled !== false;
+      const poolIdForRotate = proxyOptions?.proxyPoolId || credentials.providerSpecificData?.proxyPoolId || null;
+      const keyproxyForRotate = credentials.providerSpecificData?.ckeyKeyproxy || chatSettings.ckeyKeyproxy || "";
+      if (canAutoRotate && poolIdForRotate && keyproxyForRotate && shouldAutoRotateOnError(result.status, errorText)) {
+        const rotated = await autoRotateCkeyProxy(poolIdForRotate, {
+          keyproxy: keyproxyForRotate,
+          tinhthanh: credentials.providerSpecificData?.ckeyTinhThanh ?? 0,
+          nhamang: credentials.providerSpecificData?.ckeyNhaMang ?? "random",
+        });
+        if (rotated.rotated) log.info("CKEY", `Auto-rotated pool ${poolIdForRotate} → ${String(rotated.proxyUrl).slice(0, 40)}...`);
+        else log.warn("CKEY", `Auto-rotate skip ${poolIdForRotate}: ${rotated.reason}`);
+      }
+    } catch (e) { log.warn("CKEY", `Auto-rotate error: ${e.message}`); }
 
     // Record provider-level failure for circuit breaker. Proxy-aware: failure
     // is attributed to the specific proxy bucket.

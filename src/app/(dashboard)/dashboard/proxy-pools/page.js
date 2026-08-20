@@ -639,6 +639,17 @@ export default function ProxyPoolsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-1 sm:gap-6 sm:px-0">
+      {/* CKEY Ref Banner — đồng bộ với CkeyMoneyDisplay */}
+      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-emerald-600 font-semibold">CKEY Proxy Xoay VN</span>
+          <span className="text-text-muted text-xs">3.3k/ngày • 19k/tuần • 60k/tháng — IP sống 15-30p, đổi không giới hạn, băng thông unlimited</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <a href="https://ckey.vn/register?ref=ckeyA8497D" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700">Đăng ký CKEY ↗</a>
+          <a href="https://ckey.vn/docs" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-white text-xs font-medium hover:bg-bg">Docs</a>
+        </div>
+      </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl font-semibold sm:text-2xl">Proxy Pools</h1>
