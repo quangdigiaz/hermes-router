@@ -31,6 +31,7 @@ export default {
       "X-Product": "SaaS",
       "X-IDE-Type": "IDE",
       "X-IDE-Name": "IDE",
+      "X-Domain": "www.codebuddy.ai",
       "x-requested-with": "XMLHttpRequest",
       "x-codebuddy-request": "1",
     },

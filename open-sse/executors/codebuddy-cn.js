@@ -42,17 +42,27 @@ export class CodeBuddyExecutor extends DefaultExecutor {
       ? rawMessages
       : [{ role: "system", content: NEUTRAL_PROMPT }, ...rawMessages];
 
-    transformed.messages = baseMessages.map((message) => {
-      if (!message || (message.role !== "system" && message.role !== "developer")) return message;
-      const text = flatten(message.content);
-      if (!text) return message;
-      if (text.length > 2000 || AGENT_PATTERN.test(text)) {
-        return typeof message.content === "string"
-          ? { ...message, content: NEUTRAL_PROMPT }
-          : { ...message, content: [{ type: "text", text: NEUTRAL_PROMPT }] };
+    transformed.messages = [];
+    for (const message of baseMessages) {
+      if (!message || typeof message !== "object") continue;
+      if (message.role === "system" || message.role === "developer") {
+        const text = flatten(message.content);
+        if (text && (text.length > 2000 || AGENT_PATTERN.test(text))) {
+          transformed.messages.push(
+            typeof message.content === "string"
+              ? { ...message, content: NEUTRAL_PROMPT }
+              : { ...message, content: [{ type: "text", text: NEUTRAL_PROMPT }] }
+          );
+        } else {
+          transformed.messages.push({ ...message });
+        }
+      } else if (message.role === "user" && typeof message.content === "string") {
+        // Tencent CodeBuddy requires typed blocks (code 11140 request illegal if plain string)
+        transformed.messages.push({ ...message, content: [{ type: "text", text: message.content }] });
+      } else {
+        transformed.messages.push({ ...message });
       }
-      return message;
-    });
+    }
 
     // CodeBuddy only surfaces model reasoning when the request carries the CLI's
     // OpenAI-style params: reasoning_effort + reasoning_summary:"auto". Hermes Router's
