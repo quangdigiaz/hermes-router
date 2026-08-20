@@ -34,15 +34,33 @@ export class CodeBuddyExecutor extends DefaultExecutor {
           ? content.map((b) => (b && typeof b.text === "string" ? b.text : "")).join("\n")
           : "";
 
+    // Fix 11140: Tencent requires typed blocks for user messages and first message must be system
+    // Đồng bộ với codebuddy-intl.js — 9Router đã làm và gọi được, Hermes trước đó gửi bare string nên illegal
     if (Array.isArray(transformed.messages)) {
-      transformed.messages = transformed.messages.map((message) => {
-        if (!message || (message.role !== "system" && message.role !== "developer")) return message;
-        const text = flatten(message.content);
-        if (!text) return message;
-        if (text.length > 2000 || AGENT_PATTERN.test(text)) {
-          return typeof message.content === "string"
-            ? { ...message, content: NEUTRAL_PROMPT }
-            : { ...message, content: [{ type: "text", text: NEUTRAL_PROMPT }] };
+      const source = transformed.messages;
+      const hasSystem = source.some(m => m && (m.role === "system" || m.role === "developer"));
+      // Nếu thiếu system thì chèn neutral prompt như intl
+      const withSystem = hasSystem ? source : [{ role: "system", content: [{ type: "text", text: NEUTRAL_PROMPT }] }, ...source];
+
+      transformed.messages = withSystem.map((message) => {
+        if (!message) return message;
+        // Neutralize agent system prompts
+        if (message.role === "system" || message.role === "developer") {
+          const text = flatten(message.content);
+          if (!text) return message;
+          if (text.length > 2000 || AGENT_PATTERN.test(text)) {
+            return typeof message.content === "string"
+              ? { ...message, content: NEUTRAL_PROMPT }
+              : { ...message, content: [{ type: "text", text: NEUTRAL_PROMPT }] };
+          }
+          // Đảm bảo system luôn là typed blocks
+          if (typeof message.content === "string") {
+            return { ...message, content: [{ type: "text", text: message.content }] };
+          }
+          return message;
+        }
+        if (message.role === "user" && typeof message.content === "string") {
+          return { ...message, content: [{ type: "text", text: message.content }] };
         }
         return message;
       });

@@ -568,10 +568,11 @@ handleSingleModel: (b, m, opts) => handleSingleModelChat(b, m, clientRawRequest,
     }
 
     // Auto-rotate CKEY proxy khi gặp WAF/5xx — đỡ vất vả cho anh
+    // Lưu ý: handleSingleModelChat không có biến proxyOptions (proxy resolve ở chatCore), lấy poolId từ credentials
     try {
       const chatSettings = await getSettings();
       const canAutoRotate = chatSettings.ckeyAutoRotateEnabled !== false;
-      const poolIdForRotate = proxyOptions?.proxyPoolId || credentials.providerSpecificData?.proxyPoolId || null;
+      const poolIdForRotate = credentials.providerSpecificData?.proxyPoolId || credentials.providerSpecificData?.connectionProxyPoolId || null;
       const keyproxyForRotate = credentials.providerSpecificData?.ckeyKeyproxy || chatSettings.ckeyKeyproxy || "";
       if (canAutoRotate && poolIdForRotate && keyproxyForRotate && shouldAutoRotateOnError(result.status, errorText)) {
         const rotated = await autoRotateCkeyProxy(poolIdForRotate, {
