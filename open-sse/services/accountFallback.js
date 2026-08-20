@@ -7,6 +7,11 @@ import {
 } from "../utils/circuitBreaker.js";
 import { classify429 } from "../utils/classify429.js";
 import { getProviderResilienceProfile } from "../config/providerProfiles.js";
+import {
+  getAdaptiveCooldown,
+  recordSuccess as recordAdaptiveSuccess,
+  recordFailure as recordAdaptiveFailure,
+} from "../utils/adaptiveCooldown.js";
 
 /**
  * Calculate exponential backoff cooldown for rate limits (429)
@@ -18,6 +23,24 @@ export function getQuotaCooldown(backoffLevel = 0) {
   const level = Math.max(0, backoffLevel - 1);
   const cooldown = BACKOFF_CONFIG.base * Math.pow(2, level);
   return Math.min(cooldown, BACKOFF_CONFIG.max);
+}
+
+/**
+ * Record a successful request for adaptive cooldown.
+ * Call this after a successful upstream response.
+ * @param {string} connectionId
+ */
+export function recordSuccess(connectionId) {
+  if (connectionId) recordAdaptiveSuccess(connectionId);
+}
+
+/**
+ * Record a failed request for adaptive cooldown.
+ * Call this after a failed upstream response (429, 5xx, etc.).
+ * @param {string} connectionId
+ */
+export function recordFailure(connectionId) {
+  if (connectionId) recordAdaptiveFailure(connectionId);
 }
 
 /**
