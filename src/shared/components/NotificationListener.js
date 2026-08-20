@@ -12,6 +12,7 @@ const SEVERITY_MAP = {
 const RECONNECT_DELAY_MS = 5000;
 const SEEN_IDS_KEY = "hermes-notifications-seen-ids";
 const MAX_SEEN_IDS = 200;
+const SAVE_DEBOUNCE_MS = 1000;
 
 function loadSeenIds() {
   try {
@@ -22,7 +23,7 @@ function loadSeenIds() {
   }
 }
 
-function saveSeenIds(seenIds) {
+function persistSeenIds(seenIds) {
   const arr = [...seenIds];
   // Keep only the most recent MAX_SEEN_IDS to avoid unbounded growth
   if (arr.length > MAX_SEEN_IDS) {
@@ -37,6 +38,8 @@ export default function NotificationListener() {
   const addNotification = useNotificationStore((s) => s.addNotification);
   const dedupRef = useRef(new Map());
   const seenIdsRef = useRef(null);
+  const seenIdsDirtyRef = useRef(false);
+  const saveTimerRef = useRef(null);
   const esRef = useRef(null);
   const reconnectTimerRef = useRef(null);
   const mountedRef = useRef(true);
@@ -46,6 +49,21 @@ export default function NotificationListener() {
     if (seenIdsRef.current === null) {
       seenIdsRef.current = loadSeenIds();
     }
+
+    // Debounced flush: batch multiple seenId additions into one localStorage write
+    const flushSeenIds = () => {
+      if (seenIdsDirtyRef.current && seenIdsRef.current) {
+        persistSeenIds(seenIdsRef.current);
+        seenIdsDirtyRef.current = false;
+      }
+    };
+    const scheduleFlush = () => {
+      if (!seenIdsDirtyRef.current) {
+        seenIdsDirtyRef.current = true;
+      }
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(flushSeenIds, SAVE_DEBOUNCE_MS);
+    };
 
     const pushNotification = (n) => {
       // Skip notifications already seen (dismissed + F5 scenario)
@@ -88,7 +106,7 @@ export default function NotificationListener() {
       // Mark this notification ID as seen so it won't reappear after F5
       if (n.id != null) {
         seenIdsRef.current.add(n.id);
-        saveSeenIds(seenIdsRef.current);
+        scheduleFlush();
       }
     };
 
@@ -135,6 +153,12 @@ export default function NotificationListener() {
     return () => {
       mountedRef.current = false;
       clearTimeout(reconnectTimerRef.current);
+      clearTimeout(saveTimerRef.current);
+      // Flush any pending seen IDs before unmounting
+      if (seenIdsDirtyRef.current && seenIdsRef.current) {
+        persistSeenIds(seenIdsRef.current);
+        seenIdsDirtyRef.current = false;
+      }
       if (esRef.current) esRef.current.close();
       esRef.current = null;
       dedupRef.current.clear();

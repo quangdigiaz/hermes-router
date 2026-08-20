@@ -20,6 +20,7 @@ if (!global._notificationBusState) {
     emitter: new EventEmitter(),
     buffer: [],
     dedupMap: new Map(),
+    idCounter: 0,
   };
   global._notificationBusState.emitter.setMaxListeners(50);
 }
@@ -31,7 +32,9 @@ if (!state.emitter) {
   state.emitter.setMaxListeners(50);
 }
 
-let idCounter = 0;
+// idCounter lives on `global._notificationBusState` so it survives hot-reload.
+// A module-level `let` would reset to 0, causing ID collisions with client
+// localStorage seen-ids and silently skipping new notifications.
 
 function dedupKey(n) {
   return `${n.provider || ""}|${n.model || ""}|${n.status || ""}|${n.category || ""}`;
@@ -117,7 +120,7 @@ async function processAutoDisable(notification) {
 
   // Emit auto-disable notification
   const disableNotification = {
-    id: ++idCounter,
+    id: ++state.idCounter,
     ts: Date.now(),
     severity: "critical",
     category: "auto_disabled",
@@ -164,7 +167,7 @@ async function processAutoReactivate(notification) {
   if (actions.length === 0) return;
 
   const reactivateNotification = {
-    id: ++idCounter,
+    id: ++state.idCounter,
     ts: Date.now(),
     severity: "info",
     category: "auto_reactivated",
@@ -182,7 +185,7 @@ export function emitNotification(payload) {
   if (payload.severity !== "critical" && isDuplicate(payload)) return;
 
   const notification = {
-    id: ++idCounter,
+    id: ++state.idCounter,
     ts: Date.now(),
     severity: payload.severity || "info",
     category: payload.category || "general",
