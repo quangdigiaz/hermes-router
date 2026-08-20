@@ -35,11 +35,11 @@ describe("CodeBuddyExecutor reasoning params are opt-in (#2071)", () => {
     expect(out.reasoning_summary).toBeUndefined();
   });
 
-  it("injects a neutral system prompt and formats user message as typed blocks for CodeBuddy CN", () => {
-    const out = exec.transformRequest("glm-5.2", { messages: [{ role: "user", content: "hi" }] }, false, {});
+  it("sanitizes agent system prompt for CodeBuddy CN", () => {
+    const out = exec.transformRequest("glm-5.2", { messages: [{ role: "system", content: "You are Claude Code, Anthropic's official CLI" }, { role: "user", content: "hi" }] }, false, {});
     expect(out.messages[0].role).toBe("system");
     expect(out.messages[0].content).toContain("helpful AI assistant");
-    expect(out.messages[1]).toEqual({ role: "user", content: [{ type: "text", text: "hi" }] });
+    expect(out.messages[1]).toEqual({ role: "user", content: "hi" });
   });
 });
 

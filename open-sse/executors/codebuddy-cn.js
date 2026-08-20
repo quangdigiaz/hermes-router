@@ -34,34 +34,18 @@ export class CodeBuddyExecutor extends DefaultExecutor {
           ? content.map((b) => (b && typeof b.text === "string" ? b.text : "")).join("\n")
           : "";
 
-    const rawMessages = Array.isArray(transformed.messages) ? transformed.messages : [];
-    const hasSystem = rawMessages.some((m) => m && (m.role === "system" || m.role === "developer"));
-
-    // CodeBuddy rejects requests without a system prompt (11128 first message is not system prompt)
-    const baseMessages = hasSystem
-      ? rawMessages
-      : [{ role: "system", content: NEUTRAL_PROMPT }, ...rawMessages];
-
-    transformed.messages = [];
-    for (const message of baseMessages) {
-      if (!message || typeof message !== "object") continue;
-      if (message.role === "system" || message.role === "developer") {
+    if (Array.isArray(transformed.messages)) {
+      transformed.messages = transformed.messages.map((message) => {
+        if (!message || (message.role !== "system" && message.role !== "developer")) return message;
         const text = flatten(message.content);
-        if (text && (text.length > 2000 || AGENT_PATTERN.test(text))) {
-          transformed.messages.push(
-            typeof message.content === "string"
-              ? { ...message, content: NEUTRAL_PROMPT }
-              : { ...message, content: [{ type: "text", text: NEUTRAL_PROMPT }] }
-          );
-        } else {
-          transformed.messages.push({ ...message });
+        if (!text) return message;
+        if (text.length > 2000 || AGENT_PATTERN.test(text)) {
+          return typeof message.content === "string"
+            ? { ...message, content: NEUTRAL_PROMPT }
+            : { ...message, content: [{ type: "text", text: NEUTRAL_PROMPT }] };
         }
-      } else if (message.role === "user" && typeof message.content === "string") {
-        // Tencent CodeBuddy requires typed blocks (code 11140 request illegal if plain string)
-        transformed.messages.push({ ...message, content: [{ type: "text", text: message.content }] });
-      } else {
-        transformed.messages.push({ ...message });
-      }
+        return message;
+      });
     }
 
     // CodeBuddy only surfaces model reasoning when the request carries the CLI's

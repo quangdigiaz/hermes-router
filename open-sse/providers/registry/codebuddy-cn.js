@@ -30,7 +30,6 @@ export default {
       "X-Product": "SaaS",
       "X-IDE-Type": "CLI",
       "X-IDE-Name": "CLI",
-      "X-Domain": "copilot.tencent.com",
       "x-requested-with": "XMLHttpRequest",
       "x-codebuddy-request": "1",
     },
