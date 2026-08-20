@@ -73,10 +73,20 @@ export default function SystemPulse({ data: propData, loading: propLoading }) {
   const providers = pulse.providers || {};
   const proxy = pulse.proxyHealth || {};
 
+  const hasProviders = (providers.total || 0) > 0;
+  const isAllOnline = hasProviders && providers.active === providers.total && !providers.error;
   const providerColor =
-    providers.error > 0 ? "red" : providers.active === providers.total ? "green" : "amber";
+    providers.error > 0 ? "red" : isAllOnline ? "green" : "amber";
   const proxyColor = proxy.percent >= 80 ? "green" : proxy.percent >= 50 ? "amber" : "red";
-  const activityColor = pulse.errorsToday > 10 ? "amber" : "green";
+  const activityColor = pulse.errorsToday > 10 ? "amber" : pulse.errorsToday > 0 ? "amber" : "green";
+
+  let providerSub = translate("All online");
+  if (providers.error > 0) {
+    providerSub = `${providers.error} ${translate("with errors")}`;
+  } else if (hasProviders && providers.active < providers.total) {
+    const inactive = providers.total - providers.active;
+    providerSub = `${inactive} ${translate("inactive")}`;
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -84,11 +94,7 @@ export default function SystemPulse({ data: propData, loading: propLoading }) {
         icon="🔌"
         label={translate("Providers")}
         value={`${providers.active || 0} / ${providers.total || 0}`}
-        sub={
-          providers.error > 0
-            ? `${providers.error} ${translate("with errors")}`
-            : translate("All online")
-        }
+        sub={providerSub}
         color={providerColor}
       />
       <MetricCard

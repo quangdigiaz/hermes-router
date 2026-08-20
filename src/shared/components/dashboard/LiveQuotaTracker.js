@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { translate } from "@/i18n/runtime";
 
-function ProgressBar({ value, max, color = "brand", label, sub }) {
+function ProgressBar({ value, max, color = "brand", label, sub, mode = "usage" }) {
   const percent = max > 0 ? Math.min((value / max) * 100, 100) : 0;
   const colors = {
     brand: "bg-brand-500",
@@ -11,8 +11,27 @@ function ProgressBar({ value, max, color = "brand", label, sub }) {
     amber: "bg-amber-500",
     red: "bg-red-500",
   };
-  const barColor =
-    percent > 80 ? "bg-red-500" : percent > 50 ? "bg-amber-500" : colors[color] || colors.brand;
+
+  let barColor;
+  if (mode === "health") {
+    // Health / Availability mode: 100% or high is healthy (green), drops to amber, then red
+    if (percent >= 90) {
+      barColor = colors.green;
+    } else if (percent >= 50) {
+      barColor = colors.amber;
+    } else {
+      barColor = colors.red;
+    }
+  } else {
+    // Usage / Quota mode: lower is normal, higher is warning/danger
+    if (percent > 90) {
+      barColor = colors.red;
+    } else if (percent > 70) {
+      barColor = colors.amber;
+    } else {
+      barColor = colors[color] || colors.brand;
+    }
+  }
 
   return (
     <div className="space-y-1">
@@ -35,12 +54,12 @@ function ProgressBar({ value, max, color = "brand", label, sub }) {
   );
 }
 
-function QuotaRow({ icon, label, value, max, sub, color }) {
+function QuotaRow({ icon, label, value, max, sub, color, mode = "usage" }) {
   return (
     <div className="flex items-start gap-3">
       <span className="text-base mt-0.5 flex-shrink-0">{icon}</span>
       <div className="flex-1 min-w-0">
-        <ProgressBar value={value} max={max} label={label} sub={sub} color={color} />
+        <ProgressBar value={value} max={max} label={label} sub={sub} color={color} mode={mode} />
       </div>
     </div>
   );
@@ -91,6 +110,9 @@ export default function LiveQuotaTracker({ data: propData, loading: propLoading 
   const proxy = pulse.proxyHealth || {};
   const activeCooldowns = pulse.activeCooldowns || 0;
 
+  const hasProviders = (providers.total || 0) > 0;
+  const isAllHealthy = hasProviders && providers.active === providers.total && !providers.error;
+
   return (
     <div className="rounded-xl border border-border-subtle bg-surface-1 px-4 py-3 space-y-3 shadow-sm">
       <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wide">
@@ -105,11 +127,14 @@ export default function LiveQuotaTracker({ data: propData, loading: propLoading 
         sub={
           providers.error > 0
             ? `${providers.error} ${translate("with errors")}`
-            : providers.active === providers.total
+            : isAllHealthy
             ? translate("All healthy")
+            : hasProviders
+            ? `${providers.total - providers.active} ${translate("inactive")}`
             : ""
         }
         color="green"
+        mode="health"
       />
 
       <QuotaRow
@@ -123,6 +148,7 @@ export default function LiveQuotaTracker({ data: propData, loading: propLoading 
             : translate("No pools configured")
         }
         color="brand"
+        mode={proxy.total > 0 ? "health" : "usage"}
       />
 
       {activeCooldowns > 0 && (
@@ -133,6 +159,7 @@ export default function LiveQuotaTracker({ data: propData, loading: propLoading 
           max={activeCooldowns + 5}
           sub={translate("Models / pools in cooldown")}
           color="amber"
+          mode="usage"
         />
       )}
 
@@ -147,6 +174,7 @@ export default function LiveQuotaTracker({ data: propData, loading: propLoading 
             : translate("No errors")
         }
         color="green"
+        mode="usage"
       />
     </div>
   );

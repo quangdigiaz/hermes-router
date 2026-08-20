@@ -98,6 +98,8 @@ export async function GET() {
     const errorGroups = recentErrors(logs);
 
     for (const conn of connections) {
+      if (conn.isActive === false) continue;
+
       const pInfo = providerInfoCache.get(conn.provider) || (() => {
         const info = resolveProviderInfo(conn.provider, nodesMap);
         providerInfoCache.set(conn.provider, info);
@@ -116,12 +118,54 @@ export async function GET() {
           providerColor: pInfo.color,
           connectionId: conn.id,
           connectionName: connName,
-          message: "Token expired or invalid — re-login or update key",
+          message: conn.lastError || "Token expired or invalid — re-login or update key",
           link: targetLink,
           actionLabel: "Re-login",
         });
-      }
-      if (conn.testStatus === "error" && conn.lastError) {
+      } else if (conn.testStatus === "unavailable") {
+        const isAuth = conn.errorCode === 401 || conn.errorCode === 403 || conn.lastErrorType === "auth_failed";
+        incidents.push({
+          severity: isAuth ? "critical" : "warning",
+          type: isAuth ? "auth_failed" : "unavailable",
+          provider: conn.provider,
+          providerName: pInfo.name,
+          providerIcon: pInfo.icon,
+          providerColor: pInfo.color,
+          connectionId: conn.id,
+          connectionName: connName,
+          message: conn.lastError ? `Account unavailable (${conn.errorCode || (isAuth ? 403 : "error")}): ${conn.lastError}` : "Account temporarily unavailable",
+          link: targetLink,
+          actionLabel: isAuth ? "Fix Auth →" : "Fix →",
+        });
+      } else if (conn.testStatus === "payment_required") {
+        incidents.push({
+          severity: "warning",
+          type: "payment_required",
+          provider: conn.provider,
+          providerName: pInfo.name,
+          providerIcon: pInfo.icon,
+          providerColor: pInfo.color,
+          connectionId: conn.id,
+          connectionName: connName,
+          message: conn.lastError || "Payment required (insufficient balance)",
+          link: conn.rechargeUrl || targetLink,
+          actionLabel: conn.rechargeUrl ? "Recharge →" : "Top Up →",
+        });
+      } else if (conn.testStatus === "expired") {
+        incidents.push({
+          severity: "critical",
+          type: "token_expired",
+          provider: conn.provider,
+          providerName: pInfo.name,
+          providerIcon: pInfo.icon,
+          providerColor: pInfo.color,
+          connectionId: conn.id,
+          connectionName: connName,
+          message: conn.lastError || "Session or token expired",
+          link: targetLink,
+          actionLabel: "Re-login",
+        });
+      } else if (conn.testStatus === "error" || (conn.lastError && conn.testStatus !== "active" && conn.testStatus !== "success")) {
         incidents.push({
           severity: "warning",
           type: "test_error",
@@ -131,11 +175,12 @@ export async function GET() {
           providerColor: pInfo.color,
           connectionId: conn.id,
           connectionName: connName,
-          message: conn.lastError,
+          message: conn.lastError || "Connection error",
           link: targetLink,
           actionLabel: "Fix →",
         });
       }
+
       if (conn.rateLimitedUntil) {
         const until = new Date(conn.rateLimitedUntil).getTime();
         if (until > now) {
@@ -232,14 +277,28 @@ export async function GET() {
 
     // --- System Pulse ---
     const totalProviders = connections.length;
-    const activeProviders = connections.filter((c) => c.isActive && c.testStatus === "active").length;
-    const errorProviders = connections.filter((c) => c.testStatus === "error" || c.testStatus === "auth_failed").length;
+    const activeProviders = connections.filter((c) => c.isActive && (c.testStatus === "active" || c.testStatus === "success")).length;
+    const errorProviders = connections.filter((c) =>
+      c.isActive && (
+        ["error", "auth_failed", "unavailable", "payment_required", "expired"].includes(c.testStatus) ||
+        Boolean(c.lastError && c.testStatus !== "active" && c.testStatus !== "success")
+      )
+    ).length;
 
     const totalPools = proxyFitness.pools?.length || 0;
     const healthyPools = proxyFitness.pools?.filter((p) => !p.unfit?.length).length || 0;
     const proxyHealthPercent = totalPools > 0 ? Math.round((healthyPools / totalPools) * 100) : 100;
 
-    const activeCooldowns = freebuffState.modelLocks + freebuffState.poolLimits;
+    let connModelLocks = 0;
+    for (const conn of connections) {
+      for (const k of Object.keys(conn)) {
+        if (k.startsWith("modelLock_") && conn[k]) {
+          const exp = new Date(conn[k]).getTime();
+          if (exp > now) connModelLocks++;
+        }
+      }
+    }
+    const activeCooldowns = (freebuffState.modelLocks || 0) + (freebuffState.poolLimits || 0) + connModelLocks;
 
     const requestsToday = stats?.totalRequests || 0;
     const errorsToday = stats?.failedRequests || 0;
