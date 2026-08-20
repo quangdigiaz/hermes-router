@@ -23,6 +23,20 @@ export class CodeBuddyIntlExecutor extends DefaultExecutor {
     } else if (eff) {
       transformed.reasoning_summary = "auto";
     }
+
+    // CodeBuddy rejects requests where the first message is not a system prompt
+    // (code 11128 "first message is not system prompt") and requires typed blocks.
+    const source = Array.isArray(transformed.messages) ? transformed.messages : [];
+    transformed.messages = [{ role: "system", content: "You are CodeBuddy Code." }];
+    for (const message of source) {
+      if (!message || typeof message !== "object" || ["system", "developer"].includes(message.role)) continue;
+      if (message.role === "user" && typeof message.content === "string") {
+        transformed.messages.push({ ...message, content: [{ type: "text", text: message.content }] });
+      } else {
+        transformed.messages.push({ ...message });
+      }
+    }
+
     return transformed;
   }
 }

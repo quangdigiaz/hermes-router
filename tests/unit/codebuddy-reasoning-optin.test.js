@@ -34,4 +34,23 @@ describe("CodeBuddyExecutor reasoning params are opt-in (#2071)", () => {
     expect(out.reasoning_effort).toBeUndefined();
     expect(out.reasoning_summary).toBeUndefined();
   });
+
+  it("injects a neutral system prompt for CodeBuddy CN when client sends only user messages", () => {
+    const out = exec.transformRequest("glm-5.2", { messages: [{ role: "user", content: "hi" }] }, false, {});
+    expect(out.messages[0].role).toBe("system");
+    expect(out.messages[0].content).toContain("helpful AI assistant");
+    expect(out.messages[1].role).toBe("user");
+  });
+});
+
+import { CodeBuddyIntlExecutor } from "../../open-sse/executors/codebuddy-intl.js";
+
+describe("CodeBuddyIntlExecutor system prompt injection and block formatting", () => {
+  const intlExec = new CodeBuddyIntlExecutor();
+
+  it("injects leading system prompt and formats user messages as typed blocks", () => {
+    const out = intlExec.transformRequest("deepseek-v4-flash", { messages: [{ role: "user", content: "hi" }] }, false, {});
+    expect(out.messages[0]).toEqual({ role: "system", content: "You are CodeBuddy Code." });
+    expect(out.messages[1]).toEqual({ role: "user", content: [{ type: "text", text: "hi" }] });
+  });
 });

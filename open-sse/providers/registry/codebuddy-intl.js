@@ -63,7 +63,7 @@ export default {
     stateUrl: "https://www.codebuddy.ai/v2/plugin/auth/state",
     tokenUrl: "https://www.codebuddy.ai/v2/plugin/auth/token",
     refreshUrl: "https://www.codebuddy.ai/v2/plugin/auth/token/refresh",
-    userAgent: "IDE/2.63.2 CodeBuddy/2.63.2",
+    userAgent: "IDE/2.108.1 CodeBuddy/2.108.1",
     platform: "ide",
     pollInterval: 5000,
   },
