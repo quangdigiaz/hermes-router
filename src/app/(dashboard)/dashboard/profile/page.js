@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, Button, Toggle, Input } from "@/shared/components";
 import Modal, { ConfirmModal } from "@/shared/components/Modal";
 import LanguageSwitcher from "@/shared/components/LanguageSwitcher";
@@ -65,32 +65,34 @@ export default function ProfilePage() {
     setLocale(getLocaleFromCookie());
   }, [langOpen]);
 
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        setSettings(data);
-        setOidcForm({
-          authMode: data?.authMode || "password",
-          oidcIssuerUrl: data?.oidcIssuerUrl || "",
-          oidcClientId: data?.oidcClientId || "",
-          oidcScopes: data?.oidcScopes || "openid profile email",
-          oidcLoginLabel: data?.oidcLoginLabel || "Sign in with OIDC",
-        });
-        setOidcClientSecret("");
-        if (data?.authMode === "oidc" || data?.authMode === "both") setOidcExpanded(true);
-        setProxyForm({
+  const fetchSettings = useCallback(async () => {
+    try {
+      const res = await fetch("/api/settings");
+      const data = await res.json();
+      setSettings(data);
+      setOidcForm({
+        authMode: data?.authMode || "password",
+        oidcIssuerUrl: data?.oidcIssuerUrl || "",
+        oidcClientId: data?.oidcClientId || "",
+        oidcScopes: data?.oidcScopes || "openid profile email",
+        oidcLoginLabel: data?.oidcLoginLabel || "Sign in with OIDC",
+      });
+      setOidcClientSecret("");
+      if (data?.authMode === "oidc" || data?.authMode === "both") setOidcExpanded(true);        setProxyForm({
           outboundProxyEnabled: data?.outboundProxyEnabled === true,
           outboundProxyUrl: data?.outboundProxyUrl || "",
           outboundNoProxy: data?.outboundNoProxy || "",
         });
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch settings:", err);
-        setLoading(false);
-      });
+      } catch (err) {
+      console.error("Failed to fetch settings:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -1104,6 +1106,9 @@ export default function ProfilePage() {
           </div>
         </Card>
 
+        {/* CKEY Settings */}
+        <CkeySettingsCard settings={settings} loading={loading} onSaved={fetchSettings} />
+
         {/* Account actions */}
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
@@ -1181,5 +1186,117 @@ export default function ProfilePage() {
         />
       </Modal>
     </div>
+  );
+}
+
+function CkeySettingsCard({ settings, loading, onSaved }) {
+  const [form, setForm] = useState({ ckeyApiKey: "", ckeyKeyproxy: "" });
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [autoRotateOnWaf, setAutoRotateOnWaf] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState({ type: "", message: "" });
+
+  useEffect(() => {
+    setForm({
+      ckeyApiKey: settings?.ckeyApiKey || "",
+      ckeyKeyproxy: settings?.ckeyKeyproxy || "",
+    });
+    setAutoRotate(settings?.ckeyAutoRotateEnabled !== false);
+    setAutoRotateOnWaf(settings?.ckeyAutoRotateOnWaf !== false);
+  }, [settings]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setStatus({ type: "", message: "" });
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ckeyApiKey: form.ckeyApiKey.trim(),
+          ckeyKeyproxy: form.ckeyKeyproxy.trim(),
+          ckeyAutoRotateEnabled: autoRotate,
+          ckeyAutoRotateOnWaf: autoRotateOnWaf,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStatus({ type: "success", message: "CKEY settings saved" });
+        onSaved?.();
+      } else {
+        setStatus({ type: "error", message: data.error || "Failed to save" });
+      }
+    } catch {
+      setStatus({ type: "error", message: "An error occurred" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0">
+          <span className="material-symbols-outlined text-[20px]">shield</span>
+        </div>
+        <div>
+          <h3 className="text-base sm:text-lg font-semibold">CKEY Proxy</h3>
+          <p className="text-xs text-text-muted">Cấu hình CKEY API key và proxy xoay</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <label className="block text-xs sm:text-sm font-medium mb-1">CKEY API Key</label>
+          <Input
+            type="password"
+            placeholder="ck_xxxxxxxxxxxx"
+            value={form.ckeyApiKey}
+            onChange={(e) => setForm((p) => ({ ...p, ckeyApiKey: e.target.value }))}
+            disabled={loading || saving}
+          />
+          <p className="text-xs text-text-muted mt-1">Từ <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="underline">ckey.vn</a> → Profile → API Key</p>
+        </div>
+
+        <div>
+          <label className="block text-xs sm:text-sm font-medium mb-1">Key Proxy (Xoay)</label>
+          <Input
+            type="password"
+            placeholder="keyproxy_xxxxxxxxxxxx"
+            value={form.ckeyKeyproxy}
+            onChange={(e) => setForm((p) => ({ ...p, ckeyKeyproxy: e.target.value }))}
+            disabled={loading || saving}
+          />
+          <p className="text-xs text-text-muted mt-1">Từ ckey.vn → Proxy Xoay → Key</p>
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="font-medium text-sm">Auto-rotate IP</p>
+            <p className="text-xs text-text-muted">Tự xoay IP khi gặp lỗi</p>
+          </div>
+          <Toggle checked={autoRotate} onChange={setAutoRotate} disabled={loading || saving} />
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="font-medium text-sm">Auto-rotate on WAF</p>
+            <p className="text-xs text-text-muted">Tự xoay khi Cloudflare WAF block (403 Ray ID)</p>
+          </div>
+          <Toggle checked={autoRotateOnWaf} onChange={setAutoRotateOnWaf} disabled={loading || saving} />
+        </div>
+
+        <div className="pt-2 border-t border-border/50 flex items-center gap-2">
+          <Button variant="primary" loading={saving} disabled={loading} onClick={handleSave}>
+            Save CKEY Settings
+          </Button>
+          {status.message && (
+            <span className={`text-xs ${status.type === "error" ? "text-red-500" : "text-green-500"}`}>
+              {status.message}
+            </span>
+          )}
+        </div>
+      </div>
+    </Card>
   );
 }
