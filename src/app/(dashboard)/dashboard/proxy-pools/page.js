@@ -95,11 +95,103 @@ function BatchImportModal({ isOpen, text, importing, onChange, onImport, onClose
   );
 }
 
+const TINH_THANH_CODES = {
+  0: "Random", 1: "Phú Thọ", 2: "Tuyên Quang", 3: "Hà Nội", 4: "Hải Dương", 5: "Bắc Giang",
+  6: "HCM", 7: "Tây Ninh", 8: "Đồng Nai", 9: "Vũng Tàu", 10: "Bình Dương",
+  11: "Nghệ An", 12: "Hà Tĩnh", 13: "Quảng Bình", 14: "Quảng Trị", 15: "Huế",
+  16: "Đà Nẵng", 17: "Vĩnh Phúc", 18: "Yên Bái", 19: "Lào Cai", 20: "Lạng Sơn",
+  21: "Thái Nguyên", 22: "Hà Nam", 23: "Nam Định", 24: "Thái Bình", 25: "Hải Phòng",
+  26: "Quảng Ninh", 27: "Cà Mau", 28: "Kiên Giang", 29: "Bắc Liêu", 30: "Sóc Trăng", 31: "Hậu Giang",
+};
+
+function CkeyModal({ isOpen, form, saving, onChange, onSync, onClose }) {
+  return (
+    <Modal isOpen={isOpen} title="CKEY Proxy Xoay VN" onClose={onClose}>
+      <div className="flex flex-col gap-4">
+        <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-3 flex flex-col gap-1.5">
+          <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">⚡ CKEY Rotating Proxy</p>
+          <p className="text-xs text-text-muted">
+            Tự động lấy IP proxy xoay từ CKEY và lưu thành Proxy Pool. Proxy sẽ tự động đổi IP khi gặp lỗi WAF (Cloudflare 403) hoặc timeout.
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="ckey-modal-keyproxy" className="text-xs font-medium mb-1 block">Key Proxy (Xoay)</label>
+          <Input
+            id="ckey-modal-keyproxy"
+            type="password"
+            placeholder="keyproxy_xxxxxxxxxxxx"
+            value={form.keyproxy}
+            onChange={(e) => onChange("keyproxy", e.target.value)}
+            disabled={saving}
+          />
+          <p className="text-[11px] text-text-muted mt-1">
+            Lấy từ <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">ckey.vn</a> → Proxy xoay → Key Proxy (tự động nạp nếu đã lưu trong Cài đặt)
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="ckey-modal-tinhthanh" className="text-xs font-medium mb-1 block">Tỉnh / Thành phố</label>
+            <select
+              id="ckey-modal-tinhthanh"
+              value={form.tinhthanh}
+              onChange={(e) => onChange("tinhthanh", Number(e.target.value))}
+              disabled={saving}
+              className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+            >
+              {Object.entries(TINH_THANH_CODES).map(([code, name]) => (
+                <option key={code} value={code}>{name} (Mã {code})</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="ckey-modal-nhamang" className="text-xs font-medium mb-1 block">Nhà mạng</label>
+            <select
+              id="ckey-modal-nhamang"
+              value={form.nhamang}
+              onChange={(e) => onChange("nhamang", e.target.value)}
+              disabled={saving}
+              className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+            >
+              <option value="random">Random (Tất cả)</option>
+              <option value="viettel">Viettel</option>
+              <option value="vnpt">VNPT</option>
+              <option value="fpt">FPT</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="ckey-modal-poolname" className="text-xs font-medium mb-1 block">Tên Pool (Tùy chọn)</label>
+          <Input
+            id="ckey-modal-poolname"
+            placeholder={`CKEY Xoay - ${TINH_THANH_CODES[form.tinhthanh] || "Random"}`}
+            value={form.poolName}
+            onChange={(e) => onChange("poolName", e.target.value)}
+            disabled={saving}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 pt-2">
+          <Button fullWidth variant="primary" onClick={onSync} disabled={!form.keyproxy.trim() || saving}>
+            {saving ? "Đang lấy IP..." : "Lấy IP & Lưu vào Pool"}
+          </Button>
+          <Button fullWidth variant="ghost" onClick={onClose} disabled={saving}>
+            Đóng
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 function DeploymentModal({ isOpen, title, onClose, children }) {
   return <Modal isOpen={isOpen} title={title} onClose={onClose}>{children}</Modal>;
 }
 
-function PoolRow({ pool, selected, testing, onSelect, onToggle, onTest, onEdit, onDelete }) {
+function PoolRow({ pool, selected, testing, rotating, onSelect, onToggle, onTest, onRotateCkey, onEdit, onDelete }) {
   return (
     <div className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -109,8 +201,11 @@ function PoolRow({ pool, selected, testing, onSelect, onToggle, onTest, onEdit, 
             <p className="min-w-0 max-w-full truncate text-sm font-medium sm:max-w-[18rem]">{pool.name}</p>
             <Badge variant={getStatusVariant(pool.testStatus)} size="sm" dot>{pool.testStatus || "unknown"}</Badge>
             <Badge variant={pool.isActive ? "success" : "default"} size="sm">{pool.isActive ? "active" : "inactive"}</Badge>
+            {pool.type === "ckey" && <Badge variant="success" size="sm">ckey xoay</Badge>}
             {pool.type === "vercel" && <Badge variant="default" size="sm">vercel relay</Badge>}
             {pool.type === "cloudflare" && <Badge variant="default" size="sm">cloudflare relay</Badge>}
+            {pool.type === "deno" && <Badge variant="default" size="sm">deno relay</Badge>}
+            {pool.ckeyMeta?.tinhthanhName && <Badge variant="default" size="sm">{pool.ckeyMeta.tinhthanhName}</Badge>}
             <Badge variant="default" size="sm">{pool.boundConnectionCount || 0} bound</Badge>
           </div>
           <p className="text-xs text-text-muted truncate mt-1">{pool.proxyUrl}</p>
@@ -120,6 +215,11 @@ function PoolRow({ pool, selected, testing, onSelect, onToggle, onTest, onEdit, 
       </div>
       <div className="flex items-center justify-end gap-1">
         <Toggle size="sm" checked={pool.isActive === true} onChange={onToggle} title={pool.isActive ? "Disable" : "Enable"} />
+        {pool.type === "ckey" && (
+          <button type="button" onClick={onRotateCkey} className="p-2 rounded hover:bg-emerald-500/10 text-emerald-500" title="Xoay IP mới (CKEY)" disabled={rotating}>
+            <span className="material-symbols-outlined text-[18px]" style={rotating ? { animation: "spin 1s linear infinite" } : undefined}>sync</span>
+          </button>
+        )}
         <button type="button" onClick={onTest} className="p-2 rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-primary" title="Test proxy" disabled={testing}>
           <span className="material-symbols-outlined text-[18px]" style={testing ? { animation: "spin 1s linear infinite" } : undefined}>{testing ? "progress_activity" : "science"}</span>
         </button>
@@ -138,6 +238,7 @@ export default function ProxyPoolsPage() {
   const [showVercelModal, setShowVercelModal] = useState(false);
   const [showCloudflareModal, setShowCloudflareModal] = useState(false);
   const [showDenoModal, setShowDenoModal] = useState(false);
+  const [showCkeyModal, setShowCkeyModal] = useState(false);
   const [showRelayMenu, setShowRelayMenu] = useState(false);
   const [editingProxyPool, setEditingProxyPool] = useState(null);
   const [formData, setFormData] = useState(() => normalizeFormData());
@@ -145,7 +246,10 @@ export default function ProxyPoolsPage() {
   const [vercelForm, setVercelForm] = useState({ vercelToken: "", projectName: "vercel-relay" });
   const [cloudflareForm, setCloudflareForm] = useState({ accountId: "", apiToken: "", projectName: "cloudflare-relay" });
   const [denoForm, setDenoForm] = useState({ denoToken: "", orgDomain: "", projectName: "" });
+  const [ckeyForm, setCkeyForm] = useState({ keyproxy: "", tinhthanh: 0, nhamang: "random", poolName: "" });
   const [saving, setSaving] = useState(false);
+  const [ckeySyncing, setCkeySyncing] = useState(false);
+  const [rotatingId, setRotatingId] = useState(null);
   const [importing, setImporting] = useState(false);
   const [deploying, setDeploying] = useState(false);
   const [testingId, setTestingId] = useState(null);
@@ -473,6 +577,77 @@ export default function ProxyPoolsPage() {
     setShowDenoModal(false);
   };
 
+  const openCkeyModal = async () => {
+    try {
+      const res = await fetch("/api/settings", { cache: "no-store" });
+      const settings = await res.json();
+      if (settings?.ckeyKeyproxy) {
+        setCkeyForm((prev) => ({
+          ...prev,
+          keyproxy: prev.keyproxy || settings.ckeyKeyproxy,
+        }));
+      }
+    } catch {
+      // ignore
+    }
+    setShowCkeyModal(true);
+  };
+
+  const closeCkeyModal = () => {
+    if (ckeySyncing) return;
+    setShowCkeyModal(false);
+  };
+
+  const handleCkeySync = async () => {
+    if (!ckeyForm.keyproxy.trim()) {
+      notify.error("Vui lòng nhập Key Proxy");
+      return;
+    }
+    setCkeySyncing(true);
+    try {
+      const res = await fetch("/api/ckey/proxy/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ckeyForm),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        await fetchProxyPools();
+        closeCkeyModal();
+        notify.success(`Đã thêm CKEY Proxy vào Pool (IP: ${data.ip || "Đang hoạt động"})`);
+      } else {
+        notify.error(data.error || "Không thể kết nối CKEY Proxy");
+      }
+    } catch (error) {
+      console.log("Error syncing CKEY proxy:", error);
+      notify.error("Lỗi đồng bộ CKEY Proxy");
+    } finally {
+      setCkeySyncing(false);
+    }
+  };
+
+  const handleRotateCkeyIp = async (pool) => {
+    setRotatingId(pool.id);
+    try {
+      const res = await fetch("/api/ckey/proxy/rotate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ poolId: pool.id }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        await fetchProxyPools();
+        notify.success("Đã xoay IP CKEY thành công!");
+      } else {
+        notify.error(data.reason || data.error || "Không thể xoay IP (cooldown 15s)");
+      }
+    } catch {
+      notify.error("Lỗi xoay IP CKEY");
+    } finally {
+      setRotatingId(null);
+    }
+  };
+
   const handleVercelDeploy = async () => {
     if (!vercelForm.vercelToken.trim()) return;
     setDeploying(true);
@@ -645,9 +820,17 @@ export default function ProxyPoolsPage() {
           <span className="text-emerald-600 font-semibold">CKEY Proxy Xoay VN</span>
           <span className="text-text-muted text-xs">3.3k/ngày • 19k/tuần • 60k/tháng — IP sống 15-30p, đổi không giới hạn, băng thông unlimited</span>
         </div>
-        <div className="flex items-center gap-2">
-          <a href="https://ckey.vn/register?ref=ckeyA8497D" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700">Đăng ký CKEY ↗</a>
-          <a href="https://ckey.vn/docs" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-white text-xs font-medium hover:bg-bg">Docs</a>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={openCkeyModal}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 transition-colors shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[16px]">bolt</span>
+            Thêm CKEY vào Pool
+          </button>
+          <a href="https://ckey.vn/register?ref=ckeyA8497D" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-medium hover:bg-emerald-500/20">Đăng ký CKEY ↗</a>
+          <a href="https://ckey.vn/docs" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-white dark:bg-zinc-800 text-xs font-medium hover:bg-bg">Docs</a>
         </div>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -671,6 +854,16 @@ export default function ProxyPoolsPage() {
 
             {showRelayMenu && (
               <div className="absolute left-0 top-full z-50 mt-1 w-48 rounded-xl border border-black/10 bg-white p-1 shadow-xl dark:border-white/10 dark:bg-zinc-900 sm:left-auto sm:right-0">
+                <button type="button"
+                  onClick={() => {
+                    openCkeyModal();
+                    setShowRelayMenu(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-emerald-600 dark:text-emerald-400 font-medium transition-colors hover:bg-emerald-500/10"
+                >
+                  <span className="material-symbols-outlined text-[20px] text-emerald-500">bolt</span>
+                  CKEY Proxy Xoay VN
+                </button>
                 <button type="button"
                   onClick={() => {
                     openCloudflareModal();
@@ -789,9 +982,11 @@ export default function ProxyPoolsPage() {
                 pool={pool}
                 selected={selectedIds.includes(pool.id)}
                 testing={testingId === pool.id}
+                rotating={rotatingId === pool.id}
                 onSelect={() => toggleSelect(pool.id)}
                 onToggle={() => handleToggleActive(pool)}
                 onTest={() => handleTest(pool.id)}
+                onRotateCkey={() => handleRotateCkeyIp(pool)}
                 onEdit={() => openEditModal(pool)}
                 onDelete={() => handleDelete(pool)}
               />
@@ -972,6 +1167,15 @@ export default function ProxyPoolsPage() {
           </div>
         </div>
       </DeploymentModal>
+
+      <CkeyModal
+        isOpen={showCkeyModal}
+        form={ckeyForm}
+        saving={ckeySyncing}
+        onChange={(field, value) => setCkeyForm((prev) => ({ ...prev, [field]: value }))}
+        onSync={handleCkeySync}
+        onClose={closeCkeyModal}
+      />
 
       <PoolFormModal
         isOpen={showFormModal}

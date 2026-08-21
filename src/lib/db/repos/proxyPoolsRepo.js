@@ -59,19 +59,24 @@ export async function getProxyPoolById(id) {
 export async function createProxyPool(data) {
   const db = await getAdapter();
   const now = new Date().toISOString();
+  const {
+    id, name, proxyUrl, noProxy, type, isActive, strictProxy,
+    testStatus, lastTestedAt, lastError, createdAt, updatedAt, ...rest
+  } = data;
   const pool = {
-    id: data.id || randomUUID(),
-    name: data.name,
-    proxyUrl: data.proxyUrl,
-    noProxy: data.noProxy || "",
-    type: data.type || "http",
-    isActive: data.isActive !== undefined ? data.isActive : true,
-    strictProxy: data.strictProxy === true,
-    testStatus: data.testStatus || "unknown",
-    lastTestedAt: data.lastTestedAt || null,
-    lastError: data.lastError || null,
-    createdAt: now,
-    updatedAt: now,
+    ...rest,
+    id: id || randomUUID(),
+    name,
+    proxyUrl,
+    noProxy: noProxy || "",
+    type: type || "http",
+    isActive: isActive !== undefined ? isActive : true,
+    strictProxy: strictProxy === true,
+    testStatus: testStatus || "unknown",
+    lastTestedAt: lastTestedAt || null,
+    lastError: lastError || null,
+    createdAt: createdAt || now,
+    updatedAt: updatedAt || now,
   };
   upsert(db, pool);
   return pool;
