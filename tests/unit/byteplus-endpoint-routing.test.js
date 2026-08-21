@@ -1,0 +1,13 @@
+import { describe, it, expect } from "vitest";
+import { PROVIDERS } from "../../open-sse/providers/index.js";
+import byteplusRegistry from "../../open-sse/providers/registry/byteplus.js";
+
+describe("BytePlus ModelArk Endpoint Configuration", () => {
+  it("uses the coding v3 endpoint for chat completions", () => {
+    expect(PROVIDERS.byteplus).toBeDefined();
+    expect(PROVIDERS.byteplus.baseUrl).toBe("https://ark.ap-southeast.bytepluses.com/api/coding/v3/chat/completions");
+    expect(byteplusRegistry.transport.baseUrl).toBe("https://ark.ap-southeast.bytepluses.com/api/coding/v3/chat/completions");
+    expect(byteplusRegistry.transport.validateUrl).toBe("https://ark.ap-southeast.bytepluses.com/api/coding/v3/models");
+    expect(byteplusRegistry.modelsFetcher.url).toBe("https://ark.ap-southeast.bytepluses.com/api/coding/v3/models");
+  });
+});

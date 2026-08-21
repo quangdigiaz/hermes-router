@@ -20,9 +20,11 @@ export default {
   },
   category: "freeTier",
   transport: {
-    baseUrl: "https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions",
+    baseUrl: "https://ark.ap-southeast.bytepluses.com/api/coding/v3/chat/completions",
+    validateUrl: "https://ark.ap-southeast.bytepluses.com/api/coding/v3/models",
     headers: {},
   },
+  modelsFetcher: { url: "https://ark.ap-southeast.bytepluses.com/api/coding/v3/models", type: "openai" },
   // All models are free under Free Credits Only mode (500K tokens/model)
   // Source: console.byteplus.com/ark (2026-08-21)
   models: [

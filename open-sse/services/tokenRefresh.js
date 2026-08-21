@@ -252,6 +252,8 @@ export async function refreshWithRetry(refreshFn, maxRetries = 3, log = null) {
     try {
       const result = await refreshFn();
       if (result) return result;
+      // If refreshFn returns null (e.g. provider unsupported or no refresh token), do not retry
+      return null;
     } catch (error) {
       log?.warn?.("TOKEN_REFRESH", `Attempt ${n + 1}/${maxRetries} failed: ${error.message}`);
     }
