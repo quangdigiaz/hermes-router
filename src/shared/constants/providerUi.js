@@ -6,6 +6,7 @@ export const TIER_FILTER_OPTIONS = [
   { value: "official", label: "Official", icon: "verified" },
   { value: "bridge", label: "Bridge", icon: "link" },
   { value: "free", label: "Free", icon: "savings" },
+  { value: "cheap", label: "Cheap", icon: "attach_money" },
   { value: "community", label: "Community", icon: "groups" },
   { value: "custom", label: "Custom", icon: "extension" },
 ];
@@ -14,6 +15,7 @@ export const TIER_VARIANT = {
   official: "info",
   bridge: "warning",
   free: "success",
+  cheap: "success",
   community: "default",
   experimental: "default",
 };

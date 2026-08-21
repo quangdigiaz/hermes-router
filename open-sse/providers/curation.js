@@ -17,7 +17,7 @@ export const CURATION_DATA = {
   anthropic:  { curatedTier: "official", curatedPriority: 100, badges: ["recommended", "popular"] },
   gemini:     { curatedTier: "official", curatedPriority: 95,  badges: ["recommended", "free"] },
   xai:        { curatedTier: "official", curatedPriority: 90,  badges: ["recommended"] },
-  deepseek:   { curatedTier: "official", curatedPriority: 90,  badges: ["recommended", "popular"] },
+  deepseek:   { curatedTier: "official", curatedPriority: 90,  badges: ["recommended", "popular", "cheap"] },
   mistral:    { curatedTier: "official", curatedPriority: 85,  badges: ["recommended"] },
   cohere:     { curatedTier: "official", curatedPriority: 80,  badges: ["recommended"] },
   qwen:       { curatedTier: "official", curatedPriority: 80,  badges: ["recommended"] },
@@ -34,14 +34,16 @@ export const CURATION_DATA = {
   clinepass:    { curatedTier: "bridge", curatedPriority: 75,  badges: [] },
   freebuff:     { curatedTier: "bridge", curatedPriority: 70,  badges: ["free"] },
 
-  // Free tier / no-auth
+  // Free tier / no-auth / budget
   ollama:          { curatedTier: "free", curatedPriority: 95,  badges: ["free", "local"] },
   groq:            { curatedTier: "free", curatedPriority: 90,  badges: ["free", "fast", "popular"] },
   openrouter:      { curatedTier: "free", curatedPriority: 90,  badges: ["free", "popular"] },
   "cloudflare-ai": { curatedTier: "free", curatedPriority: 85,  badges: ["free"] },
   sambanova:       { curatedTier: "free", curatedPriority: 80,  badges: ["free"] },
-  deepinfra:       { curatedTier: "free", curatedPriority: 75,  badges: ["free"] },
-  zenmux:          { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular"] },
+  deepinfra:       { curatedTier: "free", curatedPriority: 75,  badges: ["free", "cheap"] },
+  zenmux:          { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
+  bai:             { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
+  siliconflow:     { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
   llm7:            { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },
 
   // Experimental

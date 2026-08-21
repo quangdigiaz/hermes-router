@@ -312,6 +312,9 @@ export default function ProvidersPage() {
       const stats = getProviderStats(providerId, authType || getProviderAuthTypes(info, providerId));
       return stats.error > 0;
     }
+    if (filterTier === "cheap") {
+      return info.curatedTier === "cheap" || info.badges?.includes("cheap") || info.category === "cheap";
+    }
     return filterTier === "all" || filterTier === "custom" || info.curatedTier === filterTier;
   };
   const isCustomFilter = filterTier === "custom";
