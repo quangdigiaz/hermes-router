@@ -24,6 +24,7 @@ import {
   getGlmUsage,
   getVercelAiGatewayUsage,
   getQoderUsage,
+  getTokenHarborUsage,
 } from "./usage/misc.js";
 
 /**
@@ -57,6 +58,7 @@ const USAGE_HANDLERS = {
   deepseek: (c) => getDeepseekUsage(c.apiKey, c.proxyOptions),
   freebuff: (c) => getFreebuffUsage(c.accessToken, c.providerSpecificData, c.proxyOptions),
   byteplus: (c) => getByteplusUsage(c.apiKey, c.proxyOptions),
+  tokenharbor: (c) => getTokenHarborUsage(c.apiKey, c.proxyOptions),
 };
 
 export async function getUsageForProvider(connection, proxyOptions = null) {

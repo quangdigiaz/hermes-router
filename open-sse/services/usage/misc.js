@@ -267,3 +267,27 @@ export async function getQoderUsage(accessToken, proxyOptions = null) {
     return { message: `Qoder connected. Unable to fetch usage: ${error.message}` };
   }
 }
+
+/**
+ * Token Harbor Usage & Free Allowance tracker
+ */
+export async function getTokenHarborUsage(apiKey, proxyOptions = null) {
+  try {
+    return {
+      plan: "Free Tier & Pay-As-You-Go",
+      message: "Token Harbor provides a rolling 7×24-hour free allowance for :free models (measured by list-price value). For real-time balance and personal allowance progress, visit tokenharbor.ai/dashboard.",
+      quotas: {
+        freeAllowance: {
+          name: "Free Allowance (Rolling 7×24h)",
+          type: "allowance",
+          period: "7d",
+          unit: "%",
+          message: "Resets every rolling 7×24 hours from your first free request.",
+        },
+      },
+      notice: "Ensure 'Free models enabled' is toggled ON in Token Harbor dashboard to use :free models. Paid routes remain 100% Zero Data Retention (ZDR).",
+    };
+  } catch (error) {
+    return { message: "Unable to fetch Token Harbor usage." };
+  }
+}

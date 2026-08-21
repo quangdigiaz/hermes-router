@@ -11,6 +11,9 @@ export default {
     website: "https://tokenharbor.ai",
     notice: {
       apiKeyUrl: "https://tokenharbor.ai/dashboard",
+      freeModelsInfo: "Free models (:free) have a personal rolling 7×24-hour allowance. Enable 'Free models enabled' on your Token Harbor dashboard to activate.",
+      privacyInfo: "Free routes may retain prompts/responses with user consent; paid routes remain 100% Zero Data Retention (ZDR).",
+      quotaPeriod: "Rolling 7×24h",
     },
   },
   category: "apikey",
@@ -50,5 +53,5 @@ export default {
   ],
   modelsFetcher: { url: "https://tokenharbor.ai/v1/models", type: "openai" },
   passthroughModels: true,
-  features: { fetchModels: true },
+  features: { fetchModels: true, usageApikey: true },
 };
