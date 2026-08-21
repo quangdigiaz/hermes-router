@@ -49,6 +49,8 @@ export const CURATION_DATA = {
   teamo:           { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },
   a6api:           { curatedTier: "free", curatedPriority: 85,  badges: ["cheap", "popular"] },
   a6:              { curatedTier: "free", curatedPriority: 85,  badges: ["cheap", "popular"] },
+  bazaarlink:      { curatedTier: "free", curatedPriority: 90,  badges: ["free", "cheap", "popular"] },
+  bzl:             { curatedTier: "free", curatedPriority: 90,  badges: ["free", "cheap", "popular"] },
 
   // Experimental
   antigravity:      { curatedTier: "experimental", curatedPriority: 50, badges: ["new"] },

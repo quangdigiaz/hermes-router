@@ -274,6 +274,8 @@ const PROVIDER_MODELS_CONFIG = {
   teamo: createOpenAIModelsConfig("https://api.teamorouter.com/v1/models"),
   a6api: createOpenAIModelsConfig("https://a6api.com/v1/models"),
   a6: createOpenAIModelsConfig("https://a6api.com/v1/models"),
+  bazaarlink: createOpenAIModelsConfig("https://api.bazaarlink.ai/v1/models"),
+  bzl: createOpenAIModelsConfig("https://api.bazaarlink.ai/v1/models"),
 
   cursor: {
     customResolver: async (connection) => {

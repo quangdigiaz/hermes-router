@@ -663,3 +663,104 @@ export async function getA6ApiUsage(apiKey, proxyOptions = null) {
   }
 }
 
+/**
+ * BazaarLink Balance & Key Limits tracker
+ * Calls:
+ *   1. GET https://api.bazaarlink.ai/v1/credits
+ *   2. GET https://api.bazaarlink.ai/v1/key
+ */
+export async function getBazaarLinkUsage(apiKey, proxyOptions = null) {
+  if (!apiKey) {
+    return { message: "BazaarLink API key not available." };
+  }
+
+  const cleanKey = apiKey.trim();
+  const headers = {
+    Authorization: `Bearer ${cleanKey}`,
+    Accept: "application/json",
+  };
+
+  try {
+    const baseHosts = ["https://api.bazaarlink.ai", "https://bazaarlink.ai/api"];
+    let creditsData = null;
+    let keyData = null;
+
+    for (const host of baseHosts) {
+      try {
+        const [credRes, keyRes] = await Promise.allSettled([
+          proxyAwareFetch(`${host}/v1/credits`, { headers }, proxyOptions),
+          proxyAwareFetch(`${host}/v1/key`, { headers }, proxyOptions),
+        ]);
+
+        if (credRes.status === "fulfilled" && credRes.value.ok) {
+          creditsData = await credRes.value.json().catch(() => null);
+        }
+        if (keyRes.status === "fulfilled" && keyRes.value.ok) {
+          keyData = await keyRes.value.json().catch(() => null);
+        }
+
+        if (creditsData || keyData) break;
+      } catch {}
+    }
+
+    const quotas = {};
+    let balanceVal = null;
+
+    // 1. Credits & Lifetime Usage
+    if (creditsData != null) {
+      const credits = Number(creditsData.credits ?? creditsData.balance ?? creditsData.total_credits ?? 0);
+      const lifetime = Number(creditsData.lifetime_usage ?? creditsData.lifetimeUsage ?? creditsData.total_used ?? 0);
+      balanceVal = credits;
+
+      quotas["Credits Balance (USD)"] = {
+        name: "Credits Balance (USD)",
+        used: lifetime,
+        total: credits + lifetime,
+        remainingPercentage: (credits + lifetime) > 0 ? Math.round((credits / (credits + lifetime)) * 100) : 100,
+        unit: "USD",
+        message: `Available: $${credits.toFixed(2)} | Lifetime Usage: $${lifetime.toFixed(2)}`,
+        resetAt: null,
+      };
+    }
+
+    // 2. Per-Key Spend Limits
+    if (keyData != null) {
+      const limit = Number(keyData.limit ?? keyData.spend_limit ?? 0);
+      const remaining = Number(keyData.limit_remaining ?? keyData.limitRemaining ?? keyData.remaining ?? 0);
+      if (limit > 0) {
+        quotas["Key Spend Limit (USD)"] = {
+          name: "Key Spend Limit (USD)",
+          used: Math.max(0, limit - remaining),
+          total: limit,
+          remainingPercentage: Math.round((remaining / limit) * 100),
+          unit: "USD",
+          message: `$${remaining.toFixed(2)} remaining of $${limit.toFixed(2)} limit`,
+          resetAt: keyData.limit_reset || keyData.resets_at || null,
+        };
+      }
+    }
+
+    // 3. Auto Free Router Limit Indicator
+    quotas["Auto:Free Router (Zero Cost)"] = {
+      name: "Auto:Free Router (Zero Cost)",
+      used: 0,
+      total: 100,
+      unit: "%",
+      message: "Zero credits deducted; daily rate limits apply (auto:free model).",
+    };
+
+    const formattedBal = balanceVal != null ? `$${balanceVal.toFixed(2)}` : "Connected";
+    return {
+      plan: "BazaarLink AI Gateway",
+      balance: balanceVal != null ? `$${balanceVal.toFixed(2)}` : undefined,
+      message: `Balance: ${formattedBal} | Auto:Free (Zero Cost) & 150+ models supported.`,
+      quotas,
+    };
+  } catch (error) {
+    return {
+      plan: "BazaarLink AI Gateway",
+      message: "BazaarLink connected. Auto:Free (Zero Cost) & 150+ models supported.",
+    };
+  }
+}
+
