@@ -1,6 +1,7 @@
 export default {
   id: "byteplus",
   priority: 70,
+  hasFree: true,
   alias: "byteplus",
   aliases: [
     "bpm",
@@ -13,7 +14,7 @@ export default {
     textIcon: "BP",
     website: "https://console.byteplus.com/ark",
     notice: {
-      text: "Free credits for new accounts. Access to Seed 2.0, Kimi K2 Thinking, GLM 4.7, GPT-OSS-120B models.",
+      text: "Free Credits Only: 500K free tokens per model. ⚠️ Requires credit card verification ($1.1 hold, PayPal NOT supported). Service auto-pauses when free quota is exhausted — no charges.",
       apiKeyUrl: "https://console.byteplus.com/ark/region:ark+ap-southeast-1/apiKey",
     },
   },
@@ -22,14 +23,15 @@ export default {
     baseUrl: "https://ark.ap-southeast.bytepluses.com/api/coding/v3/chat/completions",
     headers: {},
   },
+  // All models are free under Free Credits Only mode (500K tokens/model)
   models: [
-    { id: "seed-2-0-pro-260328", name: "Seed 2.0 Pro" },
-    { id: "seed-2-0-code-preview-260328", name: "Seed 2.0 Code Preview" },
-    { id: "seed-2-0-mini-260215", name: "Seed 2.0 Mini" },
-    { id: "seed-2-0-lite-260228", name: "Seed 2.0 Lite" },
-    { id: "kimi-k2-thinking-251104", name: "Kimi K2 Thinking" },
-    { id: "glm-4-7-251222", name: "GLM 4.7" },
-    { id: "gpt-oss-120b-250805", name: "GPT-OSS-120B" },
+    { id: "seed-2-0-pro-260328", name: "Seed 2.0 Pro", free: true },
+    { id: "seed-2-0-code-preview-260328", name: "Seed 2.0 Code Preview", free: true },
+    { id: "seed-2-0-mini-260215", name: "Seed 2.0 Mini", free: true },
+    { id: "seed-2-0-lite-260228", name: "Seed 2.0 Lite", free: true },
+    { id: "kimi-k2-thinking-251104", name: "Kimi K2 Thinking", free: true },
+    { id: "glm-4-7-251222", name: "GLM 4.7", free: true },
+    { id: "gpt-oss-120b-250805", name: "GPT-OSS-120B", free: true },
   ],
   serviceKinds: ["llm"],
 };

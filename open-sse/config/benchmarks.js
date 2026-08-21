@@ -131,6 +131,14 @@ export const PROMO_PRICING = [
   { model: "GLM-5.1",                promoInput: 0, promoOutput: 0, validUntil: null },
   { model: "MiniMax-M2.7",           promoInput: 0, promoOutput: 0, validUntil: null },
   { model: "Kimi-K2.6",              promoInput: 0, promoOutput: 0, validUntil: null },
+  // BytePlus ModelArk (international) — Free Credits Only (500K tokens/model)
+  { model: "seed-2-0-pro-260328",        promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "seed-2-0-code-preview-260328", promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "seed-2-0-mini-260215",       promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "seed-2-0-lite-260228",       promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "kimi-k2-thinking-251104",    promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "glm-4-7-251222",             promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "gpt-oss-120b-250805",        promoInput: 0, promoOutput: 0, validUntil: null },
 ];
 
 export function getPromoPriceSync(model) {
