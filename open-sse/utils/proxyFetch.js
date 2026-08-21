@@ -5,6 +5,39 @@ import { dbg } from "./debugLog.js";
 const originalFetch = globalThis.fetch;
 const proxyDispatchers = new Map();
 
+// Circuit breaker — tracks consecutive proxy failures per proxy URL.
+// When a proxy fails CIRCUIT_FAIL_THRESHOLD times in a row, it is considered
+// "open" and all requests skip it for CIRCUIT_OPEN_MS without attempting.
+const CIRCUIT_FAIL_THRESHOLD = 3;
+const CIRCUIT_OPEN_MS = 60_000; // 60 seconds cooldown
+const circuitState = new Map(); // proxyUrl → { failures, openUntil }
+
+function isCircuitOpen(proxyUrl) {
+  const s = circuitState.get(proxyUrl);
+  if (!s) return false;
+  if (s.openUntil && Date.now() < s.openUntil) return true;
+  // Cooldown expired — reset to half-open
+  if (s.openUntil) {
+    s.failures = 0;
+    s.openUntil = 0;
+  }
+  return false;
+}
+
+function recordProxySuccess(proxyUrl) {
+  circuitState.delete(proxyUrl);
+}
+
+function recordProxyFailure(proxyUrl) {
+  const s = circuitState.get(proxyUrl) || { failures: 0, openUntil: 0 };
+  s.failures += 1;
+  if (s.failures >= CIRCUIT_FAIL_THRESHOLD) {
+    s.openUntil = Date.now() + CIRCUIT_OPEN_MS;
+    console.warn(`[ProxyFetch] Circuit OPEN for ${proxyUrl} after ${s.failures} failures — skipping for ${CIRCUIT_OPEN_MS / 1000}s`);
+  }
+  circuitState.set(proxyUrl, s);
+}
+
 // DNS cache — use Map to avoid prototype pollution via malformed hostnames
 const DNS_CACHE = new Map();
 const MITM_BYPASS_HOSTS = [
@@ -219,19 +252,22 @@ export async function proxyAwareFetch(url, options = {}, proxyOptions = null) {
 
   // MITM DNS bypass: for known MITM-intercepted hosts, resolve real IP to avoid DNS spoof
   if (shouldBypassMitmDns(targetUrl)) {
-    if (proxyUrl) {
+    if (proxyUrl && !isCircuitOpen(proxyUrl)) {
       // Proxy resolves DNS externally (not affected by /etc/hosts) — use proxy directly
       try {
         const dispatcher = await getDispatcher(proxyUrl);
-        return await originalFetch(url, { ...options, dispatcher });
+        const res = await originalFetch(url, { ...options, dispatcher });
+        recordProxySuccess(proxyUrl);
+        return res;
       } catch (proxyError) {
+        recordProxyFailure(proxyUrl);
         if (proxyOptions?.strictProxy === true) {
           throw new Error(`[ProxyFetch] Proxy required but failed (strictProxy=true): ${proxyError.message}`);
         }
         console.warn(`[ProxyFetch] Proxy failed, falling back to direct bypass: ${proxyError.message}`);
       }
     }
-    // No proxy — manually resolve real IP to bypass DNS spoof
+    // No proxy or circuit open — manually resolve real IP to bypass DNS spoof
     try {
       const parsedUrl = new URL(targetUrl);
       const realIP = await resolveRealIP(parsedUrl.hostname);
@@ -242,10 +278,20 @@ export async function proxyAwareFetch(url, options = {}, proxyOptions = null) {
   }
 
   if (proxyUrl) {
+    if (isCircuitOpen(proxyUrl)) {
+      if (proxyOptions?.strictProxy === true) {
+        throw new Error(`[ProxyFetch] Proxy circuit is OPEN (proxy is down): ${proxyUrl}`);
+      }
+      return originalFetch(url, options);
+    }
+
     try {
       const dispatcher = await getDispatcher(proxyUrl);
-      return await originalFetch(url, { ...options, dispatcher });
+      const res = await originalFetch(url, { ...options, dispatcher });
+      recordProxySuccess(proxyUrl);
+      return res;
     } catch (proxyError) {
+      recordProxyFailure(proxyUrl);
       // If strictProxy is enabled, fail hard instead of falling back to direct
       if (proxyOptions?.strictProxy === true) {
         throw new Error(`[ProxyFetch] Proxy required but failed (strictProxy=true): ${proxyError.message}`);
