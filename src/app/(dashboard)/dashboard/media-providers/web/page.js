@@ -143,6 +143,109 @@ function Section({ title, icon, kind, providers, connections, combos, onCreateCo
   );
 }
 
+function EndpointInstructions() {
+  const [copied, setCopied] = useState(null);
+
+  const copySnippet = (key, text) => {
+    navigator.clipboard.writeText(text);
+    setCopied(key);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  const endpoints = [
+    {
+      title: "Web Search",
+      icon: "search",
+      method: "POST",
+      path: "/v1/search",
+      description: "Search the web and return results",
+      curl: `curl -X POST $NINEROUTER_URL/v1/search \\
+  -H "Authorization: Bearer $NINEROUTER_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"query": "your search query"}'`,
+      js: `const res = await fetch(\`\${process.env.NINEROUTER_URL}/v1/search\`, {
+  method: "POST",
+  headers: {
+    "Authorization": \`Bearer \${process.env.NINEROUTER_KEY}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ query: "your search query" }),
+});
+const data = await res.json();`,
+    },
+    {
+      title: "Web Fetch",
+      icon: "language",
+      method: "POST",
+      path: "/v1/web/fetch",
+      description: "Fetch a URL and extract content as markdown",
+      curl: `curl -X POST $NINEROUTER_URL/v1/web/fetch \\
+  -H "Authorization: Bearer $NINEROUTER_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"url": "https://example.com"}'`,
+      js: `const res = await fetch(\`\${process.env.NINEROUTER_URL}/v1/web/fetch\`, {
+  method: "POST",
+  headers: {
+    "Authorization": \`Bearer \${process.env.NINEROUTER_KEY}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ url: "https://example.com" }),
+});
+const data = await res.json();`,
+    },
+  ];
+
+  return (
+    <div className="rounded-xl border border-border bg-surface p-4">
+      <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+        <span className="material-symbols-outlined text-primary text-[18px]">code</span>
+        Endpoint Usage
+      </h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {endpoints.map((ep) => (
+          <div key={ep.title} className="rounded-lg border border-border/50 p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="material-symbols-outlined text-primary text-[16px]">{ep.icon}</span>
+              <span className="font-medium text-sm">{ep.title}</span>
+              <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400 text-[9px] font-bold">{ep.method}</span>
+              <code className="text-[11px] text-text-muted font-mono">{ep.path}</code>
+            </div>
+            <p className="text-[11px] text-text-muted mb-3">{ep.description}</p>
+
+            {/* cURL */}
+            <div className="relative group mb-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-text-muted font-medium">cURL</span>
+                <button
+                  onClick={() => copySnippet(`${ep.title}-curl`, ep.curl)}
+                  className="text-[10px] text-primary hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  {copied === `${ep.title}-curl` ? "Copied!" : "Copy"}
+                </button>
+              </div>
+              <pre className="bg-sidebar rounded-lg p-2 text-[10px] font-mono text-text-main overflow-x-auto whitespace-pre-wrap">{ep.curl}</pre>
+            </div>
+
+            {/* JavaScript */}
+            <div className="relative group">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-text-muted font-medium">JavaScript</span>
+                <button
+                  onClick={() => copySnippet(`${ep.title}-js`, ep.js)}
+                  className="text-[10px] text-primary hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  {copied === `${ep.title}-js` ? "Copied!" : "Copy"}
+                </button>
+              </div>
+              <pre className="bg-sidebar rounded-lg p-2 text-[10px] font-mono text-text-main overflow-x-auto whitespace-pre-wrap">{ep.js}</pre>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function WebProvidersPage() {
   const router = useRouter();
   const [connections, setConnections] = useState([]);
@@ -162,8 +265,16 @@ export default function WebProvidersPage() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchAll(); }, []);
 
-  const searchProviders = getProvidersByKind("webSearch");
-  const fetchProviders = getProvidersByKind("webFetch");
+  // Only show dedicated search providers (have searchConfig), not LLM providers with webSearch capability
+  const searchProviders = getProvidersByKind("webSearch").filter((p) => {
+    const info = AI_PROVIDERS[p.id];
+    return info?.searchConfig || info?.searchViaChat;
+  });
+  // Only show dedicated fetch providers (have fetchConfig)
+  const fetchProviders = getProvidersByKind("webFetch").filter((p) => {
+    const info = AI_PROVIDERS[p.id];
+    return !!info?.fetchConfig;
+  });
   const searchCombos = combos.filter((c) => c.kind === "webSearch");
   const fetchCombos = combos.filter((c) => c.kind === "webFetch");
 
@@ -195,6 +306,9 @@ export default function WebProvidersPage() {
         providers={searchProviders} connections={connections} combos={searchCombos}
         onCreateCombo={() => handleCreateCombo("webSearch")}
       />
+
+      {/* Endpoint Usage Instructions */}
+      <EndpointInstructions />
 
       {/* Divider between sections */}
       <div className="border-t border-border" />
