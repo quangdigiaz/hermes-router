@@ -3,13 +3,20 @@
   "message": "Nếu Hermes Router giúp bạn tiết kiệm thời gian, hãy mua cho mình một ly cà phê ☕",
   "channels": [
     {
-      "id": "momo",
-      "label": "MoMo",
-      "description": "Ví MoMo — nhanh & dễ",
-      "icon": "smartphone",
-      "color": "#FF6B99",
-      "url": "https://momo.vn/your-momo-link",
-      "qr": "/donate/momo-qr.png"
+      "id": "buymeacoffee",
+      "label": "Buy Me a Coffee",
+      "description": "Ủng hộ trực tiếp, không lộ thông tin cá nhân",
+      "icon": "local_cafe",
+      "color": "#FFDD00",
+      "url": "https://buymeacoffee.com/your-username"
+    },
+    {
+      "id": "github",
+      "label": "GitHub Sponsors",
+      "description": "Ủng hộ qua GitHub",
+      "icon": "favorite",
+      "color": "#EA4AAA",
+      "url": "https://github.com/sponsors/your-username"
     },
     {
       "id": "bank",
