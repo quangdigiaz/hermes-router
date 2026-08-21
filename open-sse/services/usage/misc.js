@@ -293,65 +293,132 @@ export async function getTokenHarborUsage(apiKey, proxyOptions = null) {
 }
 
 /**
- * TeamoRouter Usage & Balance tracker
+ * TeamoRouter Usage, Cost & Balance tracker
  */
 export async function getTeamoRouterUsage(apiKey, proxyOptions = null) {
   if (!apiKey) {
     return { message: "TeamoRouter API key not available." };
   }
 
+  const cleanKey = apiKey.trim();
+  const headers = {
+    Authorization: `Bearer ${cleanKey}`,
+    Accept: "application/json",
+  };
+
   try {
-    const urls = [
-      "https://api.teamorouter.com/v1/billing/balance",
-      "https://teamorouter.com/v1/billing/balance",
-    ];
+    const baseHosts = ["https://teamorouter.com", "https://api.teamorouter.com"];
+    let balanceData = null;
+    let costData = null;
+    let tokenData = null;
 
-    let data = null;
-    for (const url of urls) {
+    const now = Math.floor(Date.now() / 1000);
+    const sevenDaysAgo = now - 7 * 86400;
+
+    for (const host of baseHosts) {
       try {
-        const response = await proxyAwareFetch(url, {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            Accept: "application/json",
-          },
-        }, proxyOptions);
+        const balRes = await proxyAwareFetch(`${host}/v1/billing/balance`, { headers }, proxyOptions);
+        if (balRes.ok) {
+          balanceData = await balRes.json();
+          
+          // Also fetch 7-day cost and token usage
+          const [costRes, usageRes] = await Promise.allSettled([
+            proxyAwareFetch(`${host}/v1/billing/costs?start_time=${sevenDaysAgo}&end_time=${now}`, { headers }, proxyOptions),
+            proxyAwareFetch(`${host}/v1/usage?start_time=${sevenDaysAgo}&end_time=${now}`, { headers }, proxyOptions),
+          ]);
 
-        if (response.ok) {
-          data = await response.json();
+          if (costRes.status === "fulfilled" && costRes.value.ok) {
+            costData = await costRes.value.json().catch(() => null);
+          }
+          if (usageRes.status === "fulfilled" && usageRes.value.ok) {
+            tokenData = await usageRes.value.json().catch(() => null);
+          }
           break;
         }
       } catch {
-        // try next url
+        // try next host
       }
     }
 
-    const balance = data?.balance != null ? Number(data.balance) : null;
-    const currency = data?.currency || "USD";
+    // Extract balance
+    let balanceVal = null;
+    let currency = "USD";
+    if (balanceData?.balance != null) {
+      if (typeof balanceData.balance === "object") {
+        balanceVal = Number(balanceData.balance.value ?? balanceData.balance.amount ?? 0);
+        currency = balanceData.balance.currency || "USD";
+      } else {
+        balanceVal = Number(balanceData.balance);
+      }
+    }
+
+    // Extract 7-day cost
+    let cost7d = null;
+    let req7d = 0;
+    if (costData?.total_amount != null) {
+      cost7d = Number(costData.total_amount.value ?? costData.total_amount.amount ?? costData.total_amount ?? 0);
+      req7d = Number(costData.requests || 0);
+    }
+
+    // Extract token usage
+    const totalTokens7d = Number(tokenData?.usage?.total_tokens || 0);
+    const cachedTokens7d = Number(tokenData?.usage?.cached_read_tokens || 0);
+
+    const quotas = {};
+
+    // 1. Account Balance Card
+    if (balanceVal != null && !isNaN(balanceVal)) {
+      const displayBalance = Math.max(0, balanceVal);
+      quotas[`Balance (${currency})`] = {
+        name: `Account Balance (${currency})`,
+        used: 0,
+        total: displayBalance,
+        remainingPercentage: displayBalance > 0 ? 100 : 0,
+        resetAt: null,
+      };
+    }
+
+    // 2. 7-Day Cost Metric
+    if (cost7d != null && !isNaN(cost7d)) {
+      quotas["7-Day Cost (USD)"] = {
+        name: "7-Day Cost (USD)",
+        used: cost7d,
+        total: cost7d,
+        unit: "USD",
+        message: `${req7d} requests | ${(totalTokens7d / 1000).toFixed(1)}k tokens (7 days)`,
+        resetAt: null,
+      };
+    }
+
+    // 3. Complimentary Free Model Limits
+    quotas["DeepSeek V4 Flash (Free)"] = {
+      name: "DeepSeek V4 Flash (Free)",
+      used: 0,
+      total: 200,
+      unit: "req/day",
+      message: "200 requests/day complimentary limit.",
+    };
+    quotas["DeepSeek V4 Pro (Free)"] = {
+      name: "DeepSeek V4 Pro (Free)",
+      used: 0,
+      total: 50,
+      unit: "req/day",
+      message: "50 requests/day complimentary limit.",
+    };
+
+    const formattedBal = balanceVal != null ? `$${balanceVal.toFixed(2)}` : "Connected";
+    const costSummary = cost7d != null ? ` | 7D Spent: $${cost7d.toFixed(3)} (${req7d} reqs)` : "";
 
     return {
-      plan: "Pay-As-You-Go & Complimentary Tier",
-      balance: balance != null ? `${currency === "USD" ? "$" : ""}${balance.toFixed(2)}` : undefined,
-      message: balance != null
-        ? `Account balance: ${currency === "USD" ? "$" : ""}${balance.toFixed(2)}. Complimentary free models: deepseek-v4-flash-free (200 RPD), deepseek-v4-pro-free (50 RPD).`
-        : "TeamoRouter connected. Complimentary free models: deepseek-v4-flash-free (200 RPD), deepseek-v4-pro-free (50 RPD).",
-      quotas: {
-        flashFree: {
-          name: "DeepSeek V4 Flash (Free)",
-          type: "rate_limit",
-          limit: 200,
-          unit: "req/day",
-          message: "200 requests/day complimentary limit.",
-        },
-        proFree: {
-          name: "DeepSeek V4 Pro (Free)",
-          type: "rate_limit",
-          limit: 50,
-          unit: "req/day",
-          message: "50 requests/day complimentary limit.",
-        },
-      },
+      plan: "TeamoRouter Pay-As-You-Go",
+      balance: balanceVal != null ? `$${balanceVal.toFixed(2)}` : undefined,
+      message: `Balance: ${formattedBal}${costSummary}. Free models: deepseek-v4-flash-free (200 RPD), deepseek-v4-pro-free (50 RPD).`,
+      quotas,
     };
   } catch (error) {
-    return { message: "TeamoRouter connected. Complimentary models: deepseek-v4-flash-free (200 RPD), deepseek-v4-pro-free (50 RPD)." };
+    return {
+      plan: "TeamoRouter Pay-As-You-Go",
+      message: "TeamoRouter connected. Free models: deepseek-v4-flash-free (200 RPD), deepseek-v4-pro-free (50 RPD).",
+    };
   }
 }
