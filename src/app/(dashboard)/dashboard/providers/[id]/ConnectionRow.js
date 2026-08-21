@@ -3,11 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import { getStatusVariant as getConnectionStatusVariant } from "@/shared/utils/connectionStatus";
 import { Badge, Toggle, Tooltip } from "@/shared/components";
+import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import CooldownTimer from "./CooldownTimer";
 
 export default function ConnectionRow({ connection, proxyPools, isOAuth, isFirst, isLast, onMoveUp, onMoveDown, onToggleActive, onUpdateProxy, onEdit, onDelete, oneByOneStatus = null, autoPing = null, isHighlighted = false }) {
   const [showProxyDropdown, setShowProxyDropdown] = useState(false);
   const [updatingProxy, setUpdatingProxy] = useState(false);
+  const [copyingKey, setCopyingKey] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
   const proxyDropdownRef = useRef(null);
 
   const proxyPoolMap = new Map((proxyPools || []).map((pool) => [pool.id, pool]));
@@ -156,6 +159,30 @@ export default function ConnectionRow({ connection, proxyPools, isOAuth, isFirst
     return null;
   };
 
+  const handleCopyApiKey = async (e) => {
+    e?.stopPropagation?.();
+    if (copyingKey) return;
+    if (connection.apiKey) {
+      copy(connection.apiKey, `conn-key-${connection.id}`);
+      return;
+    }
+    setCopyingKey(true);
+    try {
+      const res = await fetch(`/api/providers/${connection.id}/key`);
+      const data = await res.json();
+      if (data?.apiKey) {
+        copy(data.apiKey, `conn-key-${connection.id}`);
+      } else {
+        alert("No API Key found for this connection");
+      }
+    } catch (err) {
+      console.error("Error fetching API key:", err);
+      alert("Failed to copy API key: " + err.message);
+    } finally {
+      setCopyingKey(false);
+    }
+  };
+
   return (
     <div
       id={`conn-${connection.id}`}
@@ -202,6 +229,19 @@ export default function ConnectionRow({ connection, proxyPools, isOAuth, isFirst
             <Badge variant="default" size="sm">
               {authLabel}
             </Badge>
+            {connection.maskedApiKey && (
+              <span
+                className="inline-flex items-center gap-1 rounded bg-black/5 dark:bg-white/5 px-2 py-0.5 font-mono text-[11px] text-text-muted hover:text-text-main hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                onClick={handleCopyApiKey}
+                title="Click to copy API Key"
+              >
+                <span className="material-symbols-outlined text-[12px]">key</span>
+                <span>{connection.maskedApiKey}</span>
+                <span className="material-symbols-outlined text-[12px]">
+                  {copied === `conn-key-${connection.id}` ? "check" : "content_copy"}
+                </span>
+              </span>
+            )}
             {hasAnyProxy && (
               <Badge variant={proxyBadgeVariant} size="sm">
                 Proxy
@@ -313,6 +353,25 @@ export default function ConnectionRow({ connection, proxyPools, isOAuth, isFirst
                 <span className="text-[10px] leading-tight">Auto-ping</span>
               </button>
             </Tooltip>
+          )}
+          {!isOAuthConnection && !isCookieConnection && (
+            <button
+              onClick={handleCopyApiKey}
+              disabled={copyingKey}
+              className={`flex flex-col items-center rounded px-2 py-1 transition-colors ${
+                copied === `conn-key-${connection.id}`
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-text-muted hover:bg-black/5 hover:text-primary dark:hover:bg-white/5"
+              }`}
+              title="Copy API Key"
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {copied === `conn-key-${connection.id}` ? "check" : copyingKey ? "progress_activity" : "content_copy"}
+              </span>
+              <span className="text-[10px] leading-tight">
+                {copied === `conn-key-${connection.id}` ? "Copied" : "Copy Key"}
+              </span>
+            </button>
           )}
           <button onClick={onEdit} className="flex flex-col items-center rounded px-2 py-1 text-text-muted hover:bg-black/5 hover:text-primary dark:hover:bg-white/5">
             <span className="material-symbols-outlined text-[18px]">edit</span>

@@ -9,6 +9,7 @@ import {
 import { APIKEY_PROVIDERS } from "@/shared/constants/config";
 import { AI_PROVIDERS, FREE_TIER_PROVIDERS, WEB_COOKIE_PROVIDERS, isOpenAICompatibleProvider, isAnthropicCompatibleProvider, isCustomEmbeddingProvider } from "@/shared/constants/providers";
 import { normalizeProviderId, normalizeProviderSpecificData } from "@/lib/providerNormalization";
+import { maskApiKey } from "@/lib/apiKeyMask";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,7 @@ export async function GET() {
         ...c,
         name,
         alias: providerDef?.alias || null,
+        maskedApiKey: c.apiKey ? maskApiKey(c.apiKey) : null,
         apiKey: undefined,
         accessToken: undefined,
         refreshToken: undefined,

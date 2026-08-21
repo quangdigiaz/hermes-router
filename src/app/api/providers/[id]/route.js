@@ -6,6 +6,7 @@ import {
   deleteProviderConnection,
 } from "@/models";
 import { emitNotification } from "@/lib/notificationBus.js";
+import { maskApiKey } from "@/lib/apiKeyMask";
 
 function normalizeProxyConfig(body = {}) {
   const hasAnyProxyField =
@@ -93,6 +94,7 @@ export async function GET(request, { params }) {
 
     // Hide sensitive fields
     const result = { ...connection };
+    result.maskedApiKey = connection.apiKey ? maskApiKey(connection.apiKey) : null;
     delete result.apiKey;
     delete result.accessToken;
     delete result.refreshToken;

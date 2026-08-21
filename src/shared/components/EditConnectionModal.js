@@ -6,6 +6,7 @@ import Input from "@/shared/components/Input";
 import Button from "@/shared/components/Button";
 import Badge from "@/shared/components/Badge";
 import Select from "@/shared/components/Select";
+import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import { isOpenAICompatibleProvider, isAnthropicCompatibleProvider, AI_PROVIDERS } from "@/shared/constants/providers";
 
 function asyncReducer(state, action) {
@@ -36,6 +37,9 @@ export default function EditConnectionModal({ isOpen, connection, proxyPools, on
   });
   const cloudflareData = { accountId: connection?.provider === "cloudflare-ai" && connection.providerSpecificData ? connection.providerSpecificData.accountId || "" : "" };
   const [region, setRegion] = useState("");
+  const [showKey, setShowKey] = useState(false);
+  const [loadingKey, setLoadingKey] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
   const [async_, dispatch] = useReducer(asyncReducer, { testing: false, testResult: null, validating: false, validationResult: null, saving: false });
   const { testing, testResult, validating, validationResult, saving } = async_;
 
@@ -108,6 +112,33 @@ export default function EditConnectionModal({ isOpen, connection, proxyPools, on
       active = false;
     };
   }, [isOpen, connection?.id, isGoogle]);
+
+  useEffect(() => {
+    if (!isOpen || !connection || connection.authType === "oauth" || connection.authType === "cookie") {
+      return;
+    }
+
+    let active = true;
+    const loadApiKey = async () => {
+      setLoadingKey(true);
+      try {
+        const res = await fetch(`/api/providers/${connection.id}/key`);
+        const data = await res.json();
+        if (active && data?.apiKey) {
+          setFormData((prev) => ({ ...prev, apiKey: data.apiKey }));
+        }
+      } catch (err) {
+        console.error("Failed to load connection API key:", err);
+      } finally {
+        if (active) setLoadingKey(false);
+      }
+    };
+
+    loadApiKey();
+    return () => {
+      active = false;
+    };
+  }, [isOpen, connection?.id, connection?.authType]);
 
   const isOAuth = connection?.authType === "oauth";
   const isAzure = connection?.provider === "azure";
@@ -291,16 +322,45 @@ export default function EditConnectionModal({ isOpen, connection, proxyPools, on
 
         {!isOAuth && (
           <>
-            <div className="flex gap-2">
-              <Input
-                label="API Key"
-                type="password"
-                value={formData.apiKey}
-                onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
-                placeholder="Enter new API key"
-                hint="Leave blank to keep the current API key."
-                className="flex-1"
-              />
+            <div className="flex gap-2 items-start">
+              <div className="relative flex-1">
+                <Input
+                  label="API Key"
+                  type={showKey ? "text" : "password"}
+                  value={formData.apiKey}
+                  onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
+                  placeholder={loadingKey ? "Loading current API key..." : "Enter API key"}
+                  hint="View, copy, or update the API key for this connection."
+                  className="pr-20 font-mono text-sm"
+                />
+                <div className="absolute right-2 top-8 flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowKey(!showKey)}
+                    className="p-1 rounded text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    title={showKey ? "Hide API key" : "Show API key"}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      {showKey ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => formData.apiKey && copy(formData.apiKey, "edit-key")}
+                    disabled={!formData.apiKey}
+                    className={`p-1 rounded transition-colors ${
+                      copied === "edit-key"
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-30"
+                    }`}
+                    title="Copy API key"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      {copied === "edit-key" ? "check" : "content_copy"}
+                    </span>
+                  </button>
+                </div>
+              </div>
               <div className="pt-6">
                 <Button onClick={handleValidate} disabled={!formData.apiKey || validating || saving} variant="secondary">
                   {validating ? "Checking..." : "Check"}
