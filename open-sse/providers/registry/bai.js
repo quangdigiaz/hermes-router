@@ -2,6 +2,7 @@ export default {
   id: "bai",
   priority: 117,
   alias: "bai",
+  aliases: ["b.ai", "b-ai"],
   uiAlias: "bai",
   display: {
     name: "B.AI",
