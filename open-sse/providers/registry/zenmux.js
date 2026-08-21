@@ -48,7 +48,8 @@ export default {
     { id: "glm-5.2", name: "GLM 5.2" },
     { id: "minimax-m3", name: "MiniMax M3" },
   ],
+  hasFree: true,
   modelsFetcher: { url: "https://zenmux.ai/api/v1/models", type: "openai" },
   passthroughModels: true,
-  features: { fetchModels: true },
+  features: { fetchModels: true, usage: true, usageApikey: true },
 };

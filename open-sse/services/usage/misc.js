@@ -422,3 +422,120 @@ export async function getTeamoRouterUsage(apiKey, proxyOptions = null) {
     };
   }
 }
+
+/**
+ * ZenMux usage & balance fetcher via Platform Management API
+ *
+ * Calls:
+ *   1. GET https://zenmux.ai/api/v1/management/payg/balance
+ *   2. GET https://zenmux.ai/api/v1/management/subscription/detail
+ *
+ * Uses managementApiKey if present in providerSpecificData, or falls back to apiKey
+ */
+export async function getZenMuxUsage(apiKey, providerSpecificData = null, proxyOptions = null) {
+  const mgKey = providerSpecificData?.managementApiKey || apiKey;
+  if (!mgKey) {
+    return { plan: "ZenMux", message: "ZenMux connected." };
+  }
+
+  try {
+    const headers = {
+      Authorization: `Bearer ${mgKey}`,
+      Accept: "application/json",
+    };
+
+    // 1. Fetch PAYG balance
+    const balanceRes = await proxyAwareFetch(
+      "https://zenmux.ai/api/v1/management/payg/balance",
+      { method: "GET", headers },
+      proxyOptions
+    ).catch(() => null);
+
+    // 2. Fetch Subscription details & rolling window quotas
+    const subRes = await proxyAwareFetch(
+      "https://zenmux.ai/api/v1/management/subscription/detail",
+      { method: "GET", headers },
+      proxyOptions
+    ).catch(() => null);
+
+    let balanceVal = null;
+    let currency = "USD";
+    if (balanceRes?.ok) {
+      const bData = await balanceRes.json().catch(() => null);
+      if (bData?.data?.total_credits != null) {
+        balanceVal = Number(bData.data.total_credits);
+        currency = (bData.data.currency || "USD").toUpperCase();
+      }
+    }
+
+    let subData = null;
+    if (subRes?.ok) {
+      const sData = await subRes.json().catch(() => null);
+      if (sData?.data) {
+        subData = sData.data;
+      }
+    }
+
+    const quotas = {};
+
+    // Account Balance Quota Card
+    if (balanceVal != null && !isNaN(balanceVal)) {
+      quotas[`Balance (${currency})`] = {
+        name: `Account Balance (${currency})`,
+        used: 0,
+        total: balanceVal,
+        remainingPercentage: balanceVal > 0 ? 100 : 0,
+        resetAt: null,
+      };
+    }
+
+    // 5-Hour Rolling Window Quota
+    if (subData?.quota_5_hour) {
+      const q5 = subData.quota_5_hour;
+      const maxF = Number(q5.max_flows) || 0;
+      const usedF = Number(q5.used_flows) || 0;
+      const remainingF = Number(q5.remaining_flows) ?? (maxF - usedF);
+      quotas["5-Hour Window (Flows)"] = {
+        name: "5-Hour Window (Flows)",
+        used: usedF,
+        total: maxF,
+        remainingPercentage: maxF > 0 ? Math.round((remainingF / maxF) * 100) : 0,
+        resetAt: q5.resets_at || null,
+        message: `${usedF} / ${maxF} Flows used ($${Number(q5.used_value_usd || 0).toFixed(2)})`,
+      };
+    }
+
+    // 7-Day Rolling Window Quota
+    if (subData?.quota_7_day) {
+      const q7 = subData.quota_7_day;
+      const maxF = Number(q7.max_flows) || 0;
+      const usedF = Number(q7.used_flows) || 0;
+      const remainingF = Number(q7.remaining_flows) ?? (maxF - usedF);
+      quotas["7-Day Window (Flows)"] = {
+        name: "7-Day Window (Flows)",
+        used: usedF,
+        total: maxF,
+        remainingPercentage: maxF > 0 ? Math.round((remainingF / maxF) * 100) : 0,
+        resetAt: q7.resets_at || null,
+        message: `${usedF} / ${maxF} Flows used ($${Number(q7.used_value_usd || 0).toFixed(2)})`,
+      };
+    }
+
+    const planTier = subData?.plan?.tier ? subData.plan.tier.toUpperCase() : "PAYG";
+    const accStatus = subData?.account_status ? ` | Status: ${subData.account_status}` : "";
+    const formattedBal = balanceVal != null ? `$${balanceVal.toFixed(2)}` : "Connected";
+
+    return {
+      plan: `ZenMux ${planTier}`,
+      balance: balanceVal != null ? `$${balanceVal.toFixed(2)}` : undefined,
+      message: `Balance: ${formattedBal}${accStatus}`,
+      quotas,
+    };
+  } catch (error) {
+    return {
+      plan: "ZenMux",
+      message: "ZenMux connected.",
+    };
+  }
+}
+

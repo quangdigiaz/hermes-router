@@ -20,6 +20,7 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
 
   const isAzure = provider === "azure";
   const isCloudflareAi = provider === "cloudflare-ai";
+  const isZenMux = provider === "zenmux";
   const providerRegions = AI_PROVIDERS?.[provider]?.regions || null;
   const defaultRegion = AI_PROVIDERS?.[provider]?.defaultRegion || providerRegions?.[0]?.id || "";
 
@@ -37,6 +38,7 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
     organization: "",
   });
   const [cloudflareData, setCloudflareData] = useState({ accountId: "" });
+  const [zenmuxData, setZenmuxData] = useState({ managementApiKey: "" });
   const [region, setRegion] = useState(defaultRegion);
   const [validating, setValidating] = useState(false);
   const [validationResult, setValidationResult] = useState(null);
@@ -63,6 +65,9 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
     }
     if (isCloudflareAi) {
       return { accountId: cloudflareData.accountId };
+    }
+    if (isZenMux && zenmuxData.managementApiKey.trim()) {
+      return { managementApiKey: zenmuxData.managementApiKey.trim() };
     }
     if (providerRegions && region) {
       return { region };
@@ -329,6 +334,21 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
                 placeholder="Organization ID"
               />
             </div>
+          </div>
+        )}
+
+        {isZenMux && (
+          <div className="bg-sidebar/50 p-3.5 rounded-lg border border-accent/20">
+            <h3 className="font-semibold mb-2 text-sm">ZenMux Platform API (Tùy chọn)</h3>
+            <Input
+              label="Management Key (sk-mg-...)"
+              value={zenmuxData.managementApiKey}
+              onChange={(e) => setZenmuxData({ managementApiKey: e.target.value })}
+              placeholder="sk-mg-v1-..."
+            />
+            <p className="text-xs text-text-muted mt-1.5">
+              Điền Platform Key (sk-mg-...) để hiển thị số dư ví ($5) và hạn mức gói cước trên Quota Dashboard.
+            </p>
           </div>
         )}
 

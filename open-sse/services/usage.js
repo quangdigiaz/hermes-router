@@ -26,6 +26,7 @@ import {
   getQoderUsage,
   getTokenHarborUsage,
   getTeamoRouterUsage,
+  getZenMuxUsage,
 } from "./usage/misc.js";
 
 /**
@@ -61,6 +62,7 @@ const USAGE_HANDLERS = {
   byteplus: (c) => getByteplusUsage(c.apiKey, c.proxyOptions),
   tokenharbor: (c) => getTokenHarborUsage(c.apiKey, c.proxyOptions),
   teamorouter: (c) => getTeamoRouterUsage(c.apiKey, c.proxyOptions),
+  zenmux: (c) => getZenMuxUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
 };
 
 export async function getUsageForProvider(connection, proxyOptions = null) {
