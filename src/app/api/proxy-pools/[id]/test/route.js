@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import { getProxyPoolById, updateProxyPool } from "@/models";
+import { getProxyPoolById, updateProxyPool } from "@/lib/db/repos/proxyPoolsRepo.js";
 import { testProxyUrl } from "@/lib/network/proxyTest";
 import { fetch as undiciFetch } from "undici";
 import { requireDashboardAuth } from "@/lib/auth/routeAuth.js";
+import { autoRotateCkeyProxy } from "@/lib/ckey/autoRotate.js";
+import { getSettings } from "@/lib/db/repos/settingsRepo.js";
 
 async function testVercelRelay(relayUrl, timeoutMs = 10000) {
   const controller = new AbortController();
@@ -45,9 +47,45 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: "Proxy pool not found" }, { status: 404 });
     }
 
-    const result = proxyPool.type === "vercel" || proxyPool.type === "cloudflare" || proxyPool.type === "deno"
+    let result = proxyPool.type === "vercel" || proxyPool.type === "cloudflare" || proxyPool.type === "deno"
       ? await testVercelRelay(proxyPool.proxyUrl)
       : await testProxyUrl({ proxyUrl: proxyPool.proxyUrl });
+
+    let autoRotated = false;
+    let newIp = null;
+
+    // Smart CKEY auto-rotation on timeout / failure
+    if (!result.ok && proxyPool.type === "ckey") {
+      const settings = await getSettings();
+      const resolvedKeyproxy = (
+        proxyPool.ckeyKeyproxy ||
+        proxyPool.providerSpecificData?.ckeyKeyproxy ||
+        settings.ckeyKeyproxy ||
+        ""
+      ).trim();
+
+      if (resolvedKeyproxy) {
+        console.log(`[CKEY Test Auto-Rotate] Proxy pool ${id} failed test (${result.error}), rotating new IP...`);
+        const rotResult = await autoRotateCkeyProxy(id, {
+          keyproxy: resolvedKeyproxy,
+          tinhthanh: proxyPool.ckeyTinhThanh,
+          nhamang: proxyPool.ckeyNhaMang,
+          force: true,
+        });
+
+        if (rotResult.rotated && rotResult.proxyUrl) {
+          // Re-test with new rotated proxy URL
+          const retryResult = await testProxyUrl({ proxyUrl: rotResult.proxyUrl });
+          if (retryResult.ok) {
+            result = retryResult;
+            autoRotated = true;
+            newIp = rotResult.ip || null;
+            console.log(`[CKEY Test Auto-Rotate] Proxy pool ${id} recovered with new IP ${newIp}!`);
+          }
+        }
+      }
+    }
+
     const now = new Date().toISOString();
 
     await updateProxyPool(id, {
@@ -64,6 +102,8 @@ export async function POST(request, { params }) {
       error: result.error || null,
       elapsedMs: result.elapsedMs || 0,
       testedAt: now,
+      autoRotated,
+      newIp,
     });
   } catch (error) {
     console.log("Error testing proxy pool:", error);

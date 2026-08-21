@@ -391,7 +391,15 @@ export default function ProxyPoolsPage() {
       }
 
       await fetchProxyPools();
-      notify.success(data.ok ? "Proxy test passed" : "Proxy test failed");
+      if (data.ok) {
+        if (data.autoRotated) {
+          notify.success(`Proxy test passed (Auto-rotated new IP: ${data.newIp || "Active"})`);
+        } else {
+          notify.success("Proxy test passed");
+        }
+      } else {
+        notify.error(data.error || "Proxy test failed");
+      }
     } catch (error) {
       console.log("Error testing proxy pool:", error);
       notify.error("Failed to test proxy");
