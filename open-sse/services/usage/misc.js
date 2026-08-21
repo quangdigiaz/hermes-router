@@ -704,43 +704,51 @@ export async function getBazaarLinkUsage(apiKey, proxyOptions = null) {
     }
 
     const quotas = {};
-    let balanceVal = null;
+    const credObj = creditsData?.data || creditsData || {};
+    const keyObj = keyData?.data || keyData || {};
 
     // 1. Credits & Lifetime Usage
-    if (creditsData != null) {
-      const credits = Number(creditsData.credits ?? creditsData.balance ?? creditsData.total_credits ?? 0);
-      const lifetime = Number(creditsData.lifetime_usage ?? creditsData.lifetimeUsage ?? creditsData.total_used ?? 0);
-      balanceVal = credits;
+    const credits = Number(credObj.total_credits ?? credObj.credits ?? credObj.balance ?? 0);
+    const lifetime = Number(credObj.total_usage ?? credObj.lifetime_usage ?? credObj.total_used ?? 0);
 
-      quotas["Credits Balance (USD)"] = {
-        name: "Credits Balance (USD)",
-        used: lifetime,
-        total: credits + lifetime,
-        remainingPercentage: (credits + lifetime) > 0 ? Math.round((credits / (credits + lifetime)) * 100) : 100,
+    quotas["Credits Balance (USD)"] = {
+      name: "Credits Balance (USD)",
+      used: lifetime,
+      total: credits + lifetime,
+      remainingPercentage: (credits + lifetime) > 0 ? Math.round((credits / (credits + lifetime)) * 100) : 100,
+      unit: "USD",
+      message: `Available: $${credits.toFixed(2)} | Lifetime Usage: $${lifetime.toFixed(2)}`,
+      resetAt: null,
+    };
+
+    // 2. Per-Key Spend Limits / Quota
+    const limit = Number(keyObj.limit ?? keyObj.spend_limit ?? 0);
+    const remaining = Number(keyObj.limit_remaining ?? keyObj.limitRemaining ?? keyObj.remaining ?? 0);
+    if (limit > 0) {
+      quotas["Key Spend Limit (USD)"] = {
+        name: "Key Spend Limit (USD)",
+        used: Math.max(0, limit - remaining),
+        total: limit,
+        remainingPercentage: Math.round((remaining / limit) * 100),
         unit: "USD",
-        message: `Available: $${credits.toFixed(2)} | Lifetime Usage: $${lifetime.toFixed(2)}`,
-        resetAt: null,
+        message: `$${remaining.toFixed(2)} remaining of $${limit.toFixed(2)} limit`,
+        resetAt: keyObj.limit_reset || keyObj.resets_at || null,
       };
     }
 
-    // 2. Per-Key Spend Limits
-    if (keyData != null) {
-      const limit = Number(keyData.limit ?? keyData.spend_limit ?? 0);
-      const remaining = Number(keyData.limit_remaining ?? keyData.limitRemaining ?? keyData.remaining ?? 0);
-      if (limit > 0) {
-        quotas["Key Spend Limit (USD)"] = {
-          name: "Key Spend Limit (USD)",
-          used: Math.max(0, limit - remaining),
-          total: limit,
-          remainingPercentage: Math.round((remaining / limit) * 100),
-          unit: "USD",
-          message: `$${remaining.toFixed(2)} remaining of $${limit.toFixed(2)} limit`,
-          resetAt: keyData.limit_reset || keyData.resets_at || null,
-        };
-      }
+    // 3. Rate Limit Card
+    if (keyObj.rate_limit) {
+      const rl = keyObj.rate_limit;
+      quotas["Rate Limit"] = {
+        name: "Rate Limit",
+        used: 0,
+        total: rl.requests || 20,
+        unit: `req/${rl.interval || "1m"}`,
+        message: rl.note || `${rl.requests || 20} requests per ${rl.interval || "1 minute"}`,
+      };
     }
 
-    // 3. Auto Free Router Limit Indicator
+    // 4. Auto Free Router Indicator
     quotas["Auto:Free Router (Zero Cost)"] = {
       name: "Auto:Free Router (Zero Cost)",
       used: 0,
@@ -749,11 +757,15 @@ export async function getBazaarLinkUsage(apiKey, proxyOptions = null) {
       message: "Zero credits deducted; daily rate limits apply (auto:free model).",
     };
 
-    const formattedBal = balanceVal != null ? `$${balanceVal.toFixed(2)}` : "Connected";
+    const isFreeTier = keyObj.is_free_tier !== false;
+    const keyType = keyObj.is_management_key ? "Management Key" : (isFreeTier ? "Free Tier" : "Standard Key");
+    const keyLabel = keyObj.label ? ` (${keyObj.label})` : "";
+    const formattedBal = `$${credits.toFixed(2)}`;
+
     return {
-      plan: "BazaarLink AI Gateway",
-      balance: balanceVal != null ? `$${balanceVal.toFixed(2)}` : undefined,
-      message: `Balance: ${formattedBal} | Auto:Free (Zero Cost) & 150+ models supported.`,
+      plan: `BazaarLink ${keyType}${keyLabel}`,
+      balance: formattedBal,
+      message: `Balance: ${formattedBal} | Type: ${keyType}${keyLabel} | Auto:Free & 150+ models.`,
       quotas,
     };
   } catch (error) {
