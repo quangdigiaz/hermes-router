@@ -50,6 +50,8 @@ const DEFAULT_SETTINGS = {
   ckeyKeyproxy: "",
   ckeyAutoRotateEnabled: true,
   ckeyAutoRotateOnWaf: true,
+  // Landing Page Studio Theme
+  studioLandingEnabled: false,
 };
 
 async function readRaw() {

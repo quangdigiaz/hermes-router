@@ -18,6 +18,7 @@ import { getSettings, getCombos } from "@/lib/localDb";
 import { AI_PROVIDERS, resolveProviderId } from "@/shared/constants/providers.js";
 import { isModelAllowed } from "../services/allowedModels.js";
 import { handleSearchCore } from "open-sse/handlers/search/index.js";
+import { saveRequestUsage } from "@/lib/usageDb.js";
 
 /**
  * Handle web search request for the SSE/Next.js server.
@@ -220,7 +221,29 @@ async function handleSingleProviderSearch(body, providerInput, request, apiKey, 
       }
     });
 
-    if (result.success) return result.response;
+    if (result.success) {
+      // Track search usage for analytics
+      const searchData = result.data || {};
+      const responseTimeMs = searchData.metrics?.response_time_ms || 0;
+      const resultCount = searchData.results?.length || 0;
+      saveRequestUsage({
+        provider: providerId,
+        model: `${providerId}/search`,
+        connectionId: credentials.connectionId,
+        apiKey,
+        endpoint: "/v1/search",
+        tokens: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        status: "success",
+        meta: {
+          query: query.slice(0, 100),
+          searchType: body.search_type || "web",
+          resultCount,
+          responseTimeMs,
+          cost: providerConfig?.costPerQuery || 0,
+        },
+      }).catch(() => {});
+      return result.response;
+    }
 
     const { shouldFallback } = await markAccountUnavailable(credentials.connectionId, result.status, result.error, providerId);
 

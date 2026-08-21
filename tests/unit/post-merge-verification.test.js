@@ -130,11 +130,10 @@ describe("Post-merge: layout.js Hermes Router branding preserved", () => {
     expect(src).toContain("document.fonts");
   });
 
-  it("does NOT have upstream Hermes Router title", () => {
-    // Should not contain "Hermes Router - AI Infrastructure"
+  it("does NOT have upstream NineRouter title", () => {
     const titleMatch = src.match(/title:\s*["']([^"']+)["']/);
     expect(titleMatch[1]).toContain("Hermes Router");
-    expect(titleMatch[1]).not.toContain("Hermes Router");
+    expect(titleMatch[1]).not.toContain("NineRouter");
   });
 });
 

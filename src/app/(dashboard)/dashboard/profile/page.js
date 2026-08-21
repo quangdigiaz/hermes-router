@@ -555,6 +555,21 @@ export default function ProfilePage() {
     else if (mode === "import") await runImportDatabase(password);
   };
 
+  const updateStudioLanding = async (studioLandingEnabled) => {
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studioLandingEnabled }),
+      });
+      if (res.ok) {
+        setSettings((prev) => ({ ...prev, studioLandingEnabled }));
+      }
+    } catch (err) {
+      console.error("Failed to update studio landing setting:", err);
+    }
+  };
+
   const observabilityEnabled = settings.enableObservability === true;
 
   const handleShutdown = async () => {
@@ -673,6 +688,37 @@ export default function ProfilePage() {
             <span className="text-sm text-text-muted">Display language</span>
             <span className="text-2xl">{LOCALE_FLAGS[locale] || "🌐"}</span>
           </button>
+        </Card>
+
+        {/* Landing Page Theme */}
+        <Card>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="size-10 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold">Landing Page Theme</h3>
+              <p className="text-xs text-text-muted">Choose your public landing page design</p>
+            </div>
+          </div>
+          <div className="flex items-start sm:items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-sm sm:text-base">Studio Pro Mode</p>
+                <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  TeamoRouter Style
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-text-muted mt-0.5">
+                Enable modern Glassmorphism landing page with interactive model catalog, metrics, and routing flow. (Defaults to Classic).
+              </p>
+            </div>
+            <Toggle
+              checked={settings.studioLandingEnabled === true}
+              onChange={() => updateStudioLanding(!(settings.studioLandingEnabled === true))}
+              disabled={loading}
+            />
+          </div>
         </Card>
 
         {/* Security */}
