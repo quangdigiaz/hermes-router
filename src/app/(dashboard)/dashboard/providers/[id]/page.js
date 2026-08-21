@@ -27,6 +27,7 @@ import AddCustomModelModal from "./AddCustomModelModal";
 import BulkImportCodexModal from "./BulkImportCodexModal";
 import UniversalModelImportModal from "./UniversalModelImportModal";
 import ProviderPlayground from "./ProviderPlayground";
+import ProviderUsageWidget from "./ProviderUsageWidget";
 
 const ONE_BY_ONE_DELAY_MS = 1000;
 
@@ -1701,6 +1702,13 @@ function ProviderDetailContent() {
           </div>
         </Card>
       )}
+
+      {/* Live Balance & Quota Widget */}
+      <ProviderUsageWidget
+        providerId={providerId}
+        providerInfo={providerInfo}
+        connections={connections}
+      />
 
       {/* Connections */}
       {isFreeNoAuth ? (
