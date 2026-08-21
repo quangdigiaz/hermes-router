@@ -41,5 +41,5 @@ export default {
   ],
   modelsFetcher: { url: "https://api.teamorouter.com/v1/models", type: "openai" },
   passthroughModels: true,
-  features: { fetchModels: true, usageApikey: true },
+  features: { fetchModels: true, usage: true, usageApikey: true },
 };

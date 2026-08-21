@@ -45,5 +45,5 @@ export default {
   ],
   modelsFetcher: { url: "https://tokenharbor.ai/v1/models", type: "openai" },
   passthroughModels: true,
-  features: { fetchModels: true, usageApikey: true },
+  features: { fetchModels: true, usage: true, usageApikey: true },
 };

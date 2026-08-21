@@ -44,8 +44,14 @@ function sanitize(c) {
 }
 
 function isUsageEligible(connection) {
-  return USAGE_SUPPORTED_PROVIDERS.includes(connection.provider) && (
-    connection.authType === "oauth" || USAGE_APIKEY_PROVIDERS.includes(connection.provider)
+  const isSupported =
+    USAGE_SUPPORTED_PROVIDERS.includes(connection.provider) ||
+    USAGE_APIKEY_PROVIDERS.includes(connection.provider);
+  return isSupported && (
+    connection.authType === "oauth" ||
+    connection.authType === "apikey" ||
+    connection.authType === "api_key" ||
+    USAGE_APIKEY_PROVIDERS.includes(connection.provider)
   );
 }
 
