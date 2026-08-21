@@ -117,6 +117,20 @@ export const PROMO_PRICING = [
   { model: "mimo-v2.5-pro",          promoInput: 0.435, promoOutput: 0.87,  validUntil: null },
   { model: "MiniMax-M3",             promoInput: 0.30,  promoOutput: 1.20,  validUntil: null },
   { model: "gemini-3.7-flash",       promoInput: 0.75, promoOutput: 3.75, validUntil: "2026-12-31T23:59:59Z" },
+  // BytePlus ModelArk / Volcengine Ark — Free Credits Only (500K tokens per model)
+  { model: "DeepSeek-V4-Flash-GA",   promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "DeepSeek-V4-Flash",      promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "DeepSeek-V4-Pro",        promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "Doubao-Seed-2.1-turbo",  promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "Doubao-Seed-2.0-Code",   promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "Doubao-Seed-2.0-pro",    promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "Doubao-Seed-2.0-lite",   promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "Doubao-Seed-2.0-mini",   promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "Doubao-Seed-Code",       promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "GLM-5.2",                promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "GLM-5.1",                promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "MiniMax-M2.7",           promoInput: 0, promoOutput: 0, validUntil: null },
+  { model: "Kimi-K2.6",              promoInput: 0, promoOutput: 0, validUntil: null },
 ];
 
 export function getPromoPriceSync(model) {

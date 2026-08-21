@@ -98,6 +98,15 @@ const QUOTA_EXHAUSTED_PATTERNS = [
   /balance.{0,10}(zero|depleted|exhausted)/i,
   /no.{0,10}(remaining|available).{0,10}(credits?|balance|funds)/i,
   /account.{0,10}(suspended|disabled|locked)/i,
+  // BytePlus ModelArk / Volcengine Ark — Free Tokens Only mode quota exhaustion
+  // HTTP 429 + TooManyRequests + SetLimitExceeded when 500k free tokens are consumed
+  /set.?inference.?limit/i,
+  /inference.*limit.*model/i,
+  /model service.*paused/i,
+  /model activation page/i,
+  /Free Tokens? Only/i,
+  /Free Credits? Only/i,
+  /SetLimitExceeded/i,
 ];
 
 /**

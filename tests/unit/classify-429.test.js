@@ -80,6 +80,36 @@ describe("classify429 — quota_exhausted", () => {
     const result = classify429({ status: 429, body: "Individual quota reached. Contact your administrator." });
     expect(result.kind).toBe("quota_exhausted");
   });
+
+  it("classifies BytePlus ModelArk Free Tokens Only mode SetLimitExceeded as quota_exhausted", () => {
+    const body = {
+      error: {
+        code: "SetLimitExceeded",
+        message: "Your account [acct-123] has reached the set inference limit for the [DeepSeek-V4-Flash] model, and the model service has been paused. To continue using this model, please visit the Model Activation page to adjust or close the 'Free Tokens Only Mode'."
+      }
+    };
+    const result = classify429({ status: 429, body, provider: "volcengine-ark" });
+    expect(result.kind).toBe("quota_exhausted");
+    expect(result.cooldownMs).toBe(QUOTA_EXHAUSTED_COOLDOWN_MS);
+  });
+
+  it("classifies ModelArk SetLimitExceeded string body as quota_exhausted", () => {
+    const body = "SetLimitExceeded: Your account has reached the set inference limit for the model, and the model service has been paused.";
+    const result = classify429({ status: 429, body, provider: "volcengine-ark" });
+    expect(result.kind).toBe("quota_exhausted");
+  });
+
+  it("classifies ModelArk Chinese error message as quota_exhausted", () => {
+    const body = "调用额度已耗尽。如需继续调用，请前往 ModelArk 控制台关闭「Free Tokens Only」选项。";
+    const result = classify429({ status: 429, body, provider: "volcengine-ark" });
+    expect(result.kind).toBe("quota_exhausted");
+  });
+
+  it("classifies ModelArk error with 'model service paused' as quota_exhausted", () => {
+    const body = "Your account has reached the set inference limit, and the model service has been paused. To continue using this model, please visit the Model Activation page to adjust or close the Free Tokens Only Mode.";
+    const result = classify429({ status: 429, body, provider: "volcengine-ark" });
+    expect(result.kind).toBe("quota_exhausted");
+  });
 });
 
 describe("classify429 — daily_quota", () => {
