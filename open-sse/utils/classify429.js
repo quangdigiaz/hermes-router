@@ -128,6 +128,9 @@ export const PAYMENT_REQUIRED_PATTERNS = [
   /out of credits?/i,
   /balance.?zero/i,
   /enterprise_wallet/i,
+  /balance (greater than|above) \$?0/i,
+  /must have a balance/i,
+  /prevent abuse.*balance/i,
 ];
 
 /**
