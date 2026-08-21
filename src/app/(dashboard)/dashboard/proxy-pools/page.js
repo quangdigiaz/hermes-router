@@ -159,6 +159,7 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onClose }) {
             >
               <option value="random">{translate("Random (All)")}</option>
               <option value="viettel">Viettel</option>
+              <option value="vinaphone">Vinaphone</option>
               <option value="vnpt">VNPT</option>
               <option value="fpt">FPT</option>
             </select>
