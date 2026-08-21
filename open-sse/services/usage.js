@@ -16,6 +16,7 @@ import { getKimiUsage } from "./usage/kimi.js";
 import { getDeepseekUsage } from "./usage/deepseek.js";
 import { resolveQoderCredentials } from "./qoderModels.js";
 import getFreebuffUsage from "./usage/freebuff.js";
+import { getByteplusUsage } from "./usage/byteplus.js";
 import {
   getQwenUsage,
   getIflowUsage,
@@ -55,6 +56,7 @@ const USAGE_HANDLERS = {
   kimi: (c) => getKimiUsage(c.accessToken, c.apiKey, c.proxyOptions, c.providerSpecificData),
   deepseek: (c) => getDeepseekUsage(c.apiKey, c.proxyOptions),
   freebuff: (c) => getFreebuffUsage(c.accessToken, c.providerSpecificData, c.proxyOptions),
+  byteplus: (c) => getByteplusUsage(c.apiKey, c.proxyOptions),
 };
 
 export async function getUsageForProvider(connection, proxyOptions = null) {

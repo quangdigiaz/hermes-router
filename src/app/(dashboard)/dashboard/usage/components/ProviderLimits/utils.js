@@ -528,6 +528,21 @@ export function parseQuotaData(provider, data) {
         }
         break;
 
+      case "byteplus":
+        // BytePlus ModelArk Free Credits Only — 500K tokens per model
+        if (data.quotas) {
+          Object.entries(data.quotas).forEach(([modelId, quota]) => {
+            normalizedQuotas.push({
+              name: quota.displayName || modelId,
+              modelKey: modelId,
+              used: quota.used || 0,
+              total: quota.total || 0,
+              resetAt: quota.resetAt || null,
+            });
+          });
+        }
+        break;
+
       default:
         // Generic fallback for unknown providers
         if (data.quotas) {

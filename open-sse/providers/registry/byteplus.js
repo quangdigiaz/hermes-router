@@ -34,4 +34,12 @@ export default {
     { id: "gpt-oss-120b-250805", name: "GPT-OSS-120B", free: true },
   ],
   serviceKinds: ["llm"],
+  freeQuota: {
+    totalTokens: 500_000,
+    label: "Free Credits Only",
+    resetOnExhaust: true,
+  },
+  features: {
+    usage: true,
+  },
 };
