@@ -30,8 +30,8 @@ export default {
   },
   models: [
     { id: "th-orchestra", name: "TH Orchestra (Agentic Router)" },
-    { id: "deepseek-v4-flash:free", name: "DeepSeek V4 Flash (Free)" },
-    { id: "mimo-v2.5:free", name: "Xiaomi MiMo V2.5 (Free)" },
+    { id: "deepseek-v4-flash:free", name: "DeepSeek V4 Flash (Free)", isFree: true, tier: "free" },
+    { id: "mimo-v2.5:free", name: "Xiaomi MiMo V2.5 (Free)", isFree: true, tier: "free" },
     { id: "deepseek-v4-pro", name: "DeepSeek V4 Pro" },
     { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
     { id: "claude-opus-5", name: "Claude Opus 5" },

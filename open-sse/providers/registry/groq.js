@@ -34,4 +34,7 @@ export default {
     authHeader: "bearer",
     format: "openai",
   },
+  features: {
+    fetchModels: true,
+  },
 };

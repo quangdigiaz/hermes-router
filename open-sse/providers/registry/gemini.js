@@ -80,4 +80,7 @@ export default {
     pricingUrl: "https://ai.google.dev/pricing",
     freeTier: "Free tier: 15 RPM, 1M tokens/day on gemini-2.5-flash via AI Studio.",
   },
+  features: {
+    fetchModels: true,
+  },
 };

@@ -28,4 +28,7 @@ export default {
   ],
   serviceKinds: ["llm","imageToText","embedding"],
   embeddingConfig: { baseUrl: "https://api.mistral.ai/v1/embeddings", authType: "apikey", authHeader: "bearer" },
+  features: {
+    fetchModels: true,
+  },
 };

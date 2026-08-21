@@ -26,4 +26,7 @@ export default {
   ],
   serviceKinds: ["llm", "embedding"],
   embeddingConfig: { baseUrl: "https://api.fireworks.ai/inference/v1/embeddings" },
+  features: {
+    fetchModels: true,
+  },
 };

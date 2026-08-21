@@ -28,4 +28,7 @@ export default {
     { id: "qwen-3-235b-a22b-instruct-2507", name: "Qwen3 235B A22B" },
     { id: "qwen-3-32b", name: "Qwen3 32B" },
   ],
+  features: {
+    fetchModels: true,
+  },
 };

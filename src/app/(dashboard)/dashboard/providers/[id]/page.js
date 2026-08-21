@@ -26,6 +26,7 @@ import EditCompatibleNodeModal from "./EditCompatibleNodeModal";
 import AddCustomModelModal from "./AddCustomModelModal";
 import BulkImportCodexModal from "./BulkImportCodexModal";
 import UniversalModelImportModal from "./UniversalModelImportModal";
+import ModelTierFilterToolbar from "./ModelTierFilterToolbar";
 import ProviderPlayground from "./ProviderPlayground";
 import ProviderUsageWidget from "./ProviderUsageWidget";
 
@@ -83,7 +84,7 @@ function ProviderDetailContent() {
   const [disabledModelIds, setDisabledModelIds] = useState([]);
   const [selectedModelIds, setSelectedModelIds] = useState([]);
   const [hiddenModelIds, setHiddenModelIds] = useState(() => new Set());
-  const [kiroTierFilter, setKiroTierFilter] = useState("all");
+  const [modelTierFilter, setModelTierFilter] = useState("all");
   const [confirmState, setConfirmState] = useState(null);
   const [showAgRiskModal, setShowAgRiskModal] = useState(false);
   const [showUniversalImportModal, setShowUniversalImportModal] = useState(false);
@@ -1268,12 +1269,31 @@ function ProviderDetailContent() {
     const visibleCustomRows = customModelRows.filter((m) => !hiddenModelIds.has(m.id));
     let visibleDisplayModels = displayModels.filter((m) => !hiddenModelIds.has(m.id));
 
-    // For Kiro AI: support filtering by Tier (Free vs Pro)
-    if (providerId === "kiro") {
-      if (kiroTierFilter === "free") {
-        visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "free");
-      } else if (kiroTierFilter === "pro") {
-        visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "pro");
+    // Universal Tier / Group filtering
+    if (modelTierFilter !== "all") {
+      if (providerId === "codex") {
+        if (modelTierFilter === "pro") {
+          visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "pro");
+        } else if (modelTierFilter === "plus") {
+          visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "plus" || (!m.tier && !m.id.includes("5.6")));
+        } else if (modelTierFilter === "review") {
+          visibleDisplayModels = visibleDisplayModels.filter((m) => m.quotaFamily === "review" || m.id.endsWith("-review"));
+        } else if (modelTierFilter === "image") {
+          visibleDisplayModels = visibleDisplayModels.filter((m) => m.kind === "image" || m.capabilities?.includes("text2img"));
+        }
+      } else if (providerId === "kiro") {
+        if (modelTierFilter === "free") {
+          visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "free");
+        } else if (modelTierFilter === "pro") {
+          visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "pro");
+        }
+      } else {
+        // Free vs Paid filtering
+        if (modelTierFilter === "free") {
+          visibleDisplayModels = visibleDisplayModels.filter((m) => m.isFree || isFreeModel(m.id, providerId, AI_PROVIDERS, m));
+        } else if (modelTierFilter === "paid") {
+          visibleDisplayModels = visibleDisplayModels.filter((m) => !m.isFree && !isFreeModel(m.id, providerId, AI_PROVIDERS, m));
+        }
       }
     }
 
@@ -1281,62 +1301,20 @@ function ProviderDetailContent() {
 
     return (
       <div className="flex flex-col gap-3">
-        {/* Kiro Tier Switcher & Quick Pro-Disable Safety */}
-        {providerId === "kiro" && (
-          <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-2.5 text-xs">
-            <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-primary">Kiro Tier:</span>
-              <div className="inline-flex rounded-lg border border-border bg-surface p-0.5 shadow-xs">
-                <button
-                  type="button"
-                  onClick={() => setKiroTierFilter("all")}
-                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
-                    kiroTierFilter === "all"
-                      ? "bg-primary text-white"
-                      : "text-text-muted hover:text-text-main"
-                  }`}
-                >
-                  Tất cả (19)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setKiroTierFilter("free")}
-                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
-                    kiroTierFilter === "free"
-                      ? "bg-green-600 text-white shadow-xs"
-                      : "text-text-muted hover:text-green-600"
-                  }`}
-                >
-                  🟢 Free Tier (8)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setKiroTierFilter("pro")}
-                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
-                    kiroTierFilter === "pro"
-                      ? "bg-purple-600 text-white shadow-xs"
-                      : "text-text-muted hover:text-purple-600"
-                  }`}
-                >
-                  ⭐ Pro Tier (11)
-                </button>
-              </div>
-            </div>
-
-            <Button
-              size="xs"
-              variant="secondary"
-              icon="security"
-              onClick={async () => {
-                const proModelIds = models.filter((m) => m.tier === "pro").map((m) => m.id);
-                await handleDisableAll(proModelIds);
-              }}
-              title="Tắt toàn bộ model Pro để tránh lỗi 400 cho tài khoản Free"
-            >
-              🛡️ Tắt tất cả model Pro (Tránh 400)
-            </Button>
-          </div>
-        )}
+        {/* Universal Model Tier / Category Filter Toolbar */}
+        <ModelTierFilterToolbar
+          providerId={providerId}
+          models={displayModels}
+          disabledModelIds={disabledModelIds}
+          activeFilter={modelTierFilter}
+          onFilterChange={setModelTierFilter}
+          onDisableModels={handleDisableAll}
+          onEnableModels={async (ids) => {
+            for (const id of ids) {
+              await handleEnableModel(id);
+            }
+          }}
+        />
 
         {/* Model Selection & Batch Actions Toolbar */}
         {allVisibleIds.length > 0 && (

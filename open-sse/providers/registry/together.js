@@ -28,4 +28,7 @@ export default {
   ],
   serviceKinds: ["llm", "embedding"],
   embeddingConfig: { baseUrl: "https://api.together.xyz/v1/embeddings" },
+  features: {
+    fetchModels: true,
+  },
 };

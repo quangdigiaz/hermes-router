@@ -25,8 +25,8 @@ export default {
     baseUrl: "https://api.teamorouter.com/v1/images",
   },
   models: [
-    { id: "deepseek-v4-flash-free", name: "DeepSeek V4 Flash (Free - 200 RPD)" },
-    { id: "deepseek-v4-pro-free", name: "DeepSeek V4 Pro (Free - 50 RPD)" },
+    { id: "deepseek-v4-flash-free", name: "DeepSeek V4 Flash (Free - 200 RPD)", isFree: true, tier: "free" },
+    { id: "deepseek-v4-pro-free", name: "DeepSeek V4 Pro (Free - 50 RPD)", isFree: true, tier: "free" },
     { id: "deepseek-v4-flash", name: "DeepSeek V4 Flash" },
     { id: "deepseek-v4-pro", name: "DeepSeek V4 Pro" },
     { id: "claude-sonnet-5", name: "Claude Sonnet 5" },
