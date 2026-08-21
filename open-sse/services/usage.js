@@ -67,7 +67,8 @@ const USAGE_HANDLERS = {
   kilocode: (c) => getKilocodeUsage(c.accessToken, c.providerSpecificData, c.proxyOptions),
   bluesminds: (c) => getBluesmindsUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
   tokenharbor: (c) => getTokenHarborUsage(c.apiKey, c.proxyOptions),
-  teamorouter: (c) => getTeamoRouterUsage(c.apiKey, c.proxyOptions),
+  teamorouter: (c) => getTeamoRouterUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
+  teamo: (c) => getTeamoRouterUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
   zenmux: (c) => getZenMuxUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
 };
 

@@ -293,104 +293,157 @@ export async function getTokenHarborUsage(apiKey, proxyOptions = null) {
 }
 
 /**
- * TeamoRouter Usage, Cost & Balance tracker
+ * TeamoRouter Usage, Wallet Balance & Quota tracker
+ *
+ * Endpoints:
+ *   1. GET https://api.teamorouter.com/api/management/self/wallet
+ *      Response: { success: true, data: { topUpBalance, voucherEfficientAmount, toppedUpSpent, voucherSpent } }
+ *   2. GET https://api.teamorouter.com/api/management/member/wallet?email=...
+ *      Response: { success: true, data: { quotaTotal, quotaRemaining, quotaSpent } }
+ *   3. Fallback: GET https://api.teamorouter.com/v1/billing/balance
  */
-export async function getTeamoRouterUsage(apiKey, proxyOptions = null) {
-  if (!apiKey) {
+export async function getTeamoRouterUsage(apiKey, providerSpecificData = null, proxyOptions = null) {
+  const mgKey = providerSpecificData?.managementApiKey || apiKey;
+  if (!mgKey) {
     return { message: "TeamoRouter API key not available." };
   }
 
-  const cleanKey = apiKey.trim();
+  const cleanKey = mgKey.trim();
   const headers = {
     Authorization: `Bearer ${cleanKey}`,
     Accept: "application/json",
   };
 
   try {
-    const baseHosts = ["https://teamorouter.com", "https://api.teamorouter.com"];
+    const baseHosts = ["https://api.teamorouter.com", "https://teamorouter.com"];
+    let walletData = null;
+    let memberData = null;
     let balanceData = null;
-    let costData = null;
-    let tokenData = null;
 
-    const now = Math.floor(Date.now() / 1000);
-    const sevenDaysAgo = now - 7 * 86400;
+    const memberEmail = providerSpecificData?.email?.trim();
 
-    for (const host of baseHosts) {
-      try {
-        const balRes = await proxyAwareFetch(`${host}/v1/billing/balance`, { headers }, proxyOptions);
-        if (balRes.ok) {
-          balanceData = await balRes.json();
-          
-          // Also fetch 7-day cost and token usage
-          const [costRes, usageRes] = await Promise.allSettled([
-            proxyAwareFetch(`${host}/v1/billing/costs?start_time=${sevenDaysAgo}&end_time=${now}`, { headers }, proxyOptions),
-            proxyAwareFetch(`${host}/v1/usage?start_time=${sevenDaysAgo}&end_time=${now}`, { headers }, proxyOptions),
-          ]);
-
-          if (costRes.status === "fulfilled" && costRes.value.ok) {
-            costData = await costRes.value.json().catch(() => null);
+    // 1. Fetch Member Wallet if email is present
+    if (memberEmail) {
+      for (const host of baseHosts) {
+        try {
+          const mRes = await proxyAwareFetch(
+            `${host}/api/management/member/wallet?email=${encodeURIComponent(memberEmail)}`,
+            { headers },
+            proxyOptions
+          );
+          if (mRes.ok) {
+            const mJson = await mRes.json().catch(() => null);
+            if (mJson?.success && mJson?.data) {
+              memberData = mJson.data;
+              break;
+            }
           }
-          if (usageRes.status === "fulfilled" && usageRes.value.ok) {
-            tokenData = await usageRes.value.json().catch(() => null);
-          }
-          break;
-        }
-      } catch {
-        // try next host
+        } catch {}
       }
     }
 
-    // Extract balance
-    let balanceVal = null;
-    let currency = "USD";
-    if (balanceData?.balance != null) {
-      if (typeof balanceData.balance === "object") {
-        balanceVal = Number(balanceData.balance.value ?? balanceData.balance.amount ?? 0);
-        currency = balanceData.balance.currency || "USD";
-      } else {
-        balanceVal = Number(balanceData.balance);
+    // 2. Fetch Management Self Wallet if not already resolved by member wallet
+    if (!memberData) {
+      for (const host of baseHosts) {
+        try {
+          const wRes = await proxyAwareFetch(`${host}/api/management/self/wallet`, { headers }, proxyOptions);
+          if (wRes.ok) {
+            const wJson = await wRes.json().catch(() => null);
+            if (wJson?.success && wJson?.data) {
+              walletData = wJson.data;
+              break;
+            }
+          }
+        } catch {}
       }
     }
 
-    // Extract 7-day cost
-    let cost7d = null;
-    let req7d = 0;
-    if (costData?.total_amount != null) {
-      cost7d = Number(costData.total_amount.value ?? costData.total_amount.amount ?? costData.total_amount ?? 0);
-      req7d = Number(costData.requests || 0);
+    // 3. Fallback to /v1/billing/balance if management wallet didn't return data
+    if (!walletData && !memberData) {
+      for (const host of baseHosts) {
+        try {
+          const bRes = await proxyAwareFetch(`${host}/v1/billing/balance`, { headers }, proxyOptions);
+          if (bRes.ok) {
+            balanceData = await bRes.json().catch(() => null);
+            break;
+          }
+        } catch {}
+      }
     }
-
-    // Extract token usage
-    const totalTokens7d = Number(tokenData?.usage?.total_tokens || 0);
-    const cachedTokens7d = Number(tokenData?.usage?.cached_read_tokens || 0);
 
     const quotas = {};
+    let totalAvailableBalance = null;
+    let summaryMessage = "";
 
-    // 1. Account Balance Card
-    if (balanceVal != null && !isNaN(balanceVal)) {
-      const displayBalance = Math.max(0, balanceVal);
-      quotas[`Balance (${currency})`] = {
-        name: `Account Balance (${currency})`,
-        used: 0,
-        total: displayBalance,
-        remainingPercentage: displayBalance > 0 ? 100 : 0,
-        resetAt: null,
-      };
-    }
+    if (walletData) {
+      const topUp = Number(walletData.topUpBalance || 0);
+      const voucher = Number(walletData.voucherEfficientAmount || 0);
+      const totalAvailable = topUp + voucher;
+      const topUpSpent = Number(walletData.toppedUpSpent || 0);
+      const voucherSpent = Number(walletData.voucherSpent || 0);
+      const totalSpent = topUpSpent + voucherSpent;
 
-    // 2. 7-Day Cost Metric
-    if (cost7d != null && !isNaN(cost7d)) {
-      quotas["7-Day Cost (USD)"] = {
-        name: "7-Day Cost (USD)",
-        used: cost7d,
-        total: cost7d,
+      totalAvailableBalance = totalAvailable;
+
+      // Available Balance Quota Card
+      quotas["Available Wallet (USD)"] = {
+        name: "Available Wallet (USD)",
+        used: totalSpent,
+        total: totalAvailable + totalSpent,
+        remainingPercentage: (totalAvailable + totalSpent) > 0 ? Math.round((totalAvailable / (totalAvailable + totalSpent)) * 100) : 100,
         unit: "USD",
-        message: `${req7d} requests | ${(totalTokens7d / 1000).toFixed(1)}k tokens (7 days)`,
+        message: `Top-Up: $${topUp.toFixed(2)} | Voucher: $${voucher.toFixed(2)}`,
         resetAt: null,
       };
+
+      // Spent Quota Card
+      quotas["Total Spent (USD)"] = {
+        name: "Total Spent (USD)",
+        used: totalSpent,
+        total: totalSpent,
+        unit: "USD",
+        message: `Top-Up Spent: $${topUpSpent.toFixed(2)} | Voucher Spent: $${voucherSpent.toFixed(2)}`,
+        resetAt: null,
+      };
+
+      summaryMessage = `Balance: $${totalAvailable.toFixed(2)} (Top-up: $${topUp.toFixed(2)}, Voucher: $${voucher.toFixed(2)}) | Spent: $${totalSpent.toFixed(2)}`;
+    } else if (memberData) {
+      const qTotal = Number(memberData.quotaTotal || 0);
+      const qRem = Number(memberData.quotaRemaining || 0);
+      const qSpent = Number(memberData.quotaSpent || (qTotal - qRem));
+
+      totalAvailableBalance = qRem;
+
+      quotas["Member Quota (USD)"] = {
+        name: "Member Quota (USD)",
+        used: qSpent,
+        total: qTotal,
+        remainingPercentage: qTotal > 0 ? Math.round((qRem / qTotal) * 100) : 0,
+        unit: "USD",
+        message: `$${qRem.toFixed(2)} remaining of $${qTotal.toFixed(2)} allocation`,
+        resetAt: null,
+      };
+
+      summaryMessage = `Quota: $${qRem.toFixed(2)} / $${qTotal.toFixed(2)} remaining`;
+    } else if (balanceData?.balance != null) {
+      let bVal = 0;
+      if (typeof balanceData.balance === "object") {
+        bVal = Number(balanceData.balance.value ?? balanceData.balance.amount ?? 0);
+      } else {
+        bVal = Number(balanceData.balance);
+      }
+      totalAvailableBalance = bVal;
+      quotas["Balance (USD)"] = {
+        name: "Account Balance (USD)",
+        used: 0,
+        total: bVal,
+        remainingPercentage: bVal > 0 ? 100 : 0,
+        resetAt: null,
+      };
+      summaryMessage = `Balance: $${bVal.toFixed(2)}`;
     }
 
-    // 3. Complimentary Free Model Limits
+    // Complimentary Free Models Quota Cards
     quotas["DeepSeek V4 Flash (Free)"] = {
       name: "DeepSeek V4 Flash (Free)",
       used: 0,
@@ -406,13 +459,10 @@ export async function getTeamoRouterUsage(apiKey, proxyOptions = null) {
       message: "50 requests/day complimentary limit.",
     };
 
-    const formattedBal = balanceVal != null ? `$${balanceVal.toFixed(2)}` : "Connected";
-    const costSummary = cost7d != null ? ` | 7D Spent: $${cost7d.toFixed(3)} (${req7d} reqs)` : "";
-
     return {
       plan: "TeamoRouter Pay-As-You-Go",
-      balance: balanceVal != null ? `$${balanceVal.toFixed(2)}` : undefined,
-      message: `Balance: ${formattedBal}${costSummary}. Free models: deepseek-v4-flash-free (200 RPD), deepseek-v4-pro-free (50 RPD).`,
+      balance: totalAvailableBalance != null ? `$${totalAvailableBalance.toFixed(2)}` : undefined,
+      message: summaryMessage ? `${summaryMessage}. Free: 200 Flash / 50 Pro RPD.` : "TeamoRouter connected.",
       quotas,
     };
   } catch (error) {
