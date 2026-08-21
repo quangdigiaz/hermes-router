@@ -47,6 +47,8 @@ export const CURATION_DATA = {
   llm7:            { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },
   teamorouter:     { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },
   teamo:           { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },
+  a6api:           { curatedTier: "free", curatedPriority: 85,  badges: ["cheap", "popular"] },
+  a6:              { curatedTier: "free", curatedPriority: 85,  badges: ["cheap", "popular"] },
 
   // Experimental
   antigravity:      { curatedTier: "experimental", curatedPriority: 50, badges: ["new"] },

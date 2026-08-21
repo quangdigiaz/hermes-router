@@ -272,6 +272,8 @@ const PROVIDER_MODELS_CONFIG = {
   "llm-7": createOpenAIModelsConfig("https://api.llm7.io/v1/models"),
   teamorouter: createOpenAIModelsConfig("https://api.teamorouter.com/v1/models"),
   teamo: createOpenAIModelsConfig("https://api.teamorouter.com/v1/models"),
+  a6api: createOpenAIModelsConfig("https://a6api.com/v1/models"),
+  a6: createOpenAIModelsConfig("https://a6api.com/v1/models"),
 
   cursor: {
     customResolver: async (connection) => {

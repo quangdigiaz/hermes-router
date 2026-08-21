@@ -2,15 +2,25 @@ export default {
   id: "a6api",
   priority: 115,
   alias: "a6api",
+  aliases: [
+    "a6",
+    "a6-api",
+  ],
   uiAlias: "a6",
+  curatedTier: "free",
+  badges: [
+    "cheap",
+    "popular",
+  ],
   display: {
     name: "A6API",
     icon: "bolt",
     color: "#EF4444",
     textIcon: "A6",
-    website: "https://a6api.com/?auth=register&aff=Ksbw",
+    website: "https://a6api.com/?auth=register&aff=LMjF",
     notice: {
-      apiKeyUrl: "https://a6api.com/?auth=register&aff=Ksbw",
+      text: "Unified API gateway for Claude, GPT, Gemini, Grok, DeepSeek and Kimi at high discounts.",
+      apiKeyUrl: "https://a6api.com/?auth=register&aff=LMjF",
     },
   },
   category: "apikey",
