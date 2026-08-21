@@ -228,6 +228,17 @@ export function prepareClaudeRequest(body, provider = null, apiKey = null, conne
     });
   }
 
+  // 1.5. Tools: remove cache_control from individual tools, add to last tool
+  if (body.tools && Array.isArray(body.tools) && body.tools.length > 0) {
+    body.tools = body.tools.map((tool, i) => {
+      const { cache_control, ...rest } = tool;
+      if (i === body.tools.length - 1) {
+        return { ...rest, cache_control: { type: "ephemeral", ttl: "1h" } };
+      }
+      return rest;
+    });
+  }
+
   // 2. Messages: process in optimized passes
   if (body.messages && Array.isArray(body.messages)) {
     const len = body.messages.length;

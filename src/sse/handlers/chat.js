@@ -53,6 +53,25 @@ function checkCircuitBreaker(provider, proxyHash = null, enabled = true) {
   return proxyHash ? isProviderInCooldown(provider, proxyHash) : isProviderFullyBlocked(provider);
 }
 
+export function extractSessionId(headers = {}, body = {}) {
+  const h = headers || {};
+  const sessionId =
+    h["x-session-id"] ||
+    h["x-opencode-session"] ||
+    h["x-cline-session-id"] ||
+    h["x-conversation-id"] ||
+    h["session-id"] ||
+    h["conversation-id"] ||
+    body?.session_id ||
+    body?.conversation_id ||
+    body?.metadata?.session_id ||
+    body?.metadata?.conversation_id ||
+    body?.user ||
+    null;
+
+  return typeof sessionId === "string" && sessionId.trim() ? sessionId.trim() : null;
+}
+
 /**
  * Handle chat completion request
  * Supports: OpenAI, Claude, Gemini, OpenAI Responses API formats
@@ -348,6 +367,9 @@ handleSingleModel: (b, m, opts) => handleSingleModelChat(b, m, clientRawRequest,
   // instead of immediately returning 503. Bounded to 1 retry per request.
   let cooldownRetries = 0;
 
+  const requestHeaders = clientRawRequest?.headers || (request?.headers ? Object.fromEntries(request.headers.entries()) : {});
+  const sessionId = extractSessionId(requestHeaders, body);
+
   while (true) {
     // Abort check: stop trying accounts if the client already disconnected.
     // Prevents wasted upstream calls and circuit-breaker probe hits on a dead
@@ -357,7 +379,7 @@ handleSingleModel: (b, m, opts) => handleSingleModelChat(b, m, clientRawRequest,
       return withSelectedConnectionHeader(new Response(null, { status: 499 }), lastExcludedConnectionId);
     }
 
-    const credentials = await getProviderCredentials(provider, excludeConnectionIds, model);
+    const credentials = await getProviderCredentials(provider, excludeConnectionIds, model, { sessionId });
 
     // All accounts unavailable
     if (!credentials || credentials.allRateLimited) {

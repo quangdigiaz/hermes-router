@@ -22,6 +22,46 @@ function getProviderMutex(provider) {
   return _providerMutexes.get(provider);
 }
 
+// In-memory Session Affinity Map: `${sessionId}::${providerId}` -> { connectionId, expiresAt }
+const SESSION_AFFINITY_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const sessionAffinityMap = new Map();
+
+export function getSessionPreferredConnection(sessionId, providerId) {
+  if (!sessionId || !providerId) return null;
+  const key = `${sessionId}::${providerId}`;
+  const entry = sessionAffinityMap.get(key);
+  if (!entry) return null;
+  if (entry.expiresAt <= Date.now()) {
+    sessionAffinityMap.delete(key);
+    return null;
+  }
+  return entry.connectionId;
+}
+
+export function recordSessionConnection(sessionId, providerId, connectionId) {
+  if (!sessionId || !providerId || !connectionId) return;
+  const key = `${sessionId}::${providerId}`;
+  sessionAffinityMap.set(key, {
+    connectionId,
+    expiresAt: Date.now() + SESSION_AFFINITY_TTL_MS,
+  });
+}
+
+export function clearSessionConnection(sessionId, providerId) {
+  if (!sessionId || !providerId) return;
+  const key = `${sessionId}::${providerId}`;
+  sessionAffinityMap.delete(key);
+}
+
+export function clearSessionConnectionById(connectionId) {
+  if (!connectionId) return;
+  for (const [key, entry] of sessionAffinityMap.entries()) {
+    if (entry.connectionId === connectionId) {
+      sessionAffinityMap.delete(key);
+    }
+  }
+}
+
 /**
  * Get provider credentials from localDb
  * Filters out unavailable accounts and returns the selected account based on strategy
@@ -34,7 +74,11 @@ export async function getProviderCredentials(provider, excludeConnectionIds = nu
   const excludeSet = excludeConnectionIds instanceof Set
     ? excludeConnectionIds
     : (excludeConnectionIds ? new Set([excludeConnectionIds]) : new Set());
-  const preferredConnectionId = options?.preferredConnectionId || null;
+  const sessionId = options?.sessionId || null;
+  let preferredConnectionId = options?.preferredConnectionId || null;
+  if (!preferredConnectionId && sessionId) {
+    preferredConnectionId = getSessionPreferredConnection(sessionId, resolveProviderId(provider));
+  }
   // Acquire per-provider mutex to prevent race conditions within same provider
   const currentMutex = getProviderMutex(provider);
   let resolveMutex;
@@ -188,6 +232,10 @@ export async function getProviderCredentials(provider, excludeConnectionIds = nu
       connection = availableConnections[0];
     }
 
+    if (connection && sessionId) {
+      recordSessionConnection(sessionId, providerId, connection.id);
+    }
+
     const psdForProxy = connection.providerSpecificData?.proxyPoolIds?.length
       ? { ...connection.providerSpecificData, proxyPoolScope: `${providerId}::${model || ""}` }
       : connection.providerSpecificData;
@@ -239,6 +287,7 @@ export async function getProviderCredentials(provider, excludeConnectionIds = nu
  */
 export async function markAccountUnavailable(connectionId, status, errorText, provider = null, model = null, resetsAtMs = null, options = {}) {
   if (!connectionId || connectionId === "noauth") return { shouldFallback: false, cooldownMs: 0 };
+  clearSessionConnectionById(connectionId);
   const connections = await getProviderConnections({ provider });
   const conn = connections.find(c => c.id === connectionId);
   const backoffLevel = conn?.backoffLevel || 0;

@@ -1287,7 +1287,7 @@ function CkeySettingsCard({ settings, loading, onSaved }) {
         </div>
         <div>
           <h3 className="text-base sm:text-lg font-semibold">CKEY Proxy</h3>
-          <p className="text-xs text-text-muted">Cấu hình CKEY API key và proxy xoay</p>
+          <p className="text-xs text-text-muted">Configure CKEY API key and rotating proxy</p>
         </div>
       </div>
 
@@ -1301,7 +1301,7 @@ function CkeySettingsCard({ settings, loading, onSaved }) {
             onChange={(e) => setForm((p) => ({ ...p, ckeyApiKey: e.target.value }))}
             disabled={loading || saving}
           />
-          <p className="text-xs text-text-muted mt-1">Từ <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="underline">ckey.vn</a> → Profile → API Key</p>
+          <p className="text-xs text-text-muted mt-1">From <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="underline">ckey.vn</a> → Profile → API Key</p>
         </div>
 
         <div>
@@ -1313,13 +1313,13 @@ function CkeySettingsCard({ settings, loading, onSaved }) {
             onChange={(e) => setForm((p) => ({ ...p, ckeyKeyproxy: e.target.value }))}
             disabled={loading || saving}
           />
-          <p className="text-xs text-text-muted mt-1">Từ ckey.vn → Proxy Xoay → Key</p>
+          <p className="text-xs text-text-muted mt-1">From ckey.vn → Rotating Proxy → Key</p>
         </div>
 
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium text-sm">Auto-rotate IP</p>
-            <p className="text-xs text-text-muted">Tự xoay IP khi gặp lỗi</p>
+            <p className="text-xs text-text-muted">Auto-rotate IP on errors</p>
           </div>
           <Toggle checked={autoRotate} onChange={setAutoRotate} disabled={loading || saving} />
         </div>
@@ -1327,7 +1327,7 @@ function CkeySettingsCard({ settings, loading, onSaved }) {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium text-sm">Auto-rotate on WAF</p>
-            <p className="text-xs text-text-muted">Tự xoay khi Cloudflare WAF block (403 Ray ID)</p>
+            <p className="text-xs text-text-muted">Auto-rotate on Cloudflare WAF block (403 Ray ID)</p>
           </div>
           <Toggle checked={autoRotateOnWaf} onChange={setAutoRotateOnWaf} disabled={loading || saving} />
         </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { CKEY_REF_LINK } from "@/lib/ckey/client.js";
+import { translate } from "@/i18n/runtime";
 
 export default function CkeyMoneyDisplay({ compact = false }) {
   const [data, setData] = useState(null);
@@ -16,7 +17,7 @@ export default function CkeyMoneyDisplay({ compact = false }) {
       const res = await fetch("/api/ckey/balance");
       const json = await res.json();
       if (!res.ok || json.success === false) {
-        setError(json.error || json.raw?.profile?.message || "Không lấy được số dư");
+        setError(json.error || json.raw?.profile?.message || "Failed to fetch balance");
         setData(null);
       } else {
         setData(json);
@@ -44,7 +45,7 @@ export default function CkeyMoneyDisplay({ compact = false }) {
         // refresh
         await fetchBalance();
       } else {
-        setError(json.reason || json.error || "Xoay thất bại");
+        setError(json.reason || json.error || "Rotation failed");
       }
     } catch (e) { setError(e.message); }
     finally { setRotating(""); }
@@ -65,8 +66,8 @@ export default function CkeyMoneyDisplay({ compact = false }) {
     return (
       <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
         <div className="font-medium text-amber-600">CKEY: {error}</div>
-        <div className="text-xs text-text-muted mt-1">Cấu hình CKEY_API_KEY tại Settings → CKEY hoặc env CKEY_API_KEY để hiển thị tiền.</div>
-        <button type="button" onClick={fetchBalance} className="mt-2 text-xs underline">Thử lại</button>
+        <div className="text-xs text-text-muted mt-1">{translate("Configure CKEY_API_KEY at Settings → CKEY or env CKEY_API_KEY to display balance.")}</div>
+        <button type="button" onClick={fetchBalance} className="mt-2 text-xs underline">{translate("Retry")}</button>
       </div>
     );
   }
@@ -86,12 +87,12 @@ export default function CkeyMoneyDisplay({ compact = false }) {
           )}
           {bal?.masked && <span className="text-xs text-text-muted">({bal.masked})</span>}
         </div>
-        <button type="button" onClick={fetchBalance} className="text-xs px-2 py-1 rounded bg-bg hover:bg-border border border-border">↻ Làm mới</button>
+        <button type="button" onClick={fetchBalance} className="text-xs px-2 py-1 rounded bg-bg hover:bg-border border border-border">↻ {translate("Refresh")}</button>
       </div>
 
       {stats && (
         <div className="flex flex-wrap gap-3 text-xs text-text-muted">
-          <span>Đã dùng: <b className="text-text-main">{stats.chargedText}</b></span>
+          <span>{translate("Used")}: <b className="text-text-main">{stats.chargedText}</b></span>
           <span>Requests: {stats.requests} (OK {stats.successRequests})</span>
           <span>Tokens: {stats.promptTokens + stats.completionTokens}</span>
         </div>
@@ -101,10 +102,10 @@ export default function CkeyMoneyDisplay({ compact = false }) {
       <div className="text-[11px] text-text-muted flex items-center gap-2 flex-wrap">
         <span className="inline-flex items-center gap-1">
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          Tự xoay khi gặp 403 Ray ID / 502 / timeout — mỗi pool cooldown 15s. Đổi IP không giới hạn, băng thông unlimited.
+          {translate("Auto-rotate on 403 Ray ID / 502 / timeout — 15s cooldown per pool. Unlimited IP rotation, unlimited bandwidth.")}
         </span>
         <a href={CKEY_REF_LINK} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/15 border border-primary/20 text-[11px] font-medium">
-          Đăng ký CKEY ↗
+          {translate("Sign up for CKEY")} ↗
         </a>
       </div>
     </div>

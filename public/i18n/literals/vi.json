@@ -356,5 +356,16 @@
 
   "Free Tier models on ZenMux (kimi-k3-free, step-3.7-flash-free, dots-studio...) require a wallet balance > $0 for anti-abuse verification (usage is completely free, $0 deducted).": "Các model Free Tier trên ZenMux (kimi-k3-free, step-3.7-flash-free, dots-studio...) yêu cầu tài khoản phải có số dư ví > $0 để kích hoạt chống abuse (khi dùng hoàn toàn miễn phí, không bị trừ tiền).",
   "OrcaRouter AI Gateway. Free models (orcarouter/free, deepseek-v4-flash-free) are $0, resetting at 00:00 UTC. Top-up $1 to unlock higher limits and remove prompt token cap.": "OrcaRouter AI Gateway. Các model Free Tier (orcarouter/free, deepseek-v4-flash-free) được miễn phí $0, tự động reset quota vào 00:00 UTC. Nạp $1 mở khóa hạn mức lớn hơn và bỏ giới hạn prompt token.",
-  "Free ad-supported coding agent by Codebuff. Sign in with your Freebuff/Codebuff account via browser login. Free tier provides 6 x 1-hour sessions/day. ⚠️ One account has ONE active session locked to ONE model — requesting a different model returns 'model_locked' (409).": "Tài khoản Freebuff cung cấp 6 session (60 phút/session)/ngày. ⚠️ Mỗi tài khoản chỉ được khóa 1 model tại một thời điểm, chuyển model sẽ bị 'model_locked' (409)."
+  "Free ad-supported coding agent by Codebuff. Sign in with your Freebuff/Codebuff account via browser login. Free tier provides 6 x 1-hour sessions/day. ⚠️ One account has ONE active session locked to ONE model — requesting a different model returns 'model_locked' (409).": "Tài khoản Freebuff cung cấp 6 session (60 phút/session)/ngày. ⚠️ Mỗi tài khoản chỉ được khóa 1 model tại một thời điểm, chuyển model sẽ bị 'model_locked' (409).",
+
+  "Configure CKEY_API_KEY at Settings → CKEY or env CKEY_API_KEY to display balance.": "Cấu hình CKEY_API_KEY tại Settings → CKEY hoặc env CKEY_API_KEY để hiển thị số dư.",
+  "Retry": "Thử lại",
+  "Used": "Đã dùng",
+  "Auto-rotate on 403 Ray ID / 502 / timeout — 15s cooldown per pool. Unlimited IP rotation, unlimited bandwidth.": "Tự xoay khi gặp 403 Ray ID / 502 / timeout — mỗi pool cooldown 15s. Đổi IP không giới hạn, băng thông unlimited.",
+  "Sign up for CKEY": "Đăng ký CKEY",
+  "Configure CKEY API key and rotating proxy": "Cấu hình CKEY API key và proxy xoay",
+  "From": "Từ",
+  "Rotating Proxy": "Proxy Xoay",
+  "Auto-rotate IP on errors": "Tự xoay IP khi gặp lỗi",
+  "Auto-rotate on Cloudflare WAF block (403 Ray ID)": "Tự xoay khi Cloudflare WAF block (403 Ray ID)"
 }
