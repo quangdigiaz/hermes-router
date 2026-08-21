@@ -19,6 +19,12 @@ export default {
     },
   },
   category: "freeTier",
+  curatedTier: "free",
+  badges: [
+    "free",
+    "cheap",
+    "popular",
+  ],
   authType: "apikey",
   authModes: [
     "apikey",

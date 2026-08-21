@@ -23,6 +23,7 @@ export const BADGE_ICON = {
   new: "auto_awesome",
   popular: "trending_up",
   free: "check_circle",
+  cheap: "savings",
   deprecated: "warning",
   fast: "speed",
   local: "computer",
