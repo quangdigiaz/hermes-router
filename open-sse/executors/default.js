@@ -179,6 +179,11 @@ export class DefaultExecutor extends BaseExecutor {
           transformed.max_tokens = 8192;
         }
       }
+
+      // Token Harbor requires direct model IDs without vendor prefixes (e.g. deepseek/deepseek-chat:free -> deepseek-chat:free)
+      if (this.provider === "tokenharbor" && typeof transformed.model === "string") {
+        transformed.model = transformed.model.replace(/^[a-zA-Z0-9_-]+\/(?=[a-zA-Z0-9_-]+(?::free)?$)/, "");
+      }
     }
 
     const withReasoning = injectReasoningContent({ provider: this.provider, model, body: transformed });
