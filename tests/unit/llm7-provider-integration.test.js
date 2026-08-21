@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vitest";
 import { PROVIDERS } from "../../open-sse/providers/index.js";
 import llm7Registry from "../../open-sse/providers/registry/llm7.js";
 
@@ -7,7 +7,8 @@ describe("LLM7 Provider Configuration", () => {
     expect(PROVIDERS.llm7).toBeDefined();
     expect(PROVIDERS.llm7.baseUrl).toBe("https://api.llm7.io/v1/chat/completions");
     expect(llm7Registry.hasFree).toBe(true);
-    expect(llm7Registry.display.notice.apiKeyUrl).toBe("https://dash.llm7.io");
+    expect(llm7Registry.display.website).toBe("https://llm7.io/?r=1Tg");
+    expect(llm7Registry.display.notice.apiKeyUrl).toBe("https://llm7.io/?r=1Tg");
     expect(llm7Registry.modelsFetcher.url).toBe("https://api.llm7.io/v1/models");
     expect(llm7Registry.models.length).toBeGreaterThan(30);
   });
