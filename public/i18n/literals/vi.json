@@ -386,5 +386,22 @@
   "CKEY Proxy sync error": "Lỗi đồng bộ CKEY Proxy",
   "CKEY IP rotated successfully!": "Đã xoay IP CKEY thành công!",
   "Cannot rotate IP (cooldown 15s)": "Không thể xoay IP (cooldown 15s)",
-  "CKEY IP rotation error": "Lỗi xoay IP CKEY"
+  "CKEY IP rotation error": "Lỗi xoay IP CKEY",
+  "Multi-provider routing, wallet balance monitoring, automatic failover, and token cost optimization with next-gen Studio interface.": "Quản lý định tuyến đa nhà cung cấp, kiểm soát số dư ví, tự động failover và tối ưu hóa chi phí token với giao diện Studio thế hệ mới.",
+  "Test All": "Kiểm tra tất cả",
+  "Testing...": "Đang kiểm tra...",
+  "Add OpenAI Endpoint": "Thêm OpenAI Endpoint",
+  "Active Connections": "Kết nối đang bật",
+  "System Status": "Trạng thái hệ thống",
+  "100% Ready": "100% Sẵn sàng",
+  "Paywall Detection": "Phát hiện Paywall",
+  "Failover Engine": "Failover Engine",
+  "Fast-Skip Active": "Fast-Skip Active",
+  "Need Top-up": "Cần nạp tiền",
+  "0 issues": "0 lỗi",
+  "0 errors": "0 lỗi",
+  "Enable provider": "Bật provider",
+  "Disable provider": "Tắt provider",
+  "Switch to Classic Mode": "Chuyển về giao diện Mặc định (Classic)",
+  "Switch to Studio Pro Mode": "Chuyển sang giao diện Studio Pro"
 }

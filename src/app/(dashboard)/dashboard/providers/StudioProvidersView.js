@@ -26,9 +26,6 @@ export default function StudioProvidersView({
   setShowAddCompatibleModal,
   setShowAddAnthropicCompatibleModal,
 }) {
-  const [activeTab, setActiveTab] = useState("all");
-  const [modelSearch, setModelSearch] = useState("");
-
   // Compute total stats
   const totalStats = useMemo(() => {
     const totalConn = connections.filter((c) => c.isActive !== false).length;
@@ -36,14 +33,6 @@ export default function StudioProvidersView({
     const paymentReq = connections.filter((c) => c.testStatus === "payment_required" || c.lastErrorType === "payment_required").length;
     return { totalConn, errorConn, paymentReq };
   }, [connections]);
-
-  const studioTabs = [
-    { id: "all", label: "All Providers", icon: "grid_view" },
-    { id: "official", label: "Official APIs", icon: "verified" },
-    { id: "free", label: "Free Tier", icon: "sparkles" },
-    { id: "bridge", label: "Bridge / OAuth", icon: "link" },
-    { id: "compatible", label: "Custom Compatible", icon: "tune" },
-  ];
 
   return (
     <div className="flex flex-col gap-8 pb-16">
@@ -63,7 +52,7 @@ export default function StudioProvidersView({
               {totalStats.paymentReq > 0 && (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-0.5 text-xs font-semibold text-red-500 animate-pulse">
                   <span className="material-symbols-outlined text-[13px]">payments</span>
-                  {totalStats.paymentReq} cần nạp tiền
+                  {totalStats.paymentReq} Need Top-up
                 </span>
               )}
             </div>
@@ -71,7 +60,7 @@ export default function StudioProvidersView({
               AI Provider &amp; Model Routing Hub
             </h1>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
-              Quản lý định tuyến đa nhà cung cấp, kiểm soát số dư ví, tự động failover và tối ưu hóa chi phí token với giao diện Studio thế hệ mới.
+              Multi-provider routing, wallet balance monitoring, automatic failover, and token cost optimization with next-gen Studio interface.
             </p>
           </div>
 
@@ -85,7 +74,7 @@ export default function StudioProvidersView({
               <span className={`material-symbols-outlined text-[15px] ${testingMode ? "animate-spin" : ""}`}>
                 {testingMode ? "refresh" : "play_arrow"}
               </span>
-              <span>{testingMode ? "Đang kiểm tra..." : "Kiểm tra tất cả"}</span>
+              <span>{testingMode ? "Testing..." : "Test All"}</span>
             </button>
             <button
               type="button"
@@ -93,7 +82,7 @@ export default function StudioProvidersView({
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 backdrop-blur-md px-3.5 py-2.5 text-xs font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-all"
             >
               <span className="material-symbols-outlined text-[15px]">add</span>
-              <span>Thêm OpenAI Endpoint</span>
+              <span>Add OpenAI Endpoint</span>
             </button>
           </div>
         </div>
@@ -101,47 +90,26 @@ export default function StudioProvidersView({
         {/* Quick KPI Stats Counter */}
         <div className="relative z-10 mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-6 border-t border-black/5 dark:border-white/5">
           <div className="flex flex-col">
-            <span className="text-xs text-slate-500 dark:text-slate-400">Kết nối đang bật</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Active Connections</span>
             <span className="text-xl font-bold text-slate-900 dark:text-white">{totalStats.totalConn} accounts</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-slate-500 dark:text-slate-400">Trạng thái hệ thống</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">System Status</span>
             <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              100% Sẵn sàng
+              100% Ready
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-slate-500 dark:text-slate-400">Phát hiện Paywall</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Paywall Detection</span>
             <span className={`text-xl font-bold ${totalStats.paymentReq > 0 ? "text-red-500" : "text-slate-700 dark:text-slate-300"}`}>
-              {totalStats.paymentReq > 0 ? `${totalStats.paymentReq} Provider` : "0 lỗi"}
+              {totalStats.paymentReq > 0 ? `${totalStats.paymentReq} Providers` : "0 issues"}
             </span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-slate-500 dark:text-slate-400">Failover Engine</span>
             <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">Fast-Skip Active</span>
           </div>
-        </div>
-      </div>
-
-      {/* 🧭 Studio Filter Tabs */}
-      <div className="flex items-center justify-between gap-4 border-b border-black/5 dark:border-white/5 pb-4 overflow-x-auto">
-        <div className="flex items-center gap-2">
-          {studioTabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
-                activeTab === tab.id
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "bg-black/5 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-black/10 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[14px]">{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
         </div>
       </div>
 
@@ -221,7 +189,7 @@ export default function StudioProvidersView({
                     size="sm"
                     checked={!stats.allDisabled}
                     onChange={() => {}}
-                    title={stats.allDisabled ? "Bật provider" : "Tắt provider"}
+                    title={stats.allDisabled ? "Enable provider" : "Disable provider"}
                   />
                 </div>
               </div>
@@ -232,7 +200,7 @@ export default function StudioProvidersView({
                   {stats.allDisabled ? (
                     <span className="inline-flex items-center gap-1 text-slate-400">
                       <span className="material-symbols-outlined text-[13px]">pause_circle</span>
-                      <span>Đã tắt</span>
+                      <span>Disabled</span>
                     </span>
                   ) : (
                     getStatusDisplay(stats.connected, stats.error, stats.errorCode)

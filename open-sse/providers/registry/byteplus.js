@@ -24,14 +24,21 @@ export default {
     headers: {},
   },
   // All models are free under Free Credits Only mode (500K tokens/model)
+  // Source: console.byteplus.com/ark (2026-08-21)
   models: [
-    { id: "seed-2-0-pro-260328", name: "Seed 2.0 Pro", free: true },
-    { id: "seed-2-0-code-preview-260328", name: "Seed 2.0 Code Preview", free: true },
-    { id: "seed-2-0-mini-260215", name: "Seed 2.0 Mini", free: true },
-    { id: "seed-2-0-lite-260228", name: "Seed 2.0 Lite", free: true },
-    { id: "kimi-k2-thinking-251104", name: "Kimi K2 Thinking", free: true },
-    { id: "glm-4-7-251222", name: "GLM 4.7", free: true },
-    { id: "gpt-oss-120b-250805", name: "GPT-OSS-120B", free: true },
+    // DeepSeek
+    { id: "DeepSeek-V4-Flash-GA", name: "DeepSeek-V4-Flash-GA", free: true },
+    { id: "DeepSeek-V4-Pro-GA", name: "DeepSeek-V4-Pro-GA", free: true },
+    { id: "DeepSeek-V4-flash", name: "DeepSeek-V4-flash", free: true },
+    { id: "DeepSeek-V4-pro", name: "DeepSeek-V4-pro", free: true },
+    // Dola-Seed (ByteDance)
+    { id: "Dola-Seed-2.1-turbo", name: "Dola-Seed-2.1-turbo", free: true },
+    { id: "Dola-Seed-2.0-Code", name: "Dola-Seed-2.0-Code", free: true },
+    { id: "Dola-Seed-2.0-pro", name: "Dola-Seed-2.0-pro", free: true },
+    { id: "Dola-Seed-2.0-mini", name: "Dola-Seed-2.0-mini", free: true },
+    { id: "Dola-Seed-2.0-lite", name: "Dola-Seed-2.0-lite", free: true },
+    // GLM
+    { id: "GLM-5.2", name: "GLM-5.2", free: true },
   ],
   serviceKinds: ["llm"],
   freeQuota: {

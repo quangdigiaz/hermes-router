@@ -15,7 +15,7 @@ export default function UiModeSwitcher({ className = "" }) {
           ? "border-primary/50 bg-linear-to-r from-primary/15 via-indigo-500/15 to-purple-500/15 text-primary shadow-primary/10 hover:border-primary/70 hover:shadow-md"
           : "border-border bg-surface text-text-muted hover:border-text-muted/40 hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5"
       } ${className}`}
-      title={isStudio ? "Chuyển về giao diện Mặc định (Classic)" : "Bật giao diện Cook Riêng (Studio Pro - TeamoRouter Style)"}
+      title={isStudio ? "Switch to Classic Mode" : "Switch to Studio Pro Mode"}
       aria-label="Toggle UI Theme Mode"
     >
       <span className={`material-symbols-outlined text-[15px] transition-transform duration-300 ${isStudio ? "text-primary animate-pulse rotate-12" : "text-text-muted group-hover:rotate-45"}`}>
