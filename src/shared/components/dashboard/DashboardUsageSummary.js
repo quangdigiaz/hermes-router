@@ -49,9 +49,8 @@ export default function DashboardUsageSummary() {
   const completionTokens = stats?.totalCompletionTokens || 0;
   const totalCost = stats?.totalCost || 0;
 
-  // Calculate cache hit ratio
-  const totalInputWithCache = promptTokens + cachedTokens;
-  const cacheHitRatio = totalInputWithCache > 0 ? ((cachedTokens / totalInputWithCache) * 100).toFixed(1) : 0;
+  // Calculate cache hit ratio (promptTokens is cache-inclusive in OpenAI/Anthropic standard)
+  const cacheHitRatio = promptTokens > 0 ? ((cachedTokens / promptTokens) * 100).toFixed(1) : 0;
 
   // Estimated savings from caching (typical ~75% discount on cached tokens compared to base input)
   const estSavedCost = cachedTokens > 0 ? (cachedTokens / 1_000_000) * 2.25 : 0;
