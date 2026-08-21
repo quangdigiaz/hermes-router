@@ -1,0 +1,31 @@
+{
+  "title": "Hỗ trợ Hermes Router",
+  "message": "Nếu Hermes Router giúp bạn tiết kiệm thời gian, hãy mua cho mình một ly cà phê ☕",
+  "channels": [
+    {
+      "id": "momo",
+      "label": "MoMo",
+      "description": "Ví MoMo — nhanh & dễ",
+      "icon": "smartphone",
+      "color": "#FF6B99",
+      "url": "https://momo.vn/your-momo-link",
+      "qr": "/donate/momo-qr.png"
+    },
+    {
+      "id": "bank",
+      "label": "Chuyển khoản ngân hàng",
+      "description": "Vietcombank — 0123 4567 89\nNGUYEN VAN A",
+      "icon": "account_balance",
+      "color": "#1677FF",
+      "qr": "/donate/bank-qr.png"
+    },
+    {
+      "id": "paypal",
+      "label": "PayPal",
+      "description": "International support",
+      "icon": "payments",
+      "color": "#003087",
+      "url": "https://paypal.me/your-paypal"
+    }
+  ]
+}

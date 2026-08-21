@@ -9,7 +9,7 @@ export const APP_CONFIG = {
 
 // GitHub configuration
 export const GITHUB_CONFIG = {
-  donateUrl: "",
+  donateUrl: "/donate.json",
 };
 
 // Updater configuration
