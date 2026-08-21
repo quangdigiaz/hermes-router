@@ -45,6 +45,8 @@ export const CURATION_DATA = {
   bai:             { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
   siliconflow:     { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
   llm7:            { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },
+  teamorouter:     { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },
+  teamo:           { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },
 
   // Experimental
   antigravity:      { curatedTier: "experimental", curatedPriority: 50, badges: ["new"] },
