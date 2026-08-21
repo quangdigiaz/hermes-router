@@ -107,14 +107,41 @@ const TINH_THANH_CODES = {
 };
 
 function CkeyModal({ isOpen, form, saving, onChange, onSync, onClose }) {
+  const isBatch = form.mode !== "single";
+
   return (
     <Modal isOpen={isOpen} title={translate("CKEY Rotating Proxy")} onClose={onClose}>
       <div className="flex flex-col gap-4">
         <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-3 flex flex-col gap-1.5">
           <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">⚡ CKEY Rotating Proxy</p>
           <p className="text-xs text-text-muted">
-            Automatically fetch rotating proxy IPs from CKEY and save as a Proxy Pool. Proxies auto-rotate IP on WAF errors (Cloudflare 403) or timeout.
+            Automatically fetch rotating proxy IPs from CKEY and save as Proxy Pools. Proxies auto-rotate IP on WAF errors (Cloudflare 403) or timeout.
           </p>
+        </div>
+
+        {/* Mode Toggle */}
+        <div className="flex items-center justify-between p-2 rounded-lg bg-black/5 dark:bg-white/5">
+          <span className="text-xs font-medium">{translate("Creation Mode")}</span>
+          <div className="inline-flex rounded-md bg-black/10 dark:bg-white/10 p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => onChange("mode", "batch")}
+              className={`px-2.5 py-1 rounded transition-colors ${
+                isBatch ? "bg-primary text-white font-semibold shadow-xs" : "text-text-muted hover:text-text-main"
+              }`}
+            >
+              ⚡ {translate("Batch Create (Multiple Pools)")}
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange("mode", "single")}
+              className={`px-2.5 py-1 rounded transition-colors ${
+                !isBatch ? "bg-primary text-white font-semibold shadow-xs" : "text-text-muted hover:text-text-main"
+              }`}
+            >
+              {translate("Single Pool")}
+            </button>
+          </div>
         </div>
 
         <div>
@@ -132,54 +159,115 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onClose }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="ckey-modal-tinhthanh" className="text-xs font-medium mb-1 block">{translate("Province / City")}</label>
-            <select
-              id="ckey-modal-tinhthanh"
-              value={form.tinhthanh}
-              onChange={(e) => onChange("tinhthanh", Number(e.target.value))}
-              disabled={saving}
-              className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
-            >
-              {Object.entries(TINH_THANH_CODES).map(([code, name]) => (
-                <option key={code} value={code}>{name} (Mã {code})</option>
-              ))}
-            </select>
-          </div>
+        {isBatch ? (
+          <div className="flex flex-col gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="ckey-modal-count" className="text-xs font-medium mb-1 block">
+                  {translate("Number of Pools to Create")}
+                </label>
+                <select
+                  id="ckey-modal-count"
+                  value={form.count || 5}
+                  onChange={(e) => onChange("count", Number(e.target.value))}
+                  disabled={saving}
+                  className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50 font-semibold"
+                >
+                  <option value={2}>2 Pools (Random, Hà Nội)</option>
+                  <option value={3}>3 Pools (Random, Hà Nội, HCM)</option>
+                  <option value={4}>4 Pools (+ Đà Nẵng)</option>
+                  <option value={5}>5 Pools (+ Hải Phòng)</option>
+                  <option value={6}>6 Pools (+ Bình Dương)</option>
+                  <option value={8}>8 Pools (+ Đồng Nai, Nghệ An)</option>
+                  <option value={10}>10 Pools (10 Provinces)</option>
+                </select>
+              </div>
 
-          <div>
-            <label htmlFor="ckey-modal-nhamang" className="text-xs font-medium mb-1 block">{translate("ISP")}</label>
-            <select
-              id="ckey-modal-nhamang"
-              value={form.nhamang}
-              onChange={(e) => onChange("nhamang", e.target.value)}
-              disabled={saving}
-              className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
-            >
-              <option value="random">{translate("Random (All)")}</option>
-              <option value="viettel">Viettel</option>
-              <option value="vinaphone">Vinaphone</option>
-              <option value="vnpt">VNPT</option>
-              <option value="fpt">FPT</option>
-            </select>
-          </div>
-        </div>
+              <div>
+                <label htmlFor="ckey-modal-nhamang" className="text-xs font-medium mb-1 block">{translate("ISP")}</label>
+                <select
+                  id="ckey-modal-nhamang"
+                  value={form.nhamang}
+                  onChange={(e) => onChange("nhamang", e.target.value)}
+                  disabled={saving}
+                  className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                >
+                  <option value="random">{translate("Random (All)")}</option>
+                  <option value="viettel">Viettel</option>
+                  <option value="vinaphone">Vinaphone</option>
+                  <option value="vnpt">VNPT</option>
+                  <option value="fpt">FPT</option>
+                </select>
+              </div>
+            </div>
 
-        <div>
-          <label htmlFor="ckey-modal-poolname" className="text-xs font-medium mb-1 block">{translate("Pool Name (Optional)")}</label>
-          <Input
-            id="ckey-modal-poolname"
-            placeholder={`CKEY Xoay - ${TINH_THANH_CODES[form.tinhthanh] || "Random"}`}
-            value={form.poolName}
-            onChange={(e) => onChange("poolName", e.target.value)}
-            disabled={saving}
-          />
-        </div>
+            <label className="flex items-center gap-2 text-xs font-medium cursor-pointer pt-1">
+              <input
+                type="checkbox"
+                checked={form.autoDistribute !== false}
+                onChange={(e) => onChange("autoDistribute", e.target.checked)}
+                disabled={saving}
+                className="rounded border-border text-primary focus:ring-primary h-4 w-4"
+              />
+              <span>{translate("Auto-distribute pools across all Provider Accounts (Account 1 → Pool 1, Account 2 → Pool 2...)")}</span>
+            </label>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="ckey-modal-tinhthanh" className="text-xs font-medium mb-1 block">{translate("Province / City")}</label>
+                <select
+                  id="ckey-modal-tinhthanh"
+                  value={form.tinhthanh}
+                  onChange={(e) => onChange("tinhthanh", Number(e.target.value))}
+                  disabled={saving}
+                  className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                >
+                  {Object.entries(TINH_THANH_CODES).map(([code, name]) => (
+                    <option key={code} value={code}>{name} (Mã {code})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="ckey-modal-nhamang" className="text-xs font-medium mb-1 block">{translate("ISP")}</label>
+                <select
+                  id="ckey-modal-nhamang"
+                  value={form.nhamang}
+                  onChange={(e) => onChange("nhamang", e.target.value)}
+                  disabled={saving}
+                  className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                >
+                  <option value="random">{translate("Random (All)")}</option>
+                  <option value="viettel">Viettel</option>
+                  <option value="vinaphone">Vinaphone</option>
+                  <option value="vnpt">VNPT</option>
+                  <option value="fpt">FPT</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="ckey-modal-poolname" className="text-xs font-medium mb-1 block">{translate("Pool Name (Optional)")}</label>
+              <Input
+                id="ckey-modal-poolname"
+                placeholder={`CKEY Xoay - ${TINH_THANH_CODES[form.tinhthanh] || "Random"}`}
+                value={form.poolName}
+                onChange={(e) => onChange("poolName", e.target.value)}
+                disabled={saving}
+              />
+            </div>
+          </>
+        )}
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 pt-2">
           <Button fullWidth variant="primary" onClick={onSync} disabled={!form.keyproxy.trim() || saving}>
-            {saving ? translate("Fetching IPs...") : translate("Fetch IPs & Save to Pool")}
+            {saving
+              ? translate("Creating Pools...")
+              : isBatch
+              ? `⚡ ${translate("Auto Create")} ${form.count || 5} Pools`
+              : translate("Fetch IP & Save to Pool")}
           </Button>
           <Button fullWidth variant="ghost" onClick={onClose} disabled={saving}>
             {translate("Close")}
@@ -616,7 +704,9 @@ export default function ProxyPoolsPage() {
     }
     setCkeySyncing(true);
     try {
-      const res = await fetch("/api/ckey/proxy/sync", {
+      const isBatch = ckeyForm.mode !== "single";
+      const endpoint = isBatch ? "/api/ckey/proxy/batch-create" : "/api/ckey/proxy/sync";
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ckeyForm),
@@ -625,7 +715,12 @@ export default function ProxyPoolsPage() {
       if (res.ok && data.success) {
         await fetchProxyPools();
         closeCkeyModal();
-        notify.success(`${translate("CKEY Proxy added to Pool")} (IP: ${data.ip || translate("Active")})`);
+        if (isBatch) {
+          const distMsg = data.distributedCount ? ` & auto-assigned across ${data.distributedCount} accounts` : "";
+          notify.success(`⚡ Successfully created ${data.count} CKEY Proxy Pools${distMsg}!`);
+        } else {
+          notify.success(`${translate("CKEY Proxy added to Pool")} (IP: ${data.ip || translate("Active")})`);
+        }
       } else {
         notify.error(data.error || translate("Cannot connect to CKEY Proxy"));
       }
