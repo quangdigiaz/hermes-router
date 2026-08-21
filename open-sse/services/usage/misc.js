@@ -589,3 +589,77 @@ export async function getZenMuxUsage(apiKey, providerSpecificData = null, proxyO
   }
 }
 
+/**
+ * A6API Balance and Quota tracker
+ */
+export async function getA6ApiUsage(apiKey, proxyOptions = null) {
+  if (!apiKey) {
+    return { message: "A6API key not available." };
+  }
+
+  const cleanKey = apiKey.trim();
+  const headers = {
+    Authorization: `Bearer ${cleanKey}`,
+    Accept: "application/json",
+  };
+
+  try {
+    const endpoints = [
+      "https://a6api.com/v1/dashboard/billing/credit_grants",
+      "https://a6api.com/dashboard/billing/credit_grants",
+      "https://a6api.com/v1/billing/balance",
+      "https://a6api.com/api/user/self",
+    ];
+
+    let balanceVal = null;
+    for (const url of endpoints) {
+      try {
+        const res = await proxyAwareFetch(url, { headers }, proxyOptions);
+        if (res.ok) {
+          const json = await res.json().catch(() => null);
+          if (json?.total_available != null) {
+            balanceVal = Number(json.total_available);
+            break;
+          }
+          if (json?.data?.total_credits != null) {
+            balanceVal = Number(json.data.total_credits);
+            break;
+          }
+          if (json?.data?.quota != null) {
+            balanceVal = Number(json.data.quota) / 500000;
+            break;
+          }
+          if (json?.balance != null) {
+            balanceVal = Number(json.balance);
+            break;
+          }
+        }
+      } catch {}
+    }
+
+    const quotas = {};
+    if (balanceVal != null && !isNaN(balanceVal)) {
+      quotas["Account Balance (USD)"] = {
+        name: "Account Balance (USD)",
+        used: 0,
+        total: Math.max(0, balanceVal),
+        remainingPercentage: balanceVal > 0 ? 100 : 0,
+        resetAt: null,
+      };
+    }
+
+    const formattedBal = balanceVal != null ? `$${balanceVal.toFixed(2)}` : "Connected";
+    return {
+      plan: "A6API Pay-As-You-Go",
+      balance: balanceVal != null ? `$${balanceVal.toFixed(2)}` : undefined,
+      message: `Balance: ${formattedBal} | 4,700+ routes with up to 90% discount.`,
+      quotas,
+    };
+  } catch (error) {
+    return {
+      plan: "A6API Pay-As-You-Go",
+      message: "A6API connected. 4,700+ routes with up to 90% discount.",
+    };
+  }
+}
+

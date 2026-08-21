@@ -30,6 +30,7 @@ import {
   getTokenHarborUsage,
   getTeamoRouterUsage,
   getZenMuxUsage,
+  getA6ApiUsage,
 } from "./usage/misc.js";
 
 /**
@@ -70,6 +71,8 @@ const USAGE_HANDLERS = {
   teamorouter: (c) => getTeamoRouterUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
   teamo: (c) => getTeamoRouterUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
   zenmux: (c) => getZenMuxUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
+  a6api: (c) => getA6ApiUsage(c.apiKey, c.proxyOptions),
+  a6: (c) => getA6ApiUsage(c.apiKey, c.proxyOptions),
 };
 
 export async function getUsageForProvider(connection, proxyOptions = null) {
