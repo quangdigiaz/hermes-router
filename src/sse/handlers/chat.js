@@ -577,6 +577,7 @@ handleSingleModel: (b, m, opts) => handleSingleModelChat(b, m, clientRawRequest,
     if (shouldFallback) {
       const severity = result.status === 401 || result.status === 403 ? "critical" : "warning";
       const category = result.status === 401 || result.status === 403 ? "auth" : "quota";
+      const rechargeUrl = result.status === 402 ? (credentials.rechargeUrl || null) : null;
       emitNotification({
         severity,
         category,
@@ -584,7 +585,10 @@ handleSingleModel: (b, m, opts) => handleSingleModelChat(b, m, clientRawRequest,
         model,
         connectionId: credentials.connectionId,
         status: result.status,
-        message: `Account ${credentials.connectionName || credentials.connectionId} unavailable (${result.status}): ${errorText || "unknown error"}`,
+        message: result.status === 402
+          ? `💳 ${provider} needs recharge — balance depleted (${result.status})`
+          : `Account ${credentials.connectionName || credentials.connectionId} unavailable (${result.status}): ${errorText || "unknown error"}`,
+        rechargeUrl,
         source: "chat",
       });
     }

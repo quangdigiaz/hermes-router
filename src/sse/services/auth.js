@@ -1,7 +1,7 @@
 import { getProviderConnections, validateApiKey, updateProviderConnection, getSettings, getProviderNodeById, getProxyPools } from "@/lib/localDb";
 import { resolveConnectionProxyConfig, pickProxyPoolId } from "@/lib/network/connectionProxy";
 import { formatRetryAfter, checkFallbackError, isModelLockActive, buildModelLockUpdate, getEarliestModelLockUntil } from "open-sse/services/accountFallback.js";
-import { classify429, isPaymentRequiredError, extractRechargeUrl } from "open-sse/utils/classify429.js";
+import { classify429, isPaymentRequiredError, extractRechargeUrl, isDeprecatedModelError, DEPRECATED_MODEL_COOLDOWN_MS } from "open-sse/utils/classify429.js";
 import { MAX_RATE_LIMIT_COOLDOWN_MS } from "open-sse/config/errorConfig.js";
 import { resolveProviderId, FREE_PROVIDERS, AI_PROVIDERS, getProviderAlias, isOpenAICompatibleProvider, isAnthropicCompatibleProvider, isCustomEmbeddingProvider } from "@/shared/constants/providers.js";
 import * as log from "../utils/logger.js";
@@ -320,6 +320,18 @@ export async function markAccountUnavailable(connectionId, status, errorText, pr
       console.error(`❌ ${provider} [${status}]: ${reason}`);
     }
     return { shouldFallback: true, cooldownMs: 0 };
+  } else if (isDeprecatedModelError(status, errorText)) {
+    // Deprecated/unavailable model (e.g. gemini-2.5-flash "no longer available"):
+    // Lock model for 24h to prevent infinite retry loops. The model is GONE —
+    // retrying in 2 minutes won't help.
+    shouldFallback = true;
+    cooldownMs = DEPRECATED_MODEL_COOLDOWN_MS;
+    newBackoffLevel = 0;
+    const connName = conn?.displayName || conn?.name || conn?.email || connectionId.slice(0, 8);
+    log.warn("AUTH", `${connName} model ${model || "unknown"} DEPRECATED [404] — locked 24h`);
+    if (provider && model) {
+      console.error(`❌ ${provider}/${model} [404]: Model deprecated — locked 24h`);
+    }
   } else if (status === 429) {
     // Use classify429 for all 429 responses so rate_limit, quota_exhausted,
     // and daily_quota get deterministic, semantically correct cooldowns

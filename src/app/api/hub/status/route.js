@@ -144,7 +144,7 @@ export async function GET() {
         });
       } else if (conn.testStatus === "payment_required") {
         incidents.push({
-          severity: "warning",
+          severity: "critical",
           type: "payment_required",
           provider: conn.provider,
           providerName: pInfo.name,
@@ -152,7 +152,7 @@ export async function GET() {
           providerColor: pInfo.color,
           connectionId: conn.id,
           connectionName: connName,
-          message: conn.lastError || "Payment required (insufficient balance)",
+          message: conn.lastError || "Balance depleted — please recharge",
           link: conn.rechargeUrl || targetLink,
           actionLabel: conn.rechargeUrl ? "Recharge →" : "Top Up →",
         });

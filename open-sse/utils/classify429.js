@@ -27,7 +27,7 @@ export const QUOTA_EXHAUSTED_COOLDOWN_MS = 3_600_000;
 
 /**
  * Failure kinds returned by {@link classify429}.
- * @typedef {"rate_limit" | "quota_exhausted" | "daily_quota"} FailureKind
+ * @typedef {"rate_limit" | "quota_exhausted" | "daily_quota" | "deprecated_model"} FailureKind
  */
 
 /**
@@ -99,6 +99,48 @@ const QUOTA_EXHAUSTED_PATTERNS = [
   /no.{0,10}(remaining|available).{0,10}(credits?|balance|funds)/i,
   /account.{0,10}(suspended|disabled|locked)/i,
 ];
+
+/**
+ * Heuristic regexes for **deprecated/unavailable model** errors — a model that has been
+ * retired, renamed, or is no longer available. These should NOT be retried with short cooldown;
+ * lock the model for 24h to prevent infinite retry loops.
+ *
+ * Patterns observed across OpenAI, Google Gemini, Anthropic, and other providers.
+ */
+const DEPRECATED_MODEL_PATTERNS = [
+  /no longer available/i,
+  /not available to new users/i,
+  /deprecated.{0,20}model/i,
+  /model.{0,20}deprecated/i,
+  /please.{0,30}(update|use).{0,30}(to use|model)/i,
+  /end of life/i,
+  /retired/i,
+  /sunset/i,
+  /no longer supported/i,
+  /migrated to/i,
+  /replaced by/i,
+  /use .+ instead/i,
+  /upgrade to/i,
+];
+
+/**
+ * Cooldown (ms) applied when a404 error indicates a deprecated/unavailable model.
+ * 24 hours prevents infinite retry loops while allowing next-day re-check.
+ */
+export const DEPRECATED_MODEL_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Returns true if the error indicates a deprecated or unavailable model.
+ * @param {number|undefined} status
+ * @param {unknown} body
+ * @returns {boolean}
+ */
+export function isDeprecatedModelError(status, body) {
+  if (status !== 404) return false;
+  const text = bodyToText(body);
+  if (!text) return false;
+  return DEPRECATED_MODEL_PATTERNS.some((pat) => pat.test(text));
+}
 
 /**
  * Universal payment required / wallet balance exhausted patterns across languages.
@@ -293,6 +335,12 @@ export function getMsUntilTomorrowMidnightUTC(now = new Date()) {
 export function classify429(response) {
   if (!response) {
     return { kind: "rate_limit", cooldownMs: RATE_LIMIT_COOLDOWN_MS };
+  }
+  //404 Deprecated model: lock for 24h to prevent infinite retry loops.
+  //Must be checked BEFORE the402/429 path since some providers return404 for
+  //deprecated models with quota-like wording in the body.
+  if (response.status === 404 && isDeprecatedModelError(response.status, response.body)) {
+    return { kind: "deprecated_model", cooldownMs: DEPRECATED_MODEL_COOLDOWN_MS };
   }
   // Gemini's generic "Resource has been exhausted" / "exceeded your current quota"
   // is its per-minute RPM limit (refreshes in ~60s), NOT a quota lock. Treat it

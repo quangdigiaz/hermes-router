@@ -75,6 +75,14 @@ export const ERROR_RULES = [
   { text: "quota exceeded",           backoff: true },
   { text: "capacity",                 backoff: true },
   { text: "overloaded",               backoff: true },
+  // Deprecated/unavailable model — lock 24h to prevent infinite retry loops
+  { text: "no longer available",      cooldownMs: 24 * 60 * 60 * 1000 },
+  { text: "not available to new users", cooldownMs: 24 * 60 * 60 * 1000 },
+  { text: "model deprecated",         cooldownMs: 24 * 60 * 60 * 1000 },
+  { text: "please update",            cooldownMs: 24 * 60 * 60 * 1000 },
+  { text: "end of life",              cooldownMs: 24 * 60 * 60 * 1000 },
+  { text: "no longer supported",      cooldownMs: 24 * 60 * 60 * 1000 },
+  { text: "migrated to",              cooldownMs: 24 * 60 * 60 * 1000 },
 
   // --- Status-based rules (fallback when text doesn't match) ---
   { status: 401, cooldownMs: COOLDOWN.long },

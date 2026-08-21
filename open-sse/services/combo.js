@@ -2,7 +2,7 @@
  * Shared combo (model combo) handling with fallback support
  */
 
-import { checkFallbackError, formatRetryAfter } from "./accountFallback.js";
+import { checkFallbackError, formatRetryAfter, isProviderExhaustedReason } from "./accountFallback.js";
 import { unavailableResponse } from "../utils/error.js";
 import { DEFAULT_COMBO_TARGET_TIMEOUT_MS } from "../config/runtimeConfig.js";
 import { getCapabilitiesForModel } from "../providers/capabilities.js";
@@ -689,16 +689,34 @@ export async function handleComboChat({ body, models, handleSingleModel, log, co
       lastError = errorText || String(result.status);
       if (!lastStatus) lastStatus = result.status;
       log.warn("COMBO", `Model ${modelStr} failed, trying next`, { status: result.status });
-      const [provider] = modelStr.split("/");
+      const [failedProvider] = modelStr.split("/");
       emitNotification({
         severity: "warning",
         category: "combo_failover",
-        provider,
+        provider: failedProvider,
         model: modelStr,
         status: result.status,
         message: `Model ${modelStr} failed (${result.status}), trying next`,
         source: "combo",
       });
+
+      // Smart provider skip: if the error indicates the entire provider is exhausted
+      // (quota depleted, deprecated model, payment required), skip ALL remaining models
+      // from the same provider to avoid wasting API calls.
+      if (isProviderExhaustedReason(result)) {
+        const skipped = [];
+        for (let j = i + 1; j < rotatedModels.length; j++) {
+          const [nextProvider] = rotatedModels[j].split("/");
+          if (nextProvider === failedProvider) {
+            skipped.push(rotatedModels[j]);
+            rotatedModels.splice(j, 1);
+            j--; // adjust index after splice
+          }
+        }
+        if (skipped.length > 0) {
+          log.warn("COMBO", `Provider ${failedProvider} exhausted — skipped ${skipped.length} remaining models: ${skipped.join(", ")}`);
+        }
+      }
     } catch (error) {
       // Catch unexpected exceptions to ensure fallback continues
       lastError = error.message || String(error);
