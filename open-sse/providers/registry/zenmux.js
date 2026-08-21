@@ -8,9 +8,9 @@ export default {
     icon: "layers",
     color: "#6366F1",
     textIcon: "ZM",
-    website: "https://zenmux.ai",
+    website: "https://zenmux.ai/invite/4YA0MX",
     notice: {
-      apiKeyUrl: "https://zenmux.ai",
+      apiKeyUrl: "https://zenmux.ai/invite/4YA0MX",
       text: "Free Tier models on ZenMux (kimi-k3-free, step-3.7-flash-free, dots-studio...) require a wallet balance > $0 for anti-abuse verification (usage is completely free, $0 deducted).",
     },
   },
