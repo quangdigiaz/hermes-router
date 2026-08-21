@@ -33,7 +33,6 @@ import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { useUiMode } from "@/shared/hooks/useUiMode";
 import UiModeSwitcher from "@/shared/components/UiModeSwitcher";
 import StudioProvidersView from "./StudioProvidersView";
-import CkeyMoneyDisplay from "@/shared/components/CkeyMoneyDisplay";
 
 function getStatusDisplay(connected, error, errorCode) {
   const parts = [];
@@ -433,8 +432,6 @@ export default function ProvidersPage() {
 
   return (
     <div className="flex min-w-0 flex-col gap-6 px-1 sm:px-0">
-      {/* CKEY Money — hiển thị tiền + cơ chế tự xoay */}
-      <CkeyMoneyDisplay />
       {/* Tier Filter Tabs & Mode Switcher */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <SegmentedControl

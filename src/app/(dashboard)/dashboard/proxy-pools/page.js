@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Badge, Button, Card, CardSkeleton, Input, Modal, Toggle, ConfirmModal } from "@/shared/components";
 import { useNotificationStore } from "@/store/notificationStore";
 import { countBatchResults, dedupeProxyEntries, runProxyPoolBatch } from "./batchOperations.js";
+import CkeyMoneyDisplay from "@/shared/components/CkeyMoneyDisplay";
 
 function parseProxyLine(line) {
   const trimmed = line.trim();
@@ -833,6 +834,8 @@ export default function ProxyPoolsPage() {
           <a href="https://ckey.vn/docs" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-white dark:bg-zinc-800 text-xs font-medium hover:bg-bg">Docs</a>
         </div>
       </div>
+      {/* CKEY Money — hiển thị số dư và cơ chế tự xoay */}
+      <CkeyMoneyDisplay />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl font-semibold sm:text-2xl">Proxy Pools</h1>
