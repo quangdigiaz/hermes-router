@@ -20,12 +20,15 @@ export default {
     textIcon: "BZ",
     website: "https://bazaarlink.ai",
     notice: {
-      text: "Taiwan AI API Gateway with OpenAI & Anthropic compatibility, auto router (auto:free for zero cost), multimodal generation, and per-key spend limits. Docs: https://bazaarlink.ai/skill.md",
+      text: "Auto Router v3: 'auto' (paid) & 'auto:free' (zero cost across 14 tiers). Free limits: 10 RPM, 50 RPD (100 RPD if deposited). Suffixes: :floor (lowest price), :nitro (speed), :online (web search), :thinking, :free. Set header 'X-Free-Fallback: false' to prevent auto-switching to paid.",
       apiKeyUrl: "https://bazaarlink.ai/keys",
       docsUrl: "https://bazaarlink.ai/docs",
       skillUrl: "https://bazaarlink.ai/skill.md",
       modelsUrl: "https://bazaarlink.ai/models",
     },
+  },
+  rateLimits: {
+    free: { requestsPerMinute: 10, requestsPerDay: 50, depositedRequestsPerDay: 100 },
   },
   transport: {
     baseUrl: "https://api.bazaarlink.ai/v1/chat/completions",
@@ -50,10 +53,29 @@ export default {
     speechUrl: "https://api.bazaarlink.ai/v1/audio/speech",
   },
   models: [
-    // ── Auto Routers ────────────────────────────────────────────────────────
-    { id: "auto:free",                     name: "Auto Router (Free - Zero Cost)", isFree: true, tier: "free", free: true },
-    { id: "auto",                          name: "Auto Router (Smart Best Model)" },
-    { id: "qwen/qwen3.7-flash:free",       name: "Qwen 3.7 Flash (Free)", isFree: true, tier: "free", free: true },
+    // ── Auto Router v3 (14 Tiers) ───────────────────────────────────────────
+    { id: "auto:free",                     name: "Auto Router (Free - 14 Tiers Zero Cost)", isFree: true, tier: "free", free: true },
+    { id: "auto",                          name: "Auto Router (Smart Best Model - 14 Tiers)" },
+    { id: "qwen/qwen3.7-flash",            name: "Qwen 3.7 Flash (Free eligible - 10 RPM)", isFree: true, tier: "free", free: true },
+    { id: "qwen/qwen3.7-flash:free",       name: "Qwen 3.7 Flash (:free alias)", isFree: true, tier: "free", free: true },
+    { id: "deepseek/deepseek-v4-flash:free", name: "DeepSeek V4 Flash (:free alias)", isFree: true, tier: "free", free: true },
+
+    // ── Auto Router Primary & Suffix Variants ───────────────────────────────
+    { id: "openai/gpt-5.4-nano",           name: "GPT-5.4 Nano (Auto simple/social/email)" },
+    { id: "openai/gpt-5.4-mini",           name: "GPT-5.4 Mini (Auto standard fallback)" },
+    { id: "openai/gpt-5.4-pro",            name: "GPT-5.4 Pro (Auto complex/reasoning)" },
+    { id: "openai/gpt-5.3-codex",          name: "GPT 5.3 Codex (Auto coding primary)" },
+    { id: "openai/gpt-5.4-image-2",        name: "GPT-5.4 Image 2 (Auto vision/image)" },
+    { id: "anthropic/claude-opus-4.7",     name: "Claude Opus 4.7 (Auto reasoning primary)" },
+    { id: "anthropic/claude-sonnet-4.6",   name: "Claude Sonnet 4.6 (Auto coding/data fallback)" },
+    { id: "anthropic/claude-haiku-4.5",    name: "Claude Haiku 4.5 (Auto simple/standard fallback)" },
+    { id: "google/gemini-3-flash-preview", name: "Gemini 3 Flash (Auto standard primary)" },
+    { id: "google/gemini-3.1-pro-preview", name: "Gemini 3.1 Pro (Auto complex primary)" },
+    { id: "google/gemini-3.1-flash-lite-preview", name: "Gemini 3.1 Flash Lite (Auto fallback)" },
+    { id: "perplexity/sonar-pro",          name: "Sonar Pro (Auto search primary)" },
+    { id: "perplexity/sonar-reasoning-pro", name: "Sonar Reasoning Pro (Auto search fallback)" },
+    { id: "bytedance/seedance-2.0-fast",   name: "Seedance 2.0 Fast (Auto video primary)" },
+    { id: "bytedance/seedance-2.0",        name: "Seedance 2.0 (Auto video fallback)" },
 
     // ── OpenAI (GPT-5.6 / GPT-5.5 / GPT-5.4 / Codex) ────────────────────────
     { id: "gpt-5.6-sol",                   name: "GPT-5.6 Sol" },
