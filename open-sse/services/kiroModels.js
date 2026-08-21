@@ -275,8 +275,10 @@ export async function resolveKiroModels(credentials, options = {}) {
     if (err && (err.status === 401 || err.status === 403)) {
       emitKiroAuthNotification(credentials, err.status, err.message);
     }
-    if (err && err.status === 401 && credentials.refreshToken) {
-      options.log?.info?.("KIRO_MODELS", "Got 401 from Kiro; refreshing token");
+    // Kiro returns 403 ("bearer token invalid") for the same reason as 401 —
+    // the access token has expired. Treat both as refreshable.
+    if (err && (err.status === 401 || err.status === 403) && credentials.refreshToken) {
+      options.log?.info?.("KIRO_MODELS", `Got ${err.status} from Kiro; refreshing token`);
       const refreshed = await refreshKiroToken(
         credentials.refreshToken,
         credentials.providerSpecificData,
@@ -311,6 +313,7 @@ export async function resolveKiroModels(credentials, options = {}) {
       return null;
     }
   }
+
 
   const expanded = [];
   for (const m of raw) {
