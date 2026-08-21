@@ -455,7 +455,6 @@ export default function ProvidersPage() {
           searchQuery={searchQuery}
           filterTier={filterTier}
           setFilterTier={setFilterTier}
-          tierFilters={tierFilters}
           setShowAddCompatibleModal={setShowAddCompatibleModal}
           setShowAddAnthropicCompatibleModal={setShowAddAnthropicCompatibleModal}
         />

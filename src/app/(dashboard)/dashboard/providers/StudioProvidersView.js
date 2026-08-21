@@ -23,7 +23,6 @@ export default function StudioProvidersView({
   searchQuery,
   filterTier,
   setFilterTier,
-  tierFilters,
   setShowAddCompatibleModal,
   setShowAddAnthropicCompatibleModal,
 }) {
