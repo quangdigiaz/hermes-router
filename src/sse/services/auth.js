@@ -2,6 +2,7 @@ import { getProviderConnections, validateApiKey, updateProviderConnection, getSe
 import { resolveConnectionProxyConfig, pickProxyPoolId } from "@/lib/network/connectionProxy";
 import { formatRetryAfter, checkFallbackError, isModelLockActive, buildModelLockUpdate, getEarliestModelLockUntil } from "open-sse/services/accountFallback.js";
 import { classify429, isPaymentRequiredError, extractRechargeUrl, isDeprecatedModelError, DEPRECATED_MODEL_COOLDOWN_MS } from "open-sse/utils/classify429.js";
+import { recordDeprecatedModel } from "@/lib/deprecatedModelTracker.js";
 import { MAX_RATE_LIMIT_COOLDOWN_MS } from "open-sse/config/errorConfig.js";
 import { resolveProviderId, FREE_PROVIDERS, AI_PROVIDERS, getProviderAlias, isOpenAICompatibleProvider, isAnthropicCompatibleProvider, isCustomEmbeddingProvider } from "@/shared/constants/providers.js";
 import * as log from "../utils/logger.js";
@@ -331,6 +332,7 @@ export async function markAccountUnavailable(connectionId, status, errorText, pr
     log.warn("AUTH", `${connName} model ${model || "unknown"} DEPRECATED [404] — locked 24h`);
     if (provider && model) {
       console.error(`❌ ${provider}/${model} [404]: Model deprecated — locked 24h`);
+      recordDeprecatedModel({ provider, model, connectionId, error: errorText });
     }
   } else if (status === 429) {
     // Use classify429 for all 429 responses so rate_limit, quota_exhausted,
