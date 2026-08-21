@@ -13,8 +13,9 @@ export default {
     textIcon: "L7",
     website: "https://llm7.io",
     notice: {
-      text: "Free Token: 1,000,000 tokens/day (250 r/h, 60 r/m, 2 r/s). Anonymous: 500,000 tokens/day (60 r/h, 10 r/m, 1 r/s). Pro Subscription: 15,000 r/h, 1,500 r/m, 25 r/s with JSON mode & function calling.",
+      text: "Free Token: 1,000,000 tokens/24h (100 r/h, 40 r/m, 2 r/s). Anonymous: 500,000 tokens/24h (60 r/h, 10 r/m, 1 r/s). Pro ($12/mo): 15,000 r/h, 1,500 r/m, 25 r/s with JSON mode & function calling. Docs: https://docs.llm7.io/llms.txt",
       apiKeyUrl: "https://dash.llm7.io",
+      docsUrl: "https://docs.llm7.io/llms.txt",
     },
   },
   category: "freeTier",
@@ -22,6 +23,18 @@ export default {
   authModes: [
     "apikey",
   ],
+  serviceKinds: [
+    "llm",
+    "image",
+    "video",
+  ],
+  imageConfig: {
+    baseUrl: "https://api.llm7.io/v1/images/generations",
+    editsUrl: "https://api.llm7.io/v1/images/edits",
+  },
+  videoConfig: {
+    baseUrl: "https://api.llm7.io/v1/videos",
+  },
   transport: {
     baseUrl: "https://api.llm7.io/v1/chat/completions",
     validateUrl: "https://api.llm7.io/v1/models",
@@ -32,8 +45,8 @@ export default {
   },
   rateLimits: {
     anonymous: { tokensPerDay: 500_000, requestsPerHour: 60, requestsPerMinute: 10, requestsPerSecond: 1 },
-    free: { tokensPerDay: 1_000_000, requestsPerHour: 250, requestsPerMinute: 60, requestsPerSecond: 2 },
-    pro: { requestsPerHour: 15_000, requestsPerMinute: 1_500, requestsPerSecond: 25 },
+    free: { tokensPerDay: 1_000_000, requestsPerHour: 100, requestsPerMinute: 40, requestsPerSecond: 2 },
+    pro: { priceUsdPerMonth: 12, requestsPerHour: 15_000, requestsPerMinute: 1_500, requestsPerSecond: 25 },
   },
   // Model catalogue from https://api.llm7.io/v1/models
   // Turbo tier = Free token eligible; Pro tier = Pro subscription / usage balance
