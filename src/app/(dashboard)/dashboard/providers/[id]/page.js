@@ -1391,7 +1391,9 @@ function ProviderDetailContent() {
               onTest={connections.length > 0 || isFreeNoAuth ? () => handleTestModel(model.id) : undefined}
               isTesting={testingModelIds.has(model.id)}
               isCustom
-              isFree={model.isFree || isFreeModel(model.id, providerId, AI_PROVIDERS)}
+              isFree={model.isFree || isFreeModel(model.id, providerId, AI_PROVIDERS, model)}
+              isDisabled={disabledSet.has(model.id)}
+              onToggle={() => handleToggleModel(model.id)}
               caps={getCaps(`${providerId}/${model.id}`)}
               thinkingSuffix={resolveThinkingSuffix(model.id)}
               isSelected={selectedModelIds.includes(model.id)}
