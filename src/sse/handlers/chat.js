@@ -599,12 +599,11 @@ handleSingleModel: (b, m, opts) => handleSingleModelChat(b, m, clientRawRequest,
       const chatSettings = await getSettings();
       const canAutoRotate = chatSettings.ckeyAutoRotateEnabled !== false;
       const poolIdForRotate = credentials.providerSpecificData?.proxyPoolId || credentials.providerSpecificData?.connectionProxyPoolId || null;
-      const keyproxyForRotate = credentials.providerSpecificData?.ckeyKeyproxy || chatSettings.ckeyKeyproxy || "";
-      if (canAutoRotate && poolIdForRotate && keyproxyForRotate && shouldAutoRotateOnError(result.status, errorText)) {
+      if (canAutoRotate && poolIdForRotate && shouldAutoRotateOnError(result.status, errorText)) {
         const rotated = await autoRotateCkeyProxy(poolIdForRotate, {
-          keyproxy: keyproxyForRotate,
-          tinhthanh: credentials.providerSpecificData?.ckeyTinhThanh ?? 0,
-          nhamang: credentials.providerSpecificData?.ckeyNhaMang ?? "random",
+          keyproxy: credentials.providerSpecificData?.ckeyKeyproxy || chatSettings.ckeyKeyproxy || "",
+          tinhthanh: credentials.providerSpecificData?.ckeyTinhThanh,
+          nhamang: credentials.providerSpecificData?.ckeyNhaMang,
         });
         if (rotated.rotated) log.info("CKEY", `Auto-rotated pool ${poolIdForRotate} → ${String(rotated.proxyUrl).slice(0, 40)}...`);
         else log.warn("CKEY", `Auto-rotate skip ${poolIdForRotate}: ${rotated.reason}`);

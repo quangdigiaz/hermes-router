@@ -99,6 +99,22 @@ export async function resolveConnectionProxyConfig(
         }
 
         /**
+         * CKEY Rotating Proxy — auto-refresh if IP is older than TTL or expired
+         */
+        let effectiveProxyUrl = proxyUrl;
+        if (proxyPool.type === "ckey") {
+          try {
+            const { ensureFreshCkeyProxy } = await import("@/lib/ckey/autoRotate.js");
+            const freshRes = await ensureFreshCkeyProxy(proxyPool, 5 * 60 * 1000); // 5 mins max age
+            if (freshRes?.refreshed && freshRes?.proxyUrl) {
+              effectiveProxyUrl = normalizeString(freshRes.proxyUrl);
+            }
+          } catch (e) {
+            console.warn(`[resolveConnectionProxyConfig] CKEY refresh error: ${e.message}`);
+          }
+        }
+
+        /**
          * Standard proxy pool
          */
         return {
@@ -108,7 +124,7 @@ export async function resolveConnectionProxyConfig(
           proxyPool,
 
           connectionProxyEnabled: true,
-          connectionProxyUrl: proxyUrl,
+          connectionProxyUrl: effectiveProxyUrl,
           connectionNoProxy: noProxy,
 
           strictProxy: proxyPool.strictProxy === true,

@@ -64,13 +64,28 @@ export async function getProxyXoay({ keyproxy, nhamang = "random", tinhthanh = 0
   if (!res.ok || !res.json) return res;
   // Normalize proxyhttp -> URL
   const data = res.json;
-  if (data?.status === 100 && data?.proxyhttp) {
-    const parts = String(data.proxyhttp).split(":");
-    // format IP:PORT:user:pass
-    if (parts.length === 4) {
-      const [ip, port, user, pass] = parts;
-      data.proxyUrl = `http://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${ip}:${port}`;
-      data.parsed = { ip, port, user, pass };
+  if (data?.status === 100 && (data?.proxyhttp || data?.proxysocks5)) {
+    const raw = String(data.proxyhttp || data.proxysocks5).trim();
+    if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("socks5://")) {
+      data.proxyUrl = raw;
+      try {
+        const u = new URL(raw);
+        data.parsed = { ip: u.hostname, port: u.port, user: u.username, pass: u.password };
+      } catch { data.parsed = { ip: raw, port: "" }; }
+    } else {
+      const parts = raw.split(":");
+      if (parts.length === 4) {
+        const [ip, port, user, pass] = parts;
+        data.proxyUrl = `http://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${ip}:${port}`;
+        data.parsed = { ip, port, user, pass };
+      } else if (parts.length === 2) {
+        const [ip, port] = parts;
+        data.proxyUrl = `http://${ip}:${port}`;
+        data.parsed = { ip, port, user: "", pass: "" };
+      } else {
+        data.proxyUrl = `http://${raw}`;
+        data.parsed = { ip: raw, port: "" };
+      }
     }
   }
   return res;

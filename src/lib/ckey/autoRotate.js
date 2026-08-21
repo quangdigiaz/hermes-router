@@ -22,18 +22,20 @@ function shouldRotate(poolId) {
  */
 export async function autoRotateCkeyProxy(poolId, opts = {}) {
   if (!poolId) return { rotated: false, reason: "missing poolId" };
-  if (!opts.keyproxy) return { rotated: false, reason: "missing keyproxy" };
-  if (!opts.force && !shouldRotate(poolId)) return { rotated: false, reason: "cooldown" };
 
   const pool = await getProxyPoolById(poolId);
   if (!pool) return { rotated: false, reason: "pool not found" };
 
-  // Chỉ xoay nếu pool type là http và proxyUrl trông như CKEY (chứa IP:PORT pattern)
+  const keyproxy = (opts.keyproxy || pool.ckeyKeyproxy || pool.providerSpecificData?.ckeyKeyproxy || "").trim();
+  if (!keyproxy) return { rotated: false, reason: "missing keyproxy" };
+  if (!opts.force && !shouldRotate(poolId)) return { rotated: false, reason: "cooldown" };
+
+  // Chỉ xoay nếu pool type là ckey hoặc http
   const tinhthanh = Number.isFinite(Number(opts.tinhthanh)) ? Number(opts.tinhthanh) : (pool.ckeyTinhThanh ?? 0);
   const nhamang = opts.nhamang || pool.ckeyNhaMang || "random";
 
   try {
-    const res = await getProxyXoay({ keyproxy: opts.keyproxy, nhamang, tinhthanh });
+    const res = await getProxyXoay({ keyproxy, nhamang, tinhthanh });
     if (!res.ok) return { rotated: false, reason: `ckey api ${res.status}: ${res.text?.slice(0, 120)}` };
     const data = res.json;
     if (data?.status !== 100 || !data?.proxyUrl) {
