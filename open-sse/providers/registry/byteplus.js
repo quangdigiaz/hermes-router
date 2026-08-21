@@ -42,7 +42,16 @@ export default {
     // GLM
     { id: "GLM-5.2", name: "GLM-5.2", free: true },
   ],
-  serviceKinds: ["llm"],
+  regions: [
+    { id: "ap-southeast-1", label: "AP Southeast 1 (Singapore)" },
+    { id: "eu-west-1", label: "EU West 1 (Ireland)" },
+  ],
+  defaultRegion: "ap-southeast-1",
+  thinkingConfig: "extended",
+  serviceKinds: ["llm", "image", "video"],
+  imageConfig: {
+    baseUrl: "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations",
+  },
   freeQuota: {
     totalTokens: 500_000,
     label: "Free Credits Only",
