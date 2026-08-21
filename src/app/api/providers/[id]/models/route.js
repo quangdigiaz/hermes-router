@@ -245,7 +245,7 @@ const PROVIDER_MODELS_CONFIG = {
     parseResponse: (data) => data.data || []
   },
   "volcengine-ark": createOpenAIModelsConfig("https://ark.cn-beijing.volces.com/api/coding/v3/models"),
-  byteplus: createOpenAIModelsConfig("https://ark.ap-southeast.bytepluses.com/api/coding/v3/models"),
+  byteplus: createOpenAIModelsConfig("https://ark.ap-southeast.bytepluses.com/api/v3/models"),
 
   // OpenAI-compatible API key providers
   deepseek: createOpenAIModelsConfig("https://api.deepseek.com/models"),
@@ -268,6 +268,8 @@ const PROVIDER_MODELS_CONFIG = {
   assemblyai: createOpenAIModelsConfig("https://api.assemblyai.com/v1/models"),
   "vercel-ai-gateway": createOpenAIModelsConfig("https://ai-gateway.vercel.sh/v1/models"),
   bai: createOpenAIModelsConfig("https://api.b.ai/v1/models"),
+  llm7: createOpenAIModelsConfig("https://api.llm7.io/v1/models"),
+  "llm-7": createOpenAIModelsConfig("https://api.llm7.io/v1/models"),
 
   cursor: {
     customResolver: async (connection) => {
