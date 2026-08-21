@@ -43,7 +43,7 @@ export default {
   // hiding dynamic models like cohere/north-mini-code:free and poolside/laguna-m.1:free.
   modelsFetcher: { url: "https://api.kilo.ai/api/gateway/models", type: "openrouter-free" },
   passthroughModels: true,
-  features: { fetchModels: true },
+  features: { fetchModels: true, usage: true },
   oauth: {
     apiBaseUrl: "https://api.kilo.ai",
     initiateUrl: "https://api.kilo.ai/api/device-auth/codes",

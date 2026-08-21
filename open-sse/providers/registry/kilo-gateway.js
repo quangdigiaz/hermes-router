@@ -19,6 +19,7 @@ export default {
   category: "apikey",
   authType: "apikey",
   authModes: ["apikey"],
+  features: { fetchModels: true, usage: true, usageApikey: true },
   transport: {
     baseUrl: "https://api.kilo.ai/api/gateway/chat/completions",
     validateUrl: "https://api.kilo.ai/api/gateway/models",
