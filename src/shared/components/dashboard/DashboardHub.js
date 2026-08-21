@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import IncidentAlerts from "./IncidentAlerts";
 import SystemPulse from "./SystemPulse";
 import LiveQuotaTracker from "./LiveQuotaTracker";
-import EndpointPageClient from "@/app/(dashboard)/dashboard/endpoint/EndpointPageClient";
+import GatewayStatusCard from "./GatewayStatusCard";
 
 export default function DashboardHub({ machineId }) {
   const [data, setData] = useState(null);
@@ -46,19 +46,17 @@ export default function DashboardHub({ machineId }) {
   }, [fetchStatus]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Incident Alerts — top, full width */}
       <IncidentAlerts data={data} loading={loading} />
+
+      {/* Gateway Status & Quick URL Widget */}
+      <GatewayStatusCard />
 
       {/* System Pulse + Quota — 2 columns on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <SystemPulse data={data} loading={loading} />
         <LiveQuotaTracker data={data} loading={loading} />
-      </div>
-
-      {/* Endpoint section below */}
-      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-        <EndpointPageClient machineId={machineId} />
       </div>
     </div>
   );
