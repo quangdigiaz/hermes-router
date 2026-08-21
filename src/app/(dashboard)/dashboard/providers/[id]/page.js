@@ -1266,36 +1266,35 @@ function ProviderDetailContent() {
       type: "llm",
     });
 
-    const visibleCustomRows = customModelRows.filter((m) => !hiddenModelIds.has(m.id));
-    let visibleDisplayModels = displayModels.filter((m) => !hiddenModelIds.has(m.id));
+    const activeCustomRows = customModelRows.filter((m) => !hiddenModelIds.has(m.id));
+    const activeDisplayModels = displayModels.filter((m) => !hiddenModelIds.has(m.id));
 
-    // Universal Tier / Group filtering
-    if (modelTierFilter !== "all") {
+    // Combine all active models (both built-in and custom/fetched) for toolbar classification
+    const allActiveModels = [...activeCustomRows, ...activeDisplayModels];
+
+    const matchesTierFilter = (model) => {
+      if (!modelTierFilter || modelTierFilter === "all") return true;
       if (providerId === "codex") {
-        if (modelTierFilter === "pro") {
-          visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "pro");
-        } else if (modelTierFilter === "plus") {
-          visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "plus" || (!m.tier && !m.id.includes("5.6")));
-        } else if (modelTierFilter === "review") {
-          visibleDisplayModels = visibleDisplayModels.filter((m) => m.quotaFamily === "review" || m.id.endsWith("-review"));
-        } else if (modelTierFilter === "image") {
-          visibleDisplayModels = visibleDisplayModels.filter((m) => m.kind === "image" || m.capabilities?.includes("text2img"));
-        }
-      } else if (providerId === "kiro") {
-        if (modelTierFilter === "free") {
-          visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "free");
-        } else if (modelTierFilter === "pro") {
-          visibleDisplayModels = visibleDisplayModels.filter((m) => m.tier === "pro");
-        }
-      } else {
-        // Free vs Paid filtering
-        if (modelTierFilter === "free") {
-          visibleDisplayModels = visibleDisplayModels.filter((m) => m.isFree || isFreeModel(m.id, providerId, AI_PROVIDERS, m));
-        } else if (modelTierFilter === "paid") {
-          visibleDisplayModels = visibleDisplayModels.filter((m) => !m.isFree && !isFreeModel(m.id, providerId, AI_PROVIDERS, m));
-        }
+        if (modelTierFilter === "pro") return model.tier === "pro";
+        if (modelTierFilter === "plus") return model.tier === "plus" || (!model.tier && !model.id.includes("5.6"));
+        if (modelTierFilter === "review") return model.quotaFamily === "review" || model.id.endsWith("-review");
+        if (modelTierFilter === "image") return model.kind === "image" || model.capabilities?.includes("text2img");
+        return true;
       }
-    }
+      if (providerId === "kiro") {
+        if (modelTierFilter === "free") return model.tier === "free";
+        if (modelTierFilter === "pro") return model.tier === "pro";
+        return true;
+      }
+      // Free vs Paid filtering for all other providers
+      const isFree = model.isFree || model.tier === "free" || isFreeModel(model.id, providerId, AI_PROVIDERS, model);
+      if (modelTierFilter === "free") return isFree;
+      if (modelTierFilter === "paid") return !isFree;
+      return true;
+    };
+
+    const visibleCustomRows = activeCustomRows.filter(matchesTierFilter);
+    const visibleDisplayModels = activeDisplayModels.filter(matchesTierFilter);
 
     const allVisibleIds = [...visibleCustomRows.map((m) => m.id), ...visibleDisplayModels.map((m) => m.id)];
 
@@ -1304,7 +1303,7 @@ function ProviderDetailContent() {
         {/* Universal Model Tier / Category Filter Toolbar */}
         <ModelTierFilterToolbar
           providerId={providerId}
-          models={displayModels}
+          models={allActiveModels}
           disabledModelIds={disabledModelIds}
           activeFilter={modelTierFilter}
           onFilterChange={setModelTierFilter}
