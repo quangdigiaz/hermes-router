@@ -34,7 +34,7 @@ export default {
     website: "https://freebuff.com",
     notice: {
       signupUrl: "https://freebuff.com",
-      text: "Free ad-supported coding agent by Codebuff. Free tier provides 6 x 1-hour sessions/day. ⚠️ One account has ONE active session locked to ONE model — requesting a different model returns 'model_locked' (409). / Tài khoản Freebuff cung cấp 6 session (60 phút/session)/ngày. Mỗi tài khoản chỉ được khóa 1 model tại một thời điểm, chuyển model sẽ bị 'model_locked' (409).",
+      text: "Free ad-supported coding agent by Codebuff. Sign in with your Freebuff/Codebuff account via browser login. Free tier provides 6 x 1-hour sessions/day. ⚠️ One account has ONE active session locked to ONE model — requesting a different model returns 'model_locked' (409).",
     },
   },
   category: "free",

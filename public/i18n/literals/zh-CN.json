@@ -1384,5 +1384,8 @@
   "⚠️ Risk Notice: This provider uses a subscription/OAuth session not officially licensed for proxy/router use. Account may be restricted or banned. Use at your own risk.": "⚠️ 风险提示：此提供商使用的订阅/OAuth 会话未获官方授权用于代理/路由器使用。账户可能被限制或封禁。使用风险自负。",
   "✓ Confirm Add": "✓ 确认添加",
   "📝 Configure providers in dashboard or use environment variables": "📝 在仪表盘中配置提供商或使用环境变量",
-  "🔐 OAuth required. Add now and authenticate after Apply; tool list will be discovered after first connect.": "🔐 需要 OAuth。立即添加并在应用后认证；工具列表将在首次连接后自动发现。"
+  "🔐 OAuth required. Add now and authenticate after Apply; tool list will be discovered after first connect.": "🔐 需要 OAuth。立即添加并在应用后认证；工具列表将在首次连接后自动发现。",
+  "Free Tier models on ZenMux (kimi-k3-free, step-3.7-flash-free, dots-studio...) require a wallet balance > $0 for anti-abuse verification (usage is completely free, $0 deducted).": "ZenMux 上的免费层模型（kimi-k3-free、step-3.7-flash-free、dots-studio...）需要钱包余额 > $0 以进行防滥用验证（使用完全免费，$0 扣费）。",
+  "OrcaRouter AI Gateway. Free models (orcarouter/free, deepseek-v4-flash-free) are $0, resetting at 00:00 UTC. Top-up $1 to unlock higher limits and remove prompt token cap.": "OrcaRouter AI 网关。免费模型（orcarouter/free、deepseek-v4-flash-free）为 $0，每日 00:00 UTC 重置。充值 $1 可解锁更高限额并移除提示词令牌上限。",
+  "Free ad-supported coding agent by Codebuff. Sign in with your Freebuff/Codebuff account via browser login. Free tier provides 6 x 1-hour sessions/day. ⚠️ One account has ONE active session locked to ONE model — requesting a different model returns 'model_locked' (409).": "Codebuff 提供的广告支持免费编程代理。通过浏览器登录 Freebuff/Codebuff 账户。免费层每天提供 6 次 1 小时会话。⚠️ 一个账户仅有一个活跃会话锁定到单个模型 — 请求不同模型将返回 'model_locked' (409)。"
 }

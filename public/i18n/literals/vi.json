@@ -352,5 +352,9 @@
   "Token is used once for deployment, not stored. Found in Organization Settings.": "Token chỉ dùng một lần để triển khai, không lưu. Tìm trong Organization Settings.",
   "Organization's default domain. Your relay URL will be in the format: https://my-relay.your-org.deno.net": "Domain mặc định của Organization. Relay URL sẽ dạng: https://my-relay.your-org.deno.net",
   "App Name": "App Name",
-  "Unique app name. Leave empty for auto-generated name.": "Tên app duy nhất. Để trống để tự động tạo tên."
+  "Unique app name. Leave empty for auto-generated name.": "Tên app duy nhất. Để trống để tự động tạo tên.",
+
+  "Free Tier models on ZenMux (kimi-k3-free, step-3.7-flash-free, dots-studio...) require a wallet balance > $0 for anti-abuse verification (usage is completely free, $0 deducted).": "Các model Free Tier trên ZenMux (kimi-k3-free, step-3.7-flash-free, dots-studio...) yêu cầu tài khoản phải có số dư ví > $0 để kích hoạt chống abuse (khi dùng hoàn toàn miễn phí, không bị trừ tiền).",
+  "OrcaRouter AI Gateway. Free models (orcarouter/free, deepseek-v4-flash-free) are $0, resetting at 00:00 UTC. Top-up $1 to unlock higher limits and remove prompt token cap.": "OrcaRouter AI Gateway. Các model Free Tier (orcarouter/free, deepseek-v4-flash-free) được miễn phí $0, tự động reset quota vào 00:00 UTC. Nạp $1 mở khóa hạn mức lớn hơn và bỏ giới hạn prompt token.",
+  "Free ad-supported coding agent by Codebuff. Sign in with your Freebuff/Codebuff account via browser login. Free tier provides 6 x 1-hour sessions/day. ⚠️ One account has ONE active session locked to ONE model — requesting a different model returns 'model_locked' (409).": "Tài khoản Freebuff cung cấp 6 session (60 phút/session)/ngày. ⚠️ Mỗi tài khoản chỉ được khóa 1 model tại một thời điểm, chuyển model sẽ bị 'model_locked' (409)."
 }
