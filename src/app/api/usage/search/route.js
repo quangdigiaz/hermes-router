@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdapter } from "@/lib/db/driver.js";
+import { AI_PROVIDERS } from "@/shared/constants/providers.js";
 
 /**
  * GET /api/usage/search?period=7d&provider=brave-search
@@ -187,10 +188,34 @@ export async function GET(request) {
     // Get list of unique providers for filter
     const providers = [...new Set(rows.map(r => r.provider).filter(Boolean))];
 
+    // Build provider capabilities map
+    const providerCapabilities = {};
+    for (const [id, prov] of Object.entries(AI_PROVIDERS)) {
+      const kinds = prov.serviceKinds || [];
+      const hasSearch = kinds.includes("webSearch");
+      const hasFetch = kinds.includes("webFetch");
+      if (hasSearch || hasFetch) {
+        providerCapabilities[id] = {
+          name: prov.display?.name || id,
+          icon: prov.display?.icon || "search",
+          color: prov.display?.color || "#6366f1",
+          hasSearch,
+          hasFetch,
+          capability: hasSearch && hasFetch ? "both" : hasSearch ? "search" : "fetch",
+          searchTypes: prov.searchConfig?.searchTypes || [],
+          fetchFormats: prov.fetchConfig?.formats || [],
+          costPerSearchQuery: prov.searchConfig?.costPerQuery || 0,
+          costPerFetchQuery: prov.fetchConfig?.costPerQuery || 0,
+          freeMonthlyQuota: prov.searchConfig?.freeMonthlyQuota || prov.fetchConfig?.freeMonthlyQuota || 0,
+        };
+      }
+    }
+
     return NextResponse.json({
       period,
       provider,
       providers,
+      providerCapabilities,
       stats,
     });
   } catch (error) {
