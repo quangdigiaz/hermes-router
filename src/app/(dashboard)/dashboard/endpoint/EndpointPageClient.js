@@ -21,6 +21,7 @@ import EndpointRow from "./components/EndpointRow";
 import StatusAlert from "./components/StatusAlert";
 import Tooltip from "./components/Tooltip";
 import SecurityWarning from "./components/SecurityWarning";
+import EndpointUsageCard from "./components/EndpointUsageCard";
 import { buildProviderList } from "@/shared/utils/aclProviderList";
 export default function APIPageClient({ machineId }) {
   const [keys, setKeys] = useState([]);
@@ -1029,6 +1030,15 @@ export default function APIPageClient({ machineId }) {
           ? "Proxy off"
           : "Unreachable";
 
+  const activeEndpointUrl =
+    tunnelEnabled && (tunnelPublicUrl || tunnelUrl)
+      ? `${tunnelPublicUrl || tunnelUrl}/v1`
+      : tsEnabled && tsUrl
+      ? `${tsUrl}/v1`
+      : currentEndpoint;
+
+  const firstActiveKey = keys.find((k) => k.isActive !== false)?.key;
+
   return (
     <div className="flex flex-col gap-8">
       {/* Endpoint Card */}
@@ -1275,6 +1285,13 @@ export default function APIPageClient({ machineId }) {
           </div>
         )}
       </Card>
+
+      {/* Endpoint Usage & Quickstart */}
+      <EndpointUsageCard
+        baseUrl={activeEndpointUrl}
+        apiKey={firstActiveKey}
+        requireApiKey={requireApiKey}
+      />
 
       {/* Token Saver (RTK + Caveman + Ponytail + Headroom) */}
       <Card id="rtk">
