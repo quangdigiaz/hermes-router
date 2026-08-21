@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { PROVIDERS } from "../../open-sse/providers/index.js";
 import bazaarlinkRegistry from "../../open-sse/providers/registry/bazaarlink.js";
 import { getCurationData } from "../../open-sse/providers/curation.js";
@@ -13,11 +13,11 @@ describe("BazaarLink Provider Integration", () => {
     expect(bazaarlinkRegistry.modelsFetcher.url).toBe("https://api.bazaarlink.ai/v1/models");
   });
 
-  it("marks bazaarlink with free, cheap, and popular badges", () => {
+  it("marks bazaarlink with free and popular badges", () => {
     const curation = getCurationData("bazaarlink");
     expect(curation.badges).toContain("free");
-    expect(curation.badges).toContain("cheap");
     expect(curation.badges).toContain("popular");
+    expect(curation.badges).not.toContain("cheap");
   });
 
   it("fetches credits and key limits from bazaarlink API", async () => {

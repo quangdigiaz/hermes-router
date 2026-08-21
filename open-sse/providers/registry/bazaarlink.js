@@ -8,7 +8,6 @@ export default {
   hasFree: true,
   badges: [
     "free",
-    "cheap",
     "popular",
   ],
   authType: "apikey",
