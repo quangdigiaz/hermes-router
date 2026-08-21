@@ -291,3 +291,67 @@ export async function getTokenHarborUsage(apiKey, proxyOptions = null) {
     return { message: "Unable to fetch Token Harbor usage." };
   }
 }
+
+/**
+ * TeamoRouter Usage & Balance tracker
+ */
+export async function getTeamoRouterUsage(apiKey, proxyOptions = null) {
+  if (!apiKey) {
+    return { message: "TeamoRouter API key not available." };
+  }
+
+  try {
+    const urls = [
+      "https://api.teamorouter.com/v1/billing/balance",
+      "https://teamorouter.com/v1/billing/balance",
+    ];
+
+    let data = null;
+    for (const url of urls) {
+      try {
+        const response = await proxyAwareFetch(url, {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            Accept: "application/json",
+          },
+        }, proxyOptions);
+
+        if (response.ok) {
+          data = await response.json();
+          break;
+        }
+      } catch {
+        // try next url
+      }
+    }
+
+    const balance = data?.balance != null ? Number(data.balance) : null;
+    const currency = data?.currency || "USD";
+
+    return {
+      plan: "Pay-As-You-Go & Complimentary Tier",
+      balance: balance != null ? `${currency === "USD" ? "$" : ""}${balance.toFixed(2)}` : undefined,
+      message: balance != null
+        ? `Account balance: ${currency === "USD" ? "$" : ""}${balance.toFixed(2)}. Complimentary free models: deepseek-v4-flash-free (200 RPD), deepseek-v4-pro-free (50 RPD).`
+        : "TeamoRouter connected. Complimentary free models: deepseek-v4-flash-free (200 RPD), deepseek-v4-pro-free (50 RPD).",
+      quotas: {
+        flashFree: {
+          name: "DeepSeek V4 Flash (Free)",
+          type: "rate_limit",
+          limit: 200,
+          unit: "req/day",
+          message: "200 requests/day complimentary limit.",
+        },
+        proFree: {
+          name: "DeepSeek V4 Pro (Free)",
+          type: "rate_limit",
+          limit: 50,
+          unit: "req/day",
+          message: "50 requests/day complimentary limit.",
+        },
+      },
+    };
+  } catch (error) {
+    return { message: "TeamoRouter connected. Complimentary models: deepseek-v4-flash-free (200 RPD), deepseek-v4-pro-free (50 RPD)." };
+  }
+}

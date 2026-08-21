@@ -25,6 +25,7 @@ import {
   getVercelAiGatewayUsage,
   getQoderUsage,
   getTokenHarborUsage,
+  getTeamoRouterUsage,
 } from "./usage/misc.js";
 
 /**
@@ -59,6 +60,7 @@ const USAGE_HANDLERS = {
   freebuff: (c) => getFreebuffUsage(c.accessToken, c.providerSpecificData, c.proxyOptions),
   byteplus: (c) => getByteplusUsage(c.apiKey, c.proxyOptions),
   tokenharbor: (c) => getTokenHarborUsage(c.apiKey, c.proxyOptions),
+  teamorouter: (c) => getTeamoRouterUsage(c.apiKey, c.proxyOptions),
 };
 
 export async function getUsageForProvider(connection, proxyOptions = null) {

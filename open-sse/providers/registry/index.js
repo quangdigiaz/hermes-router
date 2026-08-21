@@ -122,6 +122,7 @@ import p121 from "./tencent.js";
 import p122 from "./freebuff.js";
 import p123 from "./fastrouter.js";
 import p124 from "./tokenharbor.js";
+import p125 from "./teamorouter.js";
 
 export default [
   p0,
@@ -247,5 +248,6 @@ export default [
   p121,
   p122,
   p123,
-  p124
+  p124,
+  p125
 ];
