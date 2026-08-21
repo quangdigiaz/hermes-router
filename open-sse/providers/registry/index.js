@@ -123,6 +123,7 @@ import p122 from "./freebuff.js";
 import p123 from "./fastrouter.js";
 import p124 from "./tokenharbor.js";
 import p125 from "./teamorouter.js";
+import p126 from "./bai.js";
 
 export default [
   p0,
@@ -249,5 +250,6 @@ export default [
   p122,
   p123,
   p124,
-  p125
+  p125,
+  p126
 ];
