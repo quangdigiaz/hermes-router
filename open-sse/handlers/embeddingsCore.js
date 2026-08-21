@@ -62,9 +62,13 @@ export async function handleEmbeddingsCore({
   }
 
   // Handle 401/403 — try token refresh (skip for noAuth providers)
-  const executor = getExecutor(provider);
-  if (
+  const canRefresh = Boolean(
     !executor?.noAuth &&
+    (credentials?.refreshToken || executor?.hasOAuth || executor?.canRefresh?.(credentials)) &&
+    typeof executor?.refreshCredentials === "function"
+  );
+  if (
+    canRefresh &&
     (providerResponse.status === HTTP_STATUS.UNAUTHORIZED ||
       providerResponse.status === HTTP_STATUS.FORBIDDEN)
   ) {
