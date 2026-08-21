@@ -20,7 +20,7 @@ export default {
   },
   category: "freeTier",
   transport: {
-    baseUrl: "https://ark.ap-southeast.bytepluses.com/api/coding/v3/chat/completions",
+    baseUrl: "https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions",
     headers: {},
   },
   // All models are free under Free Credits Only mode (500K tokens/model)
