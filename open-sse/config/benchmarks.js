@@ -161,11 +161,13 @@ export function getPromoPriceSync(model) {
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 
 export function isFreeModel(model, provider = "", providerRegistry = null, rawModelData = null) {
+  if (rawModelData?.isFree === true || rawModelData?.tier === "free") return true;
+
   const promo = getPromoPriceSync(model);
   if (promo && promo.promoInput === 0) return true;
 
   const base = model.includes("/") ? model.split("/").pop() : model;
-  if (base.toLowerCase().endsWith("-free") || base.toLowerCase().endsWith(":free")) return true;
+  if (base.toLowerCase().endsWith("-free") || base.toLowerCase().endsWith(":free") || base.toLowerCase().includes(":free")) return true;
 
   if (provider && providerRegistry) {
     const reg = typeof providerRegistry.get === "function"

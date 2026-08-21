@@ -697,8 +697,13 @@ function ProviderDetailContent() {
         const modelId = model.id || model.name;
         if (!modelId) continue;
         
-        // Remove provider prefix (e.g. "qoder/auto" → "auto")
-        const cleanModelId = modelId.replace(/^[^/]+\//, "");
+        // Strip provider's own prefix if present (e.g. "qoder/auto" → "auto")
+        // while preserving vendor prefixes for aggregators (e.g. "meta-llama/llama-3.3-70b-instruct:free")
+        let cleanModelId = modelId;
+        const selfPrefixRegex = new RegExp(`^(?:${providerId}|${providerStorageAlias})\\/`, "i");
+        if (selfPrefixRegex.test(modelId)) {
+          cleanModelId = modelId.replace(selfPrefixRegex, "");
+        }
         const alreadyExists = customModels.some(
           (entry) => entry.providerAlias === providerStorageAlias && entry.id === cleanModelId && (entry.kind || entry.type || "llm") === "llm"
         ) || Object.values(modelAliases).includes(`${providerStorageAlias}/${cleanModelId}`);
@@ -1455,8 +1460,8 @@ function ProviderDetailContent() {
           Add Model
         </button>
 
-        {/* Fetch models button — show for providers with fetchModels feature */}
-        {providerInfo?.features?.fetchModels && connections.some((conn) => conn.isActive !== false) && (
+        {/* Fetch models button — show for any provider that supports live model fetching */}
+        {Boolean(providerInfo?.features?.fetchModels || providerInfo?.modelsFetcher || providerInfo?.transport?.validateUrl || isOpenAICompatibleProvider(providerId)) && connections.some((conn) => conn.isActive !== false) && (
           <div className="flex items-center gap-1.5">
             <select
               value={fetchModelFilter}

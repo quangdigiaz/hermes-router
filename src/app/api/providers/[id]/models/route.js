@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getProviderConnectionById } from "@/models";
-import { isOpenAICompatibleProvider, isAnthropicCompatibleProvider } from "@/shared/constants/providers";
+import { isOpenAICompatibleProvider, isAnthropicCompatibleProvider, AI_PROVIDERS } from "@/shared/constants/providers";
 import { GEMINI_CONFIG } from "@/lib/oauth/constants/oauth";
 import { refreshGoogleToken, refreshCodexToken, updateProviderCredentials } from "@/sse/services/tokenRefresh";
 import { resolveOllamaLocalHost, getStaticProviderModels } from "open-sse/config/providers.js";
@@ -518,7 +518,14 @@ export async function GET(request, { params }) {
       });
     }
 
-    const config = PROVIDER_MODELS_CONFIG[connection.provider];
+    let config = PROVIDER_MODELS_CONFIG[connection.provider];
+    if (!config) {
+      const providerEntry = AI_PROVIDERS[connection.provider];
+      const modelsUrl = providerEntry?.modelsFetcher?.url || providerEntry?.transport?.validateUrl;
+      if (modelsUrl) {
+        config = createOpenAIModelsConfig(modelsUrl);
+      }
+    }
     if (!config) {
       return NextResponse.json(
         { error: `Provider ${connection.provider} does not support models listing` },
