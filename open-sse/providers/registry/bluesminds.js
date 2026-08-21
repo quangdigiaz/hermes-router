@@ -9,7 +9,7 @@ export default {
     color: "#2563EB",
     textIcon: "BM",
     website: "https://bluesminds.com",
-    notice: { apiKeyUrl: "https://bluesminds.com" },
+    notice: { apiKeyUrl: "https://api.bluesminds.com/sign-up?aff=I72R" },
   },
   category: "apikey",
   authType: "apikey",
