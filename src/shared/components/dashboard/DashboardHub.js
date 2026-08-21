@@ -5,6 +5,8 @@ import IncidentAlerts from "./IncidentAlerts";
 import SystemPulse from "./SystemPulse";
 import LiveQuotaTracker from "./LiveQuotaTracker";
 import GatewayStatusCard from "./GatewayStatusCard";
+import DashboardUsageSummary from "./DashboardUsageSummary";
+import ProviderLeaderboard from "./ProviderLeaderboard";
 
 export default function DashboardHub({ machineId }) {
   const [data, setData] = useState(null);
@@ -52,6 +54,12 @@ export default function DashboardHub({ machineId }) {
 
       {/* Gateway Status & Quick URL Widget */}
       <GatewayStatusCard />
+
+      {/* Live Usage & Token Savings Overview */}
+      <DashboardUsageSummary />
+
+      {/* Provider Health & Fitness Leaderboard */}
+      <ProviderLeaderboard data={data} />
 
       {/* System Pulse + Quota — 2 columns on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
