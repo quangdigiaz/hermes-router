@@ -26,17 +26,20 @@ const UNITS_PER_DOLLAR = 1_000_000;
  */
 export async function getBluesmindsUsage(apiKey, providerSpecificData, proxyOptions) {
   try {
+    const sessionToken = providerSpecificData?.sessionToken || apiKey;
     const userId = providerSpecificData?.userId;
-    if (!userId) {
+    if (!sessionToken || !userId) {
       return {
         quotas: {},
-        message: "BluesMinds: missing userId in providerSpecificData",
+        message: !userId
+          ? "BluesMinds: missing userId in providerSpecificData"
+          : "BluesMinds: missing session token",
       };
     }
 
     const baseUrl = "https://api.bluesminds.com";
     const headers = {
-      "Authorization": apiKey,
+      "Authorization": sessionToken,
       "New-Api-User": String(userId),
     };
 

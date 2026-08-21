@@ -21,6 +21,7 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
   const isAzure = provider === "azure";
   const isCloudflareAi = provider === "cloudflare-ai";
   const isZenMux = provider === "zenmux";
+  const isBluesMinds = provider === "bluesminds";
   const providerRegions = AI_PROVIDERS?.[provider]?.regions || null;
   const defaultRegion = AI_PROVIDERS?.[provider]?.defaultRegion || providerRegions?.[0]?.id || "";
 
@@ -39,6 +40,7 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
   });
   const [cloudflareData, setCloudflareData] = useState({ accountId: "" });
   const [zenmuxData, setZenmuxData] = useState({ managementApiKey: "" });
+  const [bluesmindsData, setBluesmindsData] = useState({ sessionToken: "", userId: "" });
   const [region, setRegion] = useState(defaultRegion);
   const [validating, setValidating] = useState(false);
   const [validationResult, setValidationResult] = useState(null);
@@ -68,6 +70,12 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
     }
     if (isZenMux && zenmuxData.managementApiKey.trim()) {
       return { managementApiKey: zenmuxData.managementApiKey.trim() };
+    }
+    if (isBluesMinds && (bluesmindsData.sessionToken.trim() || bluesmindsData.userId.trim())) {
+      return {
+        ...(bluesmindsData.sessionToken.trim() ? { sessionToken: bluesmindsData.sessionToken.trim() } : {}),
+        ...(bluesmindsData.userId.trim() ? { userId: bluesmindsData.userId.trim() } : {}),
+      };
     }
     if (providerRegions && region) {
       return { region };
@@ -348,6 +356,31 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
             />
             <p className="text-xs text-text-muted mt-1.5">
               Điền Platform Key (sk-mg-...) để hiển thị số dư ví ($5) và hạn mức gói cước trên Quota Dashboard.
+            </p>
+          </div>
+        )}
+
+        {isBluesMinds && (
+          <div className="bg-sidebar/50 p-3.5 rounded-lg border border-accent/20">
+            <h3 className="font-semibold mb-2 text-sm">BluesMinds Usage Tracking (Tùy chọn)</h3>
+            <Input
+              label="Session Token"
+              type="password"
+              value={bluesmindsData.sessionToken}
+              onChange={(e) => setBluesmindsData({ ...bluesmindsData, sessionToken: e.target.value })}
+              placeholder="Token từ Management API"
+            />
+            <Input
+              label="User ID"
+              value={bluesmindsData.userId}
+              onChange={(e) => setBluesmindsData({ ...bluesmindsData, userId: e.target.value })}
+              placeholder="60505"
+              className="mt-2"
+            />
+            <p className="text-xs text-text-muted mt-1.5">
+              Đăng nhập tại <a href="https://bluesminds.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">bluesminds.com</a> →
+              F12 → Application → Cookies để lấy Session Token. User ID hiển thị trên dashboard.
+              Điền để hiển thị số dư ($100) trên Quota Dashboard.
             </p>
           </div>
         )}
