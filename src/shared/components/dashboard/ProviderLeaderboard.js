@@ -2,9 +2,33 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { AI_PROVIDERS } from "@/shared/constants/providers";
+import { AI_PROVIDERS, isOpenAICompatibleProvider, isAnthropicCompatibleProvider } from "@/shared/constants/providers";
 
 const fmt = (n) => new Intl.NumberFormat().format(n || 0);
+
+function cleanProviderDisplayName(providerId, connList = []) {
+  const builtin = AI_PROVIDERS[providerId];
+  if (builtin?.name) return builtin.name;
+
+  // Check connection custom names / node names
+  for (const c of connList) {
+    if (c.name && !c.name.startsWith("openai-compatible-") && !c.name.startsWith("anthropic-compatible-")) {
+      return c.name;
+    }
+  }
+
+  if (isOpenAICompatibleProvider(providerId)) {
+    const suffix = providerId.replace(/^openai-compatible-(?:chat-)?/, "");
+    return suffix.length > 8 ? `Custom OpenAI (${suffix.slice(0, 6)})` : "OpenAI Compatible";
+  }
+
+  if (isAnthropicCompatibleProvider(providerId)) {
+    const suffix = providerId.replace(/^anthropic-compatible-(?:chat-)?/, "");
+    return suffix.length > 8 ? `Custom Anthropic (${suffix.slice(0, 6)})` : "Anthropic Compatible";
+  }
+
+  return providerId.charAt(0).toUpperCase() + providerId.slice(1);
+}
 
 export default function ProviderLeaderboard({ data: hubData }) {
   const [providersList, setProvidersList] = useState([]);
@@ -14,14 +38,15 @@ export default function ProviderLeaderboard({ data: hubData }) {
     async function loadData() {
       try {
         setLoading(true);
-        const [connRes, usageRes] = await Promise.all([
-          fetch("/api/providers/connections", { cache: "no-store" }).catch(() => null),
+        const [provRes, usageRes] = await Promise.all([
+          fetch("/api/providers", { cache: "no-store" }).catch(() => null),
           fetch("/api/usage/stats?period=7d", { cache: "no-store" }).catch(() => null),
         ]);
 
         let connections = [];
-        if (connRes?.ok) {
-          connections = await connRes.json();
+        if (provRes?.ok) {
+          const json = await provRes.json();
+          connections = json.connections || [];
         }
 
         let byProvider = {};
@@ -30,31 +55,36 @@ export default function ProviderLeaderboard({ data: hubData }) {
           byProvider = uData?.byProvider || {};
         }
 
-        // Group connections by provider
+        // Group connections by Provider
         const grouped = {};
         for (const c of connections) {
-          if (!c.provider) continue;
-          if (!grouped[c.provider]) {
-            grouped[c.provider] = {
-              id: c.provider,
+          const pId = c.provider;
+          if (!pId) continue;
+
+          if (!grouped[pId]) {
+            grouped[pId] = {
+              id: pId,
               accounts: [],
               activeAccounts: 0,
               errorAccounts: 0,
             };
           }
-          grouped[c.provider].accounts.push(c);
-          if (c.isActive && (c.testStatus === "active" || c.testStatus === "success")) {
-            grouped[c.provider].activeAccounts++;
-          } else if (
-            c.isActive &&
-            (["error", "auth_failed", "unavailable", "payment_required", "expired"].includes(c.testStatus) ||
-              Boolean(c.lastError && c.testStatus !== "active" && c.testStatus !== "success"))
-          ) {
-            grouped[c.provider].errorAccounts++;
+          grouped[pId].accounts.push(c);
+
+          const isActive = c.isActive !== false;
+          const isHealthy = c.testStatus === "active" || c.testStatus === "success";
+          const isError =
+            ["error", "auth_failed", "unavailable", "payment_required", "expired"].includes(c.testStatus) ||
+            Boolean(c.lastError && !isHealthy);
+
+          if (isActive && isHealthy) {
+            grouped[pId].activeAccounts++;
+          } else if (isActive && isError) {
+            grouped[pId].errorAccounts++;
           }
         }
 
-        // Add any provider in usage that might not have active connection
+        // Include any provider in usage stats even if no current connection
         for (const pId of Object.keys(byProvider)) {
           if (!grouped[pId]) {
             grouped[pId] = {
@@ -67,7 +97,7 @@ export default function ProviderLeaderboard({ data: hubData }) {
         }
 
         const items = Object.values(grouped).map((p) => {
-          const config = AI_PROVIDERS[p.id] || {};
+          const builtin = AI_PROVIDERS[p.id] || {};
           const usage = byProvider[p.id] || { requests: 0, promptTokens: 0, completionTokens: 0 };
           const totalTokens = (usage.promptTokens || 0) + (usage.completionTokens || 0);
 
@@ -82,11 +112,13 @@ export default function ProviderLeaderboard({ data: hubData }) {
             status = "healthy";
           }
 
+          const friendlyName = cleanProviderDisplayName(p.id, p.accounts);
+
           return {
             id: p.id,
-            name: config.name || p.id.charAt(0).toUpperCase() + p.id.slice(1),
-            icon: config.icon || config.textIcon || "🤖",
-            color: config.color || "#6366f1",
+            name: friendlyName,
+            icon: builtin.icon || builtin.textIcon || "🤖",
+            color: builtin.color || "#6366f1",
             totalAccounts: p.accounts.length,
             activeAccounts: p.activeAccounts,
             errorAccounts: p.errorAccounts,
@@ -185,7 +217,7 @@ export default function ProviderLeaderboard({ data: hubData }) {
               p.status === "healthy"
                 ? "Optimal (100% Online)"
                 : p.status === "degraded"
-                ? "Degraded (Issues detected)"
+                ? `Degraded (${p.activeAccounts}/${p.totalAccounts} online)`
                 : "Offline / Error";
 
             return (
@@ -205,7 +237,7 @@ export default function ProviderLeaderboard({ data: hubData }) {
                       {idx + 1}
                     </span>
                     <div className="min-w-0">
-                      <div className="font-bold text-sm text-slate-900 dark:text-white truncate flex items-center gap-1.5">
+                      <div className="font-bold text-sm text-slate-900 dark:text-white truncate flex items-center gap-1.5" title={p.name}>
                         <span className="truncate">{p.name}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-[11px] text-text-muted mt-0.5">
