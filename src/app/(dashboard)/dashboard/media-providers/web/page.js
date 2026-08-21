@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Card, Badge, Button } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { AI_PROVIDERS, getProvidersByKind } from "@/shared/constants/providers";
+import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 
 function getEffectiveStatus(conn) {
   const isCooldown = Object.entries(conn).some(
@@ -144,103 +145,214 @@ function Section({ title, icon, kind, providers, connections, combos, onCreateCo
 }
 
 function EndpointInstructions() {
-  const [copied, setCopied] = useState(null);
+  const [activeTabs, setActiveTabs] = useState({
+    search: "curl",
+    fetch: "curl",
+  });
+  const { copied, copy } = useCopyToClipboard();
 
-  const copySnippet = (key, text) => {
-    navigator.clipboard.writeText(text);
-    setCopied(key);
-    setTimeout(() => setCopied(null), 2000);
+  const setTab = (endpointId, lang) => {
+    setActiveTabs((prev) => ({ ...prev, [endpointId]: lang }));
   };
 
   const endpoints = [
     {
+      id: "search",
       title: "Web Search",
       icon: "search",
       method: "POST",
       path: "/v1/search",
-      description: "Search the web and return results",
-      curl: `curl -X POST $NINEROUTER_URL/v1/search \\
-  -H "Authorization: Bearer $NINEROUTER_KEY" \\
+      description: "Search across configured search engines and return structured web results.",
+      snippets: {
+        curl: `curl -X POST $HERMES_URL/v1/search \\
+  -H "Authorization: Bearer $HERMES_KEY" \\
   -H "Content-Type: application/json" \\
-  -d '{"query": "your search query"}'`,
-      js: `const res = await fetch(\`\${process.env.NINEROUTER_URL}/v1/search\`, {
+  -d '{
+    "query": "your search query",
+    "limit": 5
+  }'`,
+        js: `const response = await fetch(\`\${process.env.HERMES_URL}/v1/search\`, {
   method: "POST",
   headers: {
-    "Authorization": \`Bearer \${process.env.NINEROUTER_KEY}\`,
+    "Authorization": \`Bearer \${process.env.HERMES_KEY}\`,
     "Content-Type": "application/json",
   },
-  body: JSON.stringify({ query: "your search query" }),
+  body: JSON.stringify({
+    query: "your search query",
+    limit: 5,
+  }),
 });
-const data = await res.json();`,
+
+const data = await response.json();
+console.log(data);`,
+        python: `import os
+import requests
+
+response = requests.post(
+    f"{os.getenv('HERMES_URL')}/v1/search",
+    headers={
+        "Authorization": f"Bearer {os.getenv('HERMES_KEY')}",
+        "Content-Type": "application/json",
+    },
+    json={
+        "query": "your search query",
+        "limit": 5,
+    },
+)
+
+data = response.json()
+print(data)`,
+      },
     },
     {
+      id: "fetch",
       title: "Web Fetch",
-      icon: "language",
+      icon: "travel_explore",
       method: "POST",
       path: "/v1/web/fetch",
-      description: "Fetch a URL and extract content as markdown",
-      curl: `curl -X POST $NINEROUTER_URL/v1/web/fetch \\
-  -H "Authorization: Bearer $NINEROUTER_KEY" \\
+      description: "Extract clean Markdown and structured text from any public web page URL.",
+      snippets: {
+        curl: `curl -X POST $HERMES_URL/v1/web/fetch \\
+  -H "Authorization: Bearer $HERMES_KEY" \\
   -H "Content-Type: application/json" \\
-  -d '{"url": "https://example.com"}'`,
-      js: `const res = await fetch(\`\${process.env.NINEROUTER_URL}/v1/web/fetch\`, {
+  -d '{
+    "url": "https://example.com"
+  }'`,
+        js: `const response = await fetch(\`\${process.env.HERMES_URL}/v1/web/fetch\`, {
   method: "POST",
   headers: {
-    "Authorization": \`Bearer \${process.env.NINEROUTER_KEY}\`,
+    "Authorization": \`Bearer \${process.env.HERMES_KEY}\`,
     "Content-Type": "application/json",
   },
-  body: JSON.stringify({ url: "https://example.com" }),
+  body: JSON.stringify({
+    url: "https://example.com",
+  }),
 });
-const data = await res.json();`,
+
+const data = await response.json();
+console.log(data);`,
+        python: `import os
+import requests
+
+response = requests.post(
+    f"{os.getenv('HERMES_URL')}/v1/web/fetch",
+    headers={
+        "Authorization": f"Bearer {os.getenv('HERMES_KEY')}",
+        "Content-Type": "application/json",
+    },
+    json={
+        "url": "https://example.com",
+    },
+)
+
+data = response.json()
+print(data)`,
+      },
     },
   ];
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-4">
-      <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-        <span className="material-symbols-outlined text-primary text-[18px]">code</span>
-        Endpoint Usage
-      </h3>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {endpoints.map((ep) => (
-          <div key={ep.title} className="rounded-lg border border-border/50 p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="material-symbols-outlined text-primary text-[16px]">{ep.icon}</span>
-              <span className="font-medium text-sm">{ep.title}</span>
-              <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400 text-[9px] font-bold">{ep.method}</span>
-              <code className="text-[11px] text-text-muted font-mono">{ep.path}</code>
-            </div>
-            <p className="text-[11px] text-text-muted mb-3">{ep.description}</p>
-
-            {/* cURL */}
-            <div className="relative group mb-2">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] text-text-muted font-medium">cURL</span>
-                <button
-                  onClick={() => copySnippet(`${ep.title}-curl`, ep.curl)}
-                  className="text-[10px] text-primary hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  {copied === `${ep.title}-curl` ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              <pre className="bg-sidebar rounded-lg p-2 text-[10px] font-mono text-text-main overflow-x-auto whitespace-pre-wrap">{ep.curl}</pre>
-            </div>
-
-            {/* JavaScript */}
-            <div className="relative group">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] text-text-muted font-medium">JavaScript</span>
-                <button
-                  onClick={() => copySnippet(`${ep.title}-js`, ep.js)}
-                  className="text-[10px] text-primary hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  {copied === `${ep.title}-js` ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              <pre className="bg-sidebar rounded-lg p-2 text-[10px] font-mono text-text-main overflow-x-auto whitespace-pre-wrap">{ep.js}</pre>
-            </div>
+    <div className="rounded-2xl border border-border/80 bg-surface/90 shadow-sm backdrop-blur-md p-5 sm:p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-5 border-b border-border/60">
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+            <span className="material-symbols-outlined text-[20px]">terminal</span>
           </div>
-        ))}
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              Endpoint Usage &amp; Integration
+            </h3>
+            <p className="text-xs text-text-muted">
+              Standard REST API endpoints for AI agents, CLI tools, and web automation
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Grid of Endpoints */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {endpoints.map((ep) => {
+          const currentLang = activeTabs[ep.id] || "curl";
+          const snippetCode = ep.snippets[currentLang];
+          const isCopied = copied === `${ep.id}-${currentLang}`;
+
+          return (
+            <div
+              key={ep.id}
+              className="flex flex-col justify-between rounded-2xl border border-border/70 bg-black/[0.02] dark:bg-white/[0.02] p-4 sm:p-5 transition-all hover:border-border"
+            >
+              {/* Endpoint Meta */}
+              <div className="mb-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[18px]">
+                      {ep.icon}
+                    </span>
+                    <span className="font-bold text-sm text-slate-900 dark:text-white">
+                      {ep.title}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 font-mono text-xs">
+                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30 text-[11px]">
+                      {ep.method}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md bg-black/5 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-black/5 dark:border-white/10 text-[11px]">
+                      {ep.path}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  {ep.description}
+                </p>
+              </div>
+
+              {/* Code Terminal Box */}
+              <div className="rounded-xl border border-slate-800/90 bg-[#0c1017] shadow-lg overflow-hidden flex flex-col">
+                {/* Titlebar with tabs and copy button */}
+                <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#080b11] border-b border-slate-800/80">
+                  <div className="flex items-center gap-1.5">
+                    {[
+                      { key: "curl", label: "cURL" },
+                      { key: "js", label: "JavaScript" },
+                      { key: "python", label: "Python" },
+                    ].map((t) => (
+                      <button
+                        key={t.key}
+                        type="button"
+                        onClick={() => setTab(ep.id, t.key)}
+                        className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                          currentLang === t.key
+                            ? "bg-primary text-white shadow-xs"
+                            : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => copy(snippetCode, `${ep.id}-${currentLang}`)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white text-xs font-medium transition-all cursor-pointer"
+                    title="Copy code"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">
+                      {isCopied ? "check" : "content_copy"}
+                    </span>
+                    <span>{isCopied ? "Copied!" : "Copy"}</span>
+                  </button>
+                </div>
+
+                {/* Code pre */}
+                <pre className="p-4 font-mono text-xs sm:text-[13px] leading-relaxed text-slate-200 overflow-x-auto whitespace-pre selection:bg-primary/30">
+                  {snippetCode}
+                </pre>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
