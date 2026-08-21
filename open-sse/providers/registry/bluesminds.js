@@ -14,6 +14,7 @@ export default {
   category: "apikey",
   authType: "apikey",
   authModes: ["apikey"],
+  features: { usage: true, usageApikey: true },
   transport: {
     baseUrl: "https://api.bluesminds.com/v1/chat/completions",
     validateUrl: "https://api.bluesminds.com/v1/models",

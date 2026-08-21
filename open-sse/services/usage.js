@@ -19,6 +19,7 @@ import getFreebuffUsage from "./usage/freebuff.js";
 import { getByteplusUsage } from "./usage/byteplus.js";
 import { getKiloGatewayUsage } from "./usage/kilo-gateway.js";
 import { getKilocodeUsage } from "./usage/kilocode.js";
+import { getBluesmindsUsage } from "./usage/bluesminds.js";
 import {
   getQwenUsage,
   getIflowUsage,
@@ -64,6 +65,7 @@ const USAGE_HANDLERS = {
   byteplus: (c) => getByteplusUsage(c.apiKey, c.proxyOptions),
   "kilo-gateway": (c) => getKiloGatewayUsage(c.apiKey, c.proxyOptions),
   kilocode: (c) => getKilocodeUsage(c.accessToken, c.providerSpecificData, c.proxyOptions),
+  bluesminds: (c) => getBluesmindsUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
   tokenharbor: (c) => getTokenHarborUsage(c.apiKey, c.proxyOptions),
   teamorouter: (c) => getTeamoRouterUsage(c.apiKey, c.proxyOptions),
   zenmux: (c) => getZenMuxUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),

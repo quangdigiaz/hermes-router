@@ -544,6 +544,23 @@ export function parseQuotaData(provider, data) {
         }
         break;
 
+      case "bluesminds":
+        // BluesMinds — balance ($), API requests count
+        if (data.quotas) {
+          Object.entries(data.quotas).forEach(([quotaKey, quota]) => {
+            normalizedQuotas.push({
+              name: quota.displayName || quotaKey,
+              modelKey: quotaKey,
+              used: quota.used || 0,
+              total: quota.total || 0,
+              resetAt: quota.resetAt || null,
+              remainingPercentage: quota.remaining,
+              unit: quota.unit,
+            });
+          });
+        }
+        break;
+
       case "kilo-gateway":
       case "kilocode":
         // Kilo Gateway / Kilocode free models — 200 requests/hour rate limit
