@@ -53,4 +53,5 @@ export default {
   },
   modelsFetcher: { url: "https://api.venice.ai/api/v1/models", type: "openai" },
   passthroughModels: true,
+  features: { fetchModels: true },
 };

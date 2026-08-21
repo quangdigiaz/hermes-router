@@ -70,4 +70,5 @@ export default {
   ],
   modelsFetcher: { url: "https://a6api.com/v1/models", type: "openai" },
   passthroughModels: true,
+  features: { fetchModels: true },
 };

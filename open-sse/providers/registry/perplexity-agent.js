@@ -46,4 +46,5 @@ export default {
   },
   modelsFetcher: { url: "https://api.perplexity.ai/v1/models", type: "openai" },
   passthroughModels: true,
+  features: { fetchModels: true },
 };

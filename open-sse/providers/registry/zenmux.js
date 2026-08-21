@@ -50,4 +50,5 @@ export default {
   ],
   modelsFetcher: { url: "https://zenmux.ai/api/v1/models", type: "openai" },
   passthroughModels: true,
+  features: { fetchModels: true },
 };

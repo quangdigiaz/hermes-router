@@ -41,5 +41,6 @@ export default {
   },
   features: {
     usage: true,
+    fetchModels: true,
   },
 };

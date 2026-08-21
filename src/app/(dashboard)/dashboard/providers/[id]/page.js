@@ -658,12 +658,14 @@ function ProviderDetailContent() {
     }
   };
 
-  // Fetch Qoder model list and automatically add to available models
-  const handleImportQoderModels = async () => {
+  // Fetch model list from provider API and add to available models
+  const [fetchModelFilter, setFetchModelFilter] = useState("all");
+
+  const handleFetchModels = async () => {
     if (importingQoderModels) return;
     const activeConnection = connections.find((conn) => conn.isActive !== false);
     if (!activeConnection) {
-      alert(translate("Please add an active Qoder connection first"));
+      alert(translate("Please add an active connection first"));
       return;
     }
 
@@ -675,10 +677,19 @@ function ProviderDetailContent() {
         alert(data.error || translate("Failed to fetch models"));
         return;
       }
-      const models = data.models || [];
+      let models = data.models || [];
       if (models.length === 0) {
         alert(translate("No models returned"));
         return;
+      }
+
+      // Apply free-only filter if selected
+      if (fetchModelFilter === "free") {
+        models = models.filter((m) => isFreeModel(m.id || m.name, providerId, AI_PROVIDERS, m));
+        if (models.length === 0) {
+          alert(translate("No free models found"));
+          return;
+        }
       }
 
       let importedCount = 0;
@@ -686,8 +697,8 @@ function ProviderDetailContent() {
         const modelId = model.id || model.name;
         if (!modelId) continue;
         
-        // Qoder model ID format may be "qoder/auto" or "auto", need to remove prefix
-        const cleanModelId = modelId.replace(/^qoder\//, "");
+        // Remove provider prefix (e.g. "qoder/auto" → "auto")
+        const cleanModelId = modelId.replace(/^[^/]+\//, "");
         const alreadyExists = customModels.some(
           (entry) => entry.providerAlias === providerStorageAlias && entry.id === cleanModelId && (entry.kind || entry.type || "llm") === "llm"
         ) || Object.values(modelAliases).includes(`${providerStorageAlias}/${cleanModelId}`);
@@ -705,7 +716,7 @@ function ProviderDetailContent() {
         alert(translate("Successfully added") + ` ${importedCount} ` + translate("models"));
       }
     } catch (error) {
-      console.log("Error importing Qoder models:", error);
+      console.log("Error fetching models:", error);
       alert(translate("Error fetching models") + ": " + error.message);
     } finally {
       setImportingQoderModels(false);
@@ -1444,18 +1455,28 @@ function ProviderDetailContent() {
           Add Model
         </button>
 
-        {/* Import Qoder models button — only show for qoder provider */}
-        {providerId === "qoder" && connections.some((conn) => conn.isActive !== false) && (
-          <button
-            onClick={handleImportQoderModels}
-            disabled={importingQoderModels}
-            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-blue-500/40 px-3 py-2 text-xs text-blue-600 dark:text-blue-400 transition-colors hover:border-blue-500 hover:bg-blue-500/5 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span className="material-symbols-outlined text-sm" style={importingQoderModels ? { animation: "spin 1s linear infinite" } : undefined}>
-              {importingQoderModels ? "progress_activity" : "download"}
-            </span>
-            {importingQoderModels ? translate("Fetching...") : translate("Fetch Qoder Models")}
-          </button>
+        {/* Fetch models button — show for providers with fetchModels feature */}
+        {providerInfo?.features?.fetchModels && connections.some((conn) => conn.isActive !== false) && (
+          <div className="flex items-center gap-1.5">
+            <select
+              value={fetchModelFilter}
+              onChange={(e) => setFetchModelFilter(e.target.value)}
+              className="rounded-lg border border-border bg-surface px-2 py-1.5 text-xs text-text-main"
+            >
+              <option value="all">{translate("All Models")}</option>
+              <option value="free">{translate("Free Only")}</option>
+            </select>
+            <button
+              onClick={handleFetchModels}
+              disabled={importingQoderModels}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-blue-500/40 px-3 py-2 text-xs text-blue-600 dark:text-blue-400 transition-colors hover:border-blue-500 hover:bg-blue-500/5 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span className="material-symbols-outlined text-sm" style={importingQoderModels ? { animation: "spin 1s linear infinite" } : undefined}>
+                {importingQoderModels ? "progress_activity" : "download"}
+              </span>
+              {importingQoderModels ? translate("Fetching...") : translate("Fetch Models")}
+            </button>
+          </div>
         )}
         </div>
 
