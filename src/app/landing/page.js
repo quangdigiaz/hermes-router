@@ -24,8 +24,8 @@ export default function LandingPage() {
       }
     }
 
-    // 2. Fetch server configuration settings from DB
-    fetch("/api/settings")
+    // 2. Fetch studio theme config from public endpoint (no auth required)
+    fetch("/api/settings/require-login")
       .then((res) => res.json())
       .then((data) => {
         if (data?.studioLandingEnabled === true) {

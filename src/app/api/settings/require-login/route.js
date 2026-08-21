@@ -8,7 +8,8 @@ export async function GET() {
     const tunnelDashboardAccess = settings.tunnelDashboardAccess !== false;
     const tunnelUrl = settings.tunnelUrl || "";
     const tailscaleUrl = settings.tailscaleUrl || "";
-    return NextResponse.json({ requireLogin, tunnelDashboardAccess, tunnelUrl, tailscaleUrl });
+    const studioLandingEnabled = settings.studioLandingEnabled === true;
+    return NextResponse.json({ requireLogin, tunnelDashboardAccess, tunnelUrl, tailscaleUrl, studioLandingEnabled });
   } catch (error) {
     return NextResponse.json({ requireLogin: true }, { status: 200 });
   }
