@@ -121,6 +121,7 @@ import p120 from "./morph.js";
 import p121 from "./tencent.js";
 import p122 from "./freebuff.js";
 import p123 from "./fastrouter.js";
+import p124 from "./tokenharbor.js";
 
 export default [
   p0,
@@ -245,5 +246,6 @@ export default [
   p120,
   p121,
   p122,
-  p123
+  p123,
+  p124
 ];

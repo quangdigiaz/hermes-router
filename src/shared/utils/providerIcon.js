@@ -27,6 +27,7 @@ export function resolveProviderIconId(providerId) {
 
 const SVG_PROVIDERS = new Set([
   "fastrouter",
+  "tokenharbor",
 ]);
 
 const PNG_PROVIDERS = new Set([
