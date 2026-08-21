@@ -22,6 +22,7 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
   const isCloudflareAi = provider === "cloudflare-ai";
   const isZenMux = provider === "zenmux";
   const isTeamoRouter = provider === "teamorouter" || provider === "teamo";
+  const isBazaarLink = provider === "bazaarlink" || provider === "bzl";
   const isBluesMinds = provider === "bluesminds";
   const providerRegions = AI_PROVIDERS?.[provider]?.regions || null;
   const defaultRegion = AI_PROVIDERS?.[provider]?.defaultRegion || providerRegions?.[0]?.id || "";
@@ -42,6 +43,7 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
   const [cloudflareData, setCloudflareData] = useState({ accountId: "" });
   const [zenmuxData, setZenmuxData] = useState({ managementApiKey: "" });
   const [teamoData, setTeamoData] = useState({ managementApiKey: "", email: "" });
+  const [bazaarlinkData, setBazaarlinkData] = useState({ managementApiKey: "" });
   const [bluesmindsData, setBluesmindsData] = useState({ sessionToken: "", userId: "" });
   const [region, setRegion] = useState(defaultRegion);
   const [validating, setValidating] = useState(false);
@@ -78,6 +80,9 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
         ...(teamoData.managementApiKey.trim() ? { managementApiKey: teamoData.managementApiKey.trim() } : {}),
         ...(teamoData.email.trim() ? { email: teamoData.email.trim() } : {}),
       };
+    }
+    if (isBazaarLink && bazaarlinkData.managementApiKey.trim()) {
+      return { managementApiKey: bazaarlinkData.managementApiKey.trim() };
     }
     if (isBluesMinds && (bluesmindsData.sessionToken.trim() || bluesmindsData.userId.trim())) {
       return {
@@ -386,6 +391,21 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
             />
             <p className="text-xs text-text-muted mt-1.5">
               Điền Management Key hoặc Email thành viên để theo dõi số dư ví Top-Up, Voucher và hạn mức doanh nghiệp trên Quota Dashboard.
+            </p>
+          </div>
+        )}
+
+        {isBazaarLink && (
+          <div className="bg-sidebar/50 p-3.5 rounded-lg border border-accent/20">
+            <h3 className="font-semibold mb-2 text-sm">BazaarLink Management API (Tùy chọn)</h3>
+            <Input
+              label="Management Key (Tùy chọn)"
+              value={bazaarlinkData.managementApiKey}
+              onChange={(e) => setBazaarlinkData({ managementApiKey: e.target.value })}
+              placeholder="sk-bl-..."
+            />
+            <p className="text-xs text-text-muted mt-1.5">
+              Lưu ý: BazaarLink yêu cầu <strong>Standard Key</strong> ở ô API Key phía trên để gọi model. Nếu bạn có <strong>Management Key</strong> riêng, hãy điền vào đây để theo dõi số dư Credits và hạn mức trên Quota Dashboard.
             </p>
           </div>
         )}

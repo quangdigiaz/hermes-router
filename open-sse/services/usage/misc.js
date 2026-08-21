@@ -669,12 +669,13 @@ export async function getA6ApiUsage(apiKey, proxyOptions = null) {
  *   1. GET https://api.bazaarlink.ai/v1/credits
  *   2. GET https://api.bazaarlink.ai/v1/key
  */
-export async function getBazaarLinkUsage(apiKey, proxyOptions = null) {
-  if (!apiKey) {
+export async function getBazaarLinkUsage(apiKey, providerSpecificData = null, proxyOptions = null) {
+  const mgKey = providerSpecificData?.managementApiKey || apiKey;
+  if (!mgKey) {
     return { message: "BazaarLink API key not available." };
   }
 
-  const cleanKey = apiKey.trim();
+  const cleanKey = mgKey.trim();
   const headers = {
     Authorization: `Bearer ${cleanKey}`,
     Accept: "application/json",

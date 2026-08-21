@@ -74,8 +74,8 @@ const USAGE_HANDLERS = {
   zenmux: (c) => getZenMuxUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
   a6api: (c) => getA6ApiUsage(c.apiKey, c.proxyOptions),
   a6: (c) => getA6ApiUsage(c.apiKey, c.proxyOptions),
-  bazaarlink: (c) => getBazaarLinkUsage(c.apiKey, c.proxyOptions),
-  bzl: (c) => getBazaarLinkUsage(c.apiKey, c.proxyOptions),
+  bazaarlink: (c) => getBazaarLinkUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
+  bzl: (c) => getBazaarLinkUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
 };
 
 export async function getUsageForProvider(connection, proxyOptions = null) {

@@ -52,12 +52,10 @@ export default {
     speechUrl: "https://api.bazaarlink.ai/v1/audio/speech",
   },
   models: [
-    // ── Auto Router v3 (14 Tiers) ───────────────────────────────────────────
+    // ── Auto Router v3 (14 Tiers) & Free Models ─────────────────────────────
     { id: "auto:free",                     name: "Auto Router (Free - 14 Tiers Zero Cost)", isFree: true, tier: "free", free: true },
+    { id: "qwen/qwen3.7-flash:free",       name: "Qwen 3.7 Flash (Free - 10 RPM)", isFree: true, tier: "free", free: true },
     { id: "auto",                          name: "Auto Router (Smart Best Model - 14 Tiers)" },
-    { id: "qwen/qwen3.7-flash",            name: "Qwen 3.7 Flash (Free eligible - 10 RPM)", isFree: true, tier: "free", free: true },
-    { id: "qwen/qwen3.7-flash:free",       name: "Qwen 3.7 Flash (:free alias)", isFree: true, tier: "free", free: true },
-    { id: "deepseek/deepseek-v4-flash:free", name: "DeepSeek V4 Flash (:free alias)", isFree: true, tier: "free", free: true },
 
     // ── Auto Router Primary & Suffix Variants ───────────────────────────────
     { id: "openai/gpt-5.4-nano",           name: "GPT-5.4 Nano (Auto simple/social/email)" },
