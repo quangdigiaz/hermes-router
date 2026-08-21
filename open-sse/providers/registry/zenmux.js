@@ -11,7 +11,7 @@ export default {
     website: "https://zenmux.ai",
     notice: {
       apiKeyUrl: "https://zenmux.ai",
-      text: "💡 Lưu ý quan trọng: Các model Free Tier trên ZenMux (kimi-k3-free, step-3.7-flash-free, dots-studio...) yêu cầu tài khoản phải có số dư ví > $0 để kích hoạt chống abuse (khi dùng hoàn toàn miễn phí, không bị trừ tiền).",
+      text: "💡 Note / Lưu ý: Free Tier models (kimi-k3-free, step-3.7-flash-free, dots-studio...) require wallet balance > $0 for anti-abuse verification (usage is completely free, $0 deducted). / Các model Free Tier yêu cầu số dư ví > $0 để kích hoạt chống abuse (dùng hoàn toàn miễn phí, không bị trừ tiền).",
     },
   },
   category: "apikey",

@@ -10,7 +10,7 @@ export default {
     website: "https://www.orcarouter.ai",
     notice: {
       apiKeyUrl: "https://www.orcarouter.ai/dashboard",
-      text: "OrcaRouter AI Gateway. Các model Free Tier (orcarouter/free, deepseek-v4-flash-free) được miễn phí $0, tự động reset quota vào 00:00 UTC. Nạp $1 mở khóa hạn mức lớn hơn và bỏ giới hạn prompt token.",
+      text: "OrcaRouter Gateway. Free models (orcarouter/free, deepseek-v4-flash-free) are $0, resetting at 00:00 UTC. Top-up $1 to unlock higher limits and remove prompt token cap. / Các model Free Tier miễn phí $0, tự động reset vào 00:00 UTC. Nạp $1 để mở khóa hạn mức lớn hơn và bỏ giới hạn prompt token.",
     },
   },
   category: "apikey",
