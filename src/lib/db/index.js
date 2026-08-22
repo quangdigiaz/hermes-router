@@ -186,6 +186,8 @@ export async function importDb(payload) {
   });
 
   invalidateSettingsCache();
+  const { invalidateProviderConnectionsCache } = await import("./repos/connectionsRepo.js");
+  invalidateProviderConnectionsCache();
   return await exportDb();
 }
 
