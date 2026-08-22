@@ -325,12 +325,12 @@ export default function EditConnectionModal({ isOpen, connection, proxyPools, on
             <div className="flex gap-2 items-start">
               <div className="relative flex-1">
                 <Input
-                  label="API Key"
+                  label={connection?.provider === "freebuff" ? "Auth Token / API Key" : "API Key"}
                   type={showKey ? "text" : "password"}
                   value={formData.apiKey}
                   onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
-                  placeholder={loadingKey ? "Loading current API key..." : "Enter API key"}
-                  hint="View, copy, or update the API key for this connection."
+                  placeholder={loadingKey ? "Loading current token..." : (connection?.provider === "freebuff" ? "Dán authToken từ freebuff.com..." : "Enter API key")}
+                  hint={connection?.provider === "freebuff" ? "Dán authToken từ trình duyệt (freebuff.com → F12 → Cookies → authToken)." : "View, copy, or update the API key for this connection."}
                   className="pr-20 font-mono text-sm"
                 />
                 <div className="absolute right-2 top-8 flex items-center gap-1">

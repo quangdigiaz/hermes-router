@@ -11,12 +11,15 @@ const BULK_PLACEHOLDER = `name1|sk-key1\nname2|sk-key2\nsk-key-only-auto-named`;
 export default function AddApiKeyModal({ isOpen, provider, providerName, isCompatible, isAnthropic, authType, authHint, website, proxyPools, error, existingNames, onSave, onBulkDone, onClose }) {
   const NONE_PROXY_POOL_VALUE = "__none__";
   const isOllamaLocal = provider === "ollama-local";
+  const isFreebuff = provider === "freebuff";
   const isCookie = authType === "cookie";
   const isXaiApiKey = provider === "xai" && !isCookie;
-  const credentialLabel = isCookie ? "Cookie Value" : "API Key";
+  const credentialLabel = isCookie
+    ? "Cookie Value"
+    : (isFreebuff ? "Auth Token / API Key" : "API Key");
   const credentialPlaceholder = isCookie
     ? "eyJhbGciOi..."
-    : (isXaiApiKey ? "xai-..." : "");
+    : (isFreebuff ? "Dán authToken từ trình duyệt (freebuff.com)..." : (isXaiApiKey ? "xai-..." : ""));
 
   const isAzure = provider === "azure";
   const isCloudflareAi = provider === "cloudflare-ai";
@@ -270,6 +273,11 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
               </Button>
             </div>
           </div>
+        )}
+        {isFreebuff && (
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 p-2.5 rounded-lg border border-emerald-500/20">
+            💡 <b>Freebuff Token</b>: Freebuff không có API key độc lập dạng thanh toán. Anh có thể kết nối bằng <b>OAuth Trình duyệt</b> hoặc dán <code>authToken</code> lấy từ trình duyệt sau khi đăng nhập <a href="https://freebuff.com" target="_blank" rel="noopener noreferrer" className="underline font-semibold">freebuff.com</a> (F12 → Application → Cookies → <code>authToken</code>).
+          </p>
         )}
         {isXaiApiKey && (
           <p className="text-xs text-text-muted">
