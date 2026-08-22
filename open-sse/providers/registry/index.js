@@ -7,7 +7,6 @@ import p9 from "./black-forest-labs.js";
 import p11 from "./brave-search.js";
 import p12 from "./byteplus.js";
 import p13 from "./cartesia.js";
-import p14 from "./cerebras.js";
 import p15 from "./claude.js";
 import p16 from "./cline.js";
 import p17 from "./clinepass.js";
@@ -130,7 +129,6 @@ export default [
   p11,
   p12,
   p13,
-  p14,
   p15,
   p16,
   p17,
