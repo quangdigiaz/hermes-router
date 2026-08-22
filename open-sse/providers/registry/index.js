@@ -17,7 +17,6 @@ import p22 from "./cohere.js";
 import p23 from "./comfyui.js";
 import p24 from "./commandcode.js";
 import p25 from "./cursor.js";
-import p26 from "./databricks.js";
 import p27 from "./deepgram.js";
 import p28 from "./deepinfra.js";
 import p29 from "./deepseek.js";
@@ -138,7 +137,6 @@ export default [
   p23,
   p24,
   p25,
-  p26,
   p27,
   p28,
   p29,
