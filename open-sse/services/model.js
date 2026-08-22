@@ -115,6 +115,31 @@ export async function getModelInfoCore(modelStr, aliasesOrGetter) {
     return resolved;
   }
 
+  // Short-form case-insensitive match: `kimi-k2.5` → `moonshotai/Kimi-K2.5`
+  // Same registry that backs `cmd --list-models` and `/model` picker — not hardcoded docs table.
+  // Accepts full id or just name after "/", case-insensitive, per Command Code spec.
+  const lower = parsed.model.toLowerCase();
+  const candidates = [];
+  for (const entry of REGISTRY) {
+    for (const m of entry.models || []) {
+      const fullLower = String(m.id).toLowerCase();
+      const shortLower = String(m.id).split("/").pop().toLowerCase();
+      if (fullLower === lower || shortLower === lower) {
+        candidates.push({ provider: entry.id, model: m.id.split("/").pop() });
+      }
+    }
+  }
+  // Also check fetched dynamic models via passthrough? Fallback to infer if no candidate.
+  if (candidates.length === 1) {
+    return candidates[0];
+  }
+  if (candidates.length > 1) {
+    // Prefer commandcode when ambiguous (user likely meant `cmd --model` short form)
+    const cc = candidates.find((c) => c.provider === "commandcode");
+    if (cc) return cc;
+    return candidates[0];
+  }
+
   // Fallback: infer provider from model name prefix
   return {
     provider: inferProviderFromModelName(parsed.model),

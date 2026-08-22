@@ -13,6 +13,7 @@ import { detectModelFamily } from "../config/modelFamilies.js";
 import { emitNotification } from "@/lib/notificationBus.js";
 import { getFreeCustomModelsMap } from "@/lib/customModelFreeCache.js";
 import { canonicalModelBase } from "../utils/canonicalModelBase.js";
+import { getCommandCodeLivePricing, getCommandCodePricingMap } from "./commandcodePricing.js";
 
 let getPricingBulk = null;
 
@@ -38,7 +39,7 @@ let pricingCache = { table: null, freeMap: null, expires: 0 };
 async function getCachedPricing() {
   if (pricingCache.table && Date.now() < pricingCache.expires) return pricingCache;
   const getPricing = await loadPricing();
-  const [table, freeMap] = await Promise.all([getPricing(), getFreeCustomModelsMap()]);
+  const [table, freeMap] = await Promise.all([getPricing(), getFreeCustomModelsMap(), getCommandCodePricingMap().catch(() => new Map())]);
   pricingCache = { table, freeMap, expires: Date.now() + PRICING_CACHE_TTL_MS };
   return pricingCache;
 }
@@ -254,6 +255,11 @@ export async function sortModelsByCost(models) {
       if (freeMap.get(provider)?.has(model) || isFreeModel(model, provider)) {
         return { model: m, cost: 0, free: true };
       }
+      // Live Command Code pricing (deals 2×/5× auto-applied) — no hardcode
+      const live = (provider === "commandcode" || provider === "cmc") ? (getCommandCodeLivePricing(model) || getCommandCodeLivePricing(m)) : null;
+      if (live) {
+        return { model: m, cost: blendedCostFromPricing(live), free: false };
+      }
       const promo = getPromoPriceSync(model);
       if (promo) {
         const promoCost = (promo.promoInput ?? 0) * 0.3 + (promo.promoOutput ?? promo.promoInput ?? 0) * 0.7;
@@ -341,12 +347,17 @@ async function selectAutoModels(models, options = {}) {
     if (free) {
       cost = 0;
     } else {
-      const promo = getPromoPriceSync(model);
-      if (promo) {
-        cost = (promo.promoInput ?? 0) * 0.3 + (promo.promoOutput ?? promo.promoInput ?? 0) * 0.7;
+      const live = (provider === "commandcode" || provider === "cmc") ? (getCommandCodeLivePricing(model) || getCommandCodeLivePricing(modelStr)) : null;
+      if (live) {
+        cost = blendedCostFromPricing(live);
       } else {
-        const pr = pricingTable?.[provider]?.[model];
-        cost = pr ? blendedCostFromPricing(pr) : Infinity;
+        const promo = getPromoPriceSync(model);
+        if (promo) {
+          cost = (promo.promoInput ?? 0) * 0.3 + (promo.promoOutput ?? promo.promoInput ?? 0) * 0.7;
+        } else {
+          const pr = pricingTable?.[provider]?.[model];
+          cost = pr ? blendedCostFromPricing(pr) : Infinity;
+        }
       }
     }
 
