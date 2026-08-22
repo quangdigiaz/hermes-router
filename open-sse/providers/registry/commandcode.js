@@ -63,5 +63,5 @@ export default {
   // Fallback 11 kept for offline; passthrough allows any id from `cmd --list-models` without code change.
   modelsFetcher: { url: "https://api.commandcode.ai/provider/v1/models", type: "openai" },
   passthroughModels: true,
-  features: { fetchModels: true },
+  features: { fetchModels: true, usage: true, usageApikey: true },
 };

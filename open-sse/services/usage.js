@@ -33,6 +33,7 @@ import {
   getA6ApiUsage,
   getBazaarLinkUsage,
 } from "./usage/misc.js";
+import { getCommandCodeUsage } from "./usage/commandcode.js";
 
 /**
  * Get usage data for a provider connection
@@ -76,6 +77,8 @@ const USAGE_HANDLERS = {
   a6: (c) => getA6ApiUsage(c.apiKey, c.proxyOptions),
   bazaarlink: (c) => getBazaarLinkUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
   bzl: (c) => getBazaarLinkUsage(c.apiKey, c.providerSpecificData, c.proxyOptions),
+  commandcode: (c) => getCommandCodeUsage(c.apiKey || c.accessToken, c.proxyOptions),
+  cmc: (c) => getCommandCodeUsage(c.apiKey || c.accessToken, c.proxyOptions),
 };
 
 export async function getUsageForProvider(connection, proxyOptions = null) {
