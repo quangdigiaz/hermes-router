@@ -332,7 +332,9 @@ async function selectAutoModels(models, options = {}) {
     const limits = getModelLimits(model);
 
     // Session-Gated Isolation: Freebuff uses per-model 1h session caps and must never be auto-selected by generic auto-combos
-    if (provider === "freebuff") {
+    // Only dedicated Freebuff combos (where all models belong to freebuff) are admitted.
+    const isDedicatedFreebuffCombo = models.length > 0 && models.every((m) => typeof m === "string" && m.startsWith("freebuff/"));
+    if (provider === "freebuff" && !isDedicatedFreebuffCombo) {
       return null;
     }
 

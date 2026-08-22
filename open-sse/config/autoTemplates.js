@@ -114,7 +114,7 @@ export const AUTO_TEMPLATES = {
     description: "24/7 Agent workhorse: ultra-cheap ($0.14), fast, 429-resistant",
     models: [
       "bazaarlink/mimo-v2.5",
-      "freebuff/deepseek-v4-flash",
+      "deepseek/deepseek-v4-flash",
       "xiaomi/mimo-v2.5",
       "google/gemini-3.7-flash",
     ],
@@ -167,6 +167,51 @@ export const AUTO_TEMPLATES = {
       "anthropic/claude-sonnet-5",
       "alibaba/qwen2.5-vl-72b",
       "openai/gpt-4o",
+    ],
+  },
+
+  // ─── 4 Dedicated Freebuff Family Combos (Session Pinning & Multi-Account Failover) ───
+  "freebuff/deepseek": {
+    strategy: "auto",
+    mode: "value",
+    family: "deepseek",
+    sessionAffinity: true,
+    description: "Dedicated Freebuff DeepSeek family: multi-account failover with session pinning",
+    models: [
+      "freebuff/deepseek-v4-pro",
+      "freebuff/deepseek-v4-flash",
+    ],
+  },
+  "freebuff/kimi": {
+    strategy: "auto",
+    mode: "value",
+    family: "kimi",
+    sessionAffinity: true,
+    description: "Dedicated Freebuff Kimi K2.6: long-context coding with multi-account failover",
+    models: [
+      "freebuff/kimi-k2.6",
+    ],
+  },
+  "freebuff/minimax": {
+    strategy: "auto",
+    mode: "value",
+    family: "minimax",
+    sessionAffinity: true,
+    description: "Dedicated Freebuff MiniMax family: M3 & M2.7 coding agent failover",
+    models: [
+      "freebuff/minimax-m3",
+      "freebuff/minimax-m2.7",
+    ],
+  },
+  "freebuff/best": {
+    strategy: "auto",
+    mode: "balanced",
+    sessionAffinity: true,
+    description: "Freebuff top-tier lineup (DeepSeek Pro, Kimi, MiniMax M3) with session affinity",
+    models: [
+      "freebuff/deepseek-v4-pro",
+      "freebuff/kimi-k2.6",
+      "freebuff/minimax-m3",
     ],
   },
 };

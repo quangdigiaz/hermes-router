@@ -11,13 +11,32 @@ describe("Freebuff Isolation & Auto-Combo Safeguards", () => {
     expect(deepseekTemplate.seedModels).toContain("deepseek/deepseek-v4-flash");
   });
 
-  it("ensures all built-in auto templates exclude freebuff provider", () => {
+  it("ensures generic built-in templates exclude freebuff provider", () => {
     for (const [key, template] of Object.entries(AUTO_TEMPLATES)) {
+      if (key.startsWith("freebuff/")) continue;
       if (Array.isArray(template.seedModels)) {
         for (const model of template.seedModels) {
           expect(model.startsWith("freebuff/"), `Template ${key} contains freebuff model ${model}`).toBe(false);
         }
       }
+      if (Array.isArray(template.models)) {
+        for (const model of template.models) {
+          expect(model.startsWith("freebuff/"), `Template ${key} contains freebuff model ${model}`).toBe(false);
+        }
+      }
+    }
+  });
+
+  it("ensures dedicated freebuff family combos are properly defined", () => {
+    expect(AUTO_TEMPLATES["freebuff/deepseek"]).toBeDefined();
+    expect(AUTO_TEMPLATES["freebuff/kimi"]).toBeDefined();
+    expect(AUTO_TEMPLATES["freebuff/minimax"]).toBeDefined();
+    expect(AUTO_TEMPLATES["freebuff/best"]).toBeDefined();
+
+    for (const key of ["freebuff/deepseek", "freebuff/kimi", "freebuff/minimax", "freebuff/best"]) {
+      const t = AUTO_TEMPLATES[key];
+      expect(t.sessionAffinity).toBe(true);
+      expect(t.models.every((m) => m.startsWith("freebuff/"))).toBe(true);
     }
   });
 
