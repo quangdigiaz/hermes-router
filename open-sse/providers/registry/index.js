@@ -4,7 +4,6 @@ import p5 from "./antigravity.js";
 import p6 from "./assemblyai.js";
 import p7 from "./aws-polly.js";
 import p9 from "./black-forest-labs.js";
-import p10 from "./blackbox.js";
 import p11 from "./brave-search.js";
 import p12 from "./byteplus.js";
 import p13 from "./cartesia.js";
@@ -128,7 +127,6 @@ export default [
   p6,
   p7,
   p9,
-  p10,
   p11,
   p12,
   p13,
