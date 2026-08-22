@@ -90,6 +90,45 @@ const FREE_ROOT_AGENT_BY_MODEL = {
   "openai/gpt-5.6-luna": "base2-free-luna",
 };
 
+const DYNAMIC_SYNC_SOURCES = [
+  "https://raw.githubusercontent.com/CodebuffAI/freebuff/main/common/src/constants/free-agents.ts",
+  "https://cdn.jsdelivr.net/gh/CodebuffAI/freebuff@main/common/src/constants/free-agents.ts",
+];
+const DYNAMIC_SYNC_REFRESH_MS = 6 * 60 * 60 * 1000;
+let dynamicAgentCache = {
+  fetchedAt: 0,
+  mappings: null,
+};
+
+async function refreshDynamicAgentMappings() {
+  if (dynamicAgentCache.mappings && Date.now() - dynamicAgentCache.fetchedAt < DYNAMIC_SYNC_REFRESH_MS) {
+    return dynamicAgentCache.mappings;
+  }
+  for (const url of DYNAMIC_SYNC_SOURCES) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (resp.ok) {
+        const text = await resp.text();
+        if (text && text.length > 100) {
+          const map = {};
+          const re = /\[\s*([A-Z0-9_]+)\s*\]\s*:\s*'([^']+)'/g;
+          let m;
+          while ((m = re.exec(text)) !== null) {
+            const rawKey = m[1];
+            const agent = m[2];
+            map[rawKey] = agent;
+          }
+          if (Object.keys(map).length > 0) {
+            dynamicAgentCache = { fetchedAt: Date.now(), mappings: map };
+            return map;
+          }
+        }
+      }
+    } catch {}
+  }
+  return dynamicAgentCache.mappings;
+}
+
 // Per-token+model session cache (in-memory; keyed so multi-account setups
 // don't share one session row). Re-claims are driven by the cache expiring or
 // by a 428 from chat — no early re-claim, so we never POST /session while our
@@ -215,6 +254,10 @@ function sessionCacheKey(token, model) {
 }
 
 function rootAgentIdForModel(model) {
+  refreshDynamicAgentMappings().catch(() => {});
+  if (dynamicAgentCache.mappings && dynamicAgentCache.mappings[model]) {
+    return dynamicAgentCache.mappings[model];
+  }
   return FREE_ROOT_AGENT_BY_MODEL[model] || "base2-free";
 }
 
@@ -647,6 +690,26 @@ export class FreebuffExecutor extends BaseExecutor {
         const text = await response.text().catch(() => "");
         const err = new Error(`Freebuff auth failed (401) — re-login in the dashboard. ${text.slice(0, 120)}`);
         err.status = 401;
+        throw err;
+      }
+
+      if (response.status === 429) {
+        const text = await response.text().catch(() => "");
+        let retryAfterMs = 5 * 60 * 1000;
+        try {
+          const parsed = JSON.parse(text);
+          if (typeof parsed.retryAfterMs === "number" && parsed.retryAfterMs > 0) {
+            retryAfterMs = Math.min(parsed.retryAfterMs, 6 * 3600 * 1000);
+          }
+        } catch {
+          const match = text.match(/try again in (?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?\s*(?:(\d+)\s*s)?/i);
+          if (match) {
+            retryAfterMs = ((parseInt(match[1] || 0, 10) * 3600 + parseInt(match[2] || 0, 10) * 60 + parseInt(match[3] || 0, 10)) * 1000) || retryAfterMs;
+          }
+        }
+        const err = new Error(`Freebuff rate limited (429) — retry after ${Math.ceil(retryAfterMs / 1000)}s. ${text.slice(0, 120)}`);
+        err.status = 429;
+        err.resetsAtMs = Date.now() + retryAfterMs;
         throw err;
       }
 

@@ -46,7 +46,7 @@ export const AUTO_TEMPLATES = {
     family: "deepseek",
     description: "Cross-provider DeepSeek auto-routing (V4, V3, R1) across all active connections",
     seedModels: [
-      "freebuff/deepseek-v4-flash",
+      "deepseek/deepseek-v4-flash",
       "deepseek/deepseek-v4-pro",
     ],
   },

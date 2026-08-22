@@ -7,6 +7,7 @@ import {
 } from "@/models";
 import { emitNotification } from "@/lib/notificationBus.js";
 import { maskApiKey } from "@/lib/apiKeyMask";
+import { invalidateHubStatusCache } from "@/app/api/hub/status/route.js";
 
 function normalizeProxyConfig(body = {}) {
   const hasAnyProxyField =
@@ -216,6 +217,7 @@ export async function PUT(request, { params }) {
     delete result.refreshToken;
     delete result.idToken;
 
+    invalidateHubStatusCache();
     return NextResponse.json({ connection: result });
   } catch (error) {
     console.log("Error updating connection:", error);
@@ -233,6 +235,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Connection not found" }, { status: 404 });
     }
 
+    invalidateHubStatusCache();
     return NextResponse.json({ message: "Connection deleted successfully" });
   } catch (error) {
     console.log("Error deleting connection:", error);

@@ -331,6 +331,11 @@ async function selectAutoModels(models, options = {}) {
 
     const limits = getModelLimits(model);
 
+    // Session-Gated Isolation: Freebuff uses per-model 1h session caps and must never be auto-selected by generic auto-combos
+    if (provider === "freebuff") {
+      return null;
+    }
+
     // Vision Guard: filter text-only models when request has images
     if (hasImages && !limits.vision) {
       return null;

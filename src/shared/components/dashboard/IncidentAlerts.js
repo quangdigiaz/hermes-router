@@ -56,7 +56,7 @@ function Countdown({ resetsAtMs }) {
   );
 }
 
-function IssueRow({ issue }) {
+function IssueRow({ issue, onDismiss }) {
   const style = SEVERITY_STYLES[issue.severity] || SEVERITY_STYLES.info;
   const providerLabel = issue.providerName || issue.provider;
 
@@ -94,14 +94,26 @@ function IssueRow({ issue }) {
         {issue.resetsAtMs && <Countdown resetsAtMs={issue.resetsAtMs} />}
       </div>
 
-      {issue.link && (
-        <Link
-          href={issue.link}
-          className={`text-xs font-medium px-2.5 py-1 rounded-md shadow-xs ${style.badge} hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all flex-shrink-0`}
-        >
-          {issue.actionLabel || `${translate("Fix")} →`}
-        </Link>
-      )}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {issue.link && (
+          <Link
+            href={issue.link}
+            className={`text-xs font-medium px-2.5 py-1 rounded-md shadow-xs ${style.badge} hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all`}
+          >
+            {issue.actionLabel || `${translate("Fix")} →`}
+          </Link>
+        )}
+        {onDismiss && (
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="text-text-muted hover:text-text-main text-xs p-1 rounded hover:bg-surface-2 transition-colors cursor-pointer"
+            title={translate("Dismiss")}
+          >
+            ✕
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -119,6 +131,7 @@ export default function IncidentAlerts({ data: propData, loading: propLoading })
   const [internalData, setInternalData] = useState(null);
   const [internalLoading, setInternalLoading] = useState(true);
   const [expanded, setExpanded] = useState(true);
+  const [dismissedKeys, setDismissedKeys] = useState(() => new Set());
 
   const isControlled = propData !== undefined;
   const data = isControlled ? propData : internalData;
@@ -154,7 +167,18 @@ export default function IncidentAlerts({ data: propData, loading: propLoading })
     );
   }
 
-  if (!data || data.incidentSummary?.healthy) {
+  const rawIncidents = data?.incidents || [];
+  const incidents = rawIncidents.filter((issue, i) => {
+    const key = `${issue.type}-${issue.provider || ""}-${issue.connectionId || ""}-${i}`;
+    return !dismissedKeys.has(key);
+  });
+
+  const criticalCount = incidents.filter((i) => i.severity === "critical").length;
+  const warningCount = incidents.filter((i) => i.severity === "warning").length;
+  const infoCount = incidents.filter((i) => i.severity === "info").length;
+  const count = incidents.length;
+
+  if (!data || count === 0) {
     return (
       <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/30 px-4 py-3">
         <AllGood />
@@ -162,8 +186,9 @@ export default function IncidentAlerts({ data: propData, loading: propLoading })
     );
   }
 
-  const { incidentSummary, incidents } = data;
-  const count = incidentSummary.total;
+  const handleDismiss = (key) => {
+    setDismissedKeys((prev) => new Set(prev).add(key));
+  };
 
   return (
     <div className="rounded-xl border border-border-subtle bg-surface-1 overflow-hidden shadow-sm">
@@ -173,25 +198,25 @@ export default function IncidentAlerts({ data: propData, loading: propLoading })
       >
         <div className="flex items-center gap-2">
           <span className="text-base">
-            {incidentSummary.critical > 0 ? "🚨" : "⚠️"}
+            {criticalCount > 0 ? "🚨" : "⚠️"}
           </span>
           <span className="text-sm font-semibold text-text-main">
             {count} {count !== 1 ? translate("issues detected") : translate("issue detected")}
           </span>
           <div className="flex gap-1 ml-1">
-            {incidentSummary.critical > 0 && (
+            {criticalCount > 0 && (
               <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
-                {incidentSummary.critical} {translate("critical")}
+                {criticalCount} {translate("critical")}
               </span>
             )}
-            {incidentSummary.warning > 0 && (
+            {warningCount > 0 && (
               <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300">
-                {incidentSummary.warning} {translate("warning")}
+                {warningCount} {translate("warning")}
               </span>
             )}
-            {incidentSummary.info > 0 && (
+            {infoCount > 0 && (
               <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                {incidentSummary.info} {translate("info")}
+                {infoCount} {translate("info")}
               </span>
             )}
           </div>
@@ -203,9 +228,16 @@ export default function IncidentAlerts({ data: propData, loading: propLoading })
 
       {expanded && (
         <div className="px-4 pb-3 space-y-1.5">
-          {incidents.map((issue, i) => (
-            <IssueRow key={`${issue.type}-${issue.provider || ""}-${i}`} issue={issue} />
-          ))}
+          {incidents.map((issue, i) => {
+            const key = `${issue.type}-${issue.provider || ""}-${issue.connectionId || ""}-${i}`;
+            return (
+              <IssueRow
+                key={key}
+                issue={issue}
+                onDismiss={() => handleDismiss(key)}
+              />
+            );
+          })}
         </div>
       )}
     </div>

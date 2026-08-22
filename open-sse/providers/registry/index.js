@@ -33,7 +33,6 @@ import p41 from "./glm.js";
 import p42 from "./google-pse.js";
 import p43 from "./google-tts.js";
 import p44 from "./grok-cli.js";
-import p45 from "./grok-web.js";
 import p48 from "./huggingface.js";
 import p50 from "./iflow.js";
 import p51 from "./inworld.js";
@@ -77,7 +76,6 @@ import p102 from "./xiaomi-mimo.js";
 import p103 from "./xiaomi-tokenplan.js";
 import p104 from "./youcom.js";
 import p105 from "./zcode.js";
-import p106 from "./muse-spark-web.js";
 import p107 from "./a6api.js";
 import p109 from "./zenmux.js";
 import p110 from "./tokenrouter.js";
@@ -133,7 +131,6 @@ export default [
   p42,
   p43,
   p44,
-  p45,
   p48,
   p50,
   p51,
@@ -177,7 +174,6 @@ export default [
   p103,
   p104,
   p105,
-  p106,
   p107,
   p109,
   p110,

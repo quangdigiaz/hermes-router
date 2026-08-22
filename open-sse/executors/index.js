@@ -11,7 +11,6 @@ import { VertexExecutor } from "./vertex.js";
 import { QwenExecutor } from "./qwen.js";
 import { OpenCodeExecutor } from "./opencode.js";
 import { OpenCodeGoExecutor } from "./opencode-go.js";
-import { GrokWebExecutor } from "./grok-web.js";
 import { GrokCliExecutor } from "./grok-cli.js";
 import { OllamaLocalExecutor } from "./ollama-local.js";
 import { CommandCodeExecutor } from "./commandcode.js";
@@ -19,7 +18,6 @@ import { XiaomiTokenplanExecutor } from "./xiaomi-tokenplan.js";
 import { ZcodeExecutor } from "./zcode.js";
 import { CodeBuddyExecutor } from "./codebuddy-cn.js";
 import { AgentRouterExecutor } from "./agentrouter.js";
-import { MuseSparkWebExecutor } from "./muse-spark-web.js";
 import { DevinCliExecutor } from "./devin-cli.js";
 import { CodeBuddyIntlExecutor } from "./codebuddy-intl.js";
 import FreebuffExecutor from "./freebuff.js";
@@ -40,7 +38,6 @@ const executors = {
   qwen: new QwenExecutor(),
   opencode: new OpenCodeExecutor(),
   "opencode-go": new OpenCodeGoExecutor(),
-  "grok-web": new GrokWebExecutor(),
   "grok-cli": new GrokCliExecutor(),
   gcli: new GrokCliExecutor(), // Alias
   gb: new GrokCliExecutor(), // Alias (Grok Build)
@@ -51,7 +48,6 @@ const executors = {
   zc: new ZcodeExecutor(), // Alias for zcode
   "codebuddy-cn": new CodeBuddyExecutor(),
   agentrouter: new AgentRouterExecutor(),
-  "muse-spark-web": new MuseSparkWebExecutor(),
   "devin-cli": new DevinCliExecutor(),
   "codebuddy-intl": new CodeBuddyIntlExecutor(),
   freebuff: new FreebuffExecutor(),
@@ -91,7 +87,6 @@ export { CommandCodeExecutor } from "./commandcode.js";
 export { XiaomiTokenplanExecutor } from "./xiaomi-tokenplan.js";
 export { ZcodeExecutor } from "./zcode.js";
 export { CodeBuddyExecutor } from "./codebuddy-cn.js";
-export { MuseSparkWebExecutor } from "./muse-spark-web.js";
 export { DevinCliExecutor } from "./devin-cli.js";
 export { CodeBuddyIntlExecutor } from "./codebuddy-intl.js";
 export { FreebuffExecutor } from "./freebuff.js";

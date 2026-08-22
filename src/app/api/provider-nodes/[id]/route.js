@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { deleteProviderConnectionsByProvider, deleteProviderNode, getProviderConnections, getProviderNodeById, updateProviderConnection, updateProviderNode } from "@/models";
+import { invalidateHubStatusCache } from "@/app/api/hub/status/route.js";
 
 // PUT /api/provider-nodes/[id] - Update provider node
 export async function PUT(request, { params }) {
@@ -79,6 +80,7 @@ export async function PUT(request, { params }) {
       })
     )));
 
+    invalidateHubStatusCache();
     return NextResponse.json({ node: updated });
   } catch (error) {
     console.log("Error updating provider node:", error);
@@ -99,6 +101,7 @@ export async function DELETE(request, { params }) {
     await deleteProviderConnectionsByProvider(id);
     await deleteProviderNode(id);
 
+    invalidateHubStatusCache();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.log("Error deleting provider node:", error);
