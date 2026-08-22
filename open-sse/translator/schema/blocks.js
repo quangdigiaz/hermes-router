@@ -34,6 +34,11 @@ export const RESPONSES_ITEM = {
   SUMMARY_TEXT: "summary_text",
 };
 
+// Cohere v2 content blocks (chat v2 native).
+export const COHERE_BLOCK = {
+  TEXT: "text",
+};
+
 // Valid OpenAI block types (used by filterToOpenAIFormat).
 export const VALID_OPENAI_CONTENT_TYPES = [
   OPENAI_BLOCK.TEXT, OPENAI_BLOCK.IMAGE_URL, OPENAI_BLOCK.IMAGE, OPENAI_BLOCK.INPUT_AUDIO, OPENAI_BLOCK.AUDIO_URL, OPENAI_BLOCK.FILE,

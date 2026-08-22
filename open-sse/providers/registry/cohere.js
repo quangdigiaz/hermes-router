@@ -9,17 +9,18 @@ export default {
     textIcon: "CO",
     website: "https://cohere.com",
     notice: {
+      text: "Cohere v2 native API (api.cohere.com/v2/chat). Live model list from /v1/models. Supports thinking, tools, response_format.",
       apiKeyUrl: "https://dashboard.cohere.com/api-keys",
     },
   },
   category: "apikey",
   transport: {
-    baseUrl: "https://api.cohere.ai/v1/chat/completions",
-    validateUrl: "https://api.cohere.ai/v1/models",
+    baseUrl: "https://api.cohere.com/v2/chat",
+    validateUrl: "https://api.cohere.com/v1/models",
+    format: "cohere",
   },
-  models: [
-    { id: "command-r-plus-08-2024", name: "Command R+ (Aug 2024)" },
-    { id: "command-r-08-2024", name: "Command R (Aug 2024)" },
-    { id: "command-a-03-2025", name: "Command A (Mar 2025)" },
-  ],
+  models: [],
+  modelsFetcher: { url: "https://api.cohere.com/v1/models", type: "openai" },
+  passthroughModels: true,
+  features: { fetchModels: true },
 };

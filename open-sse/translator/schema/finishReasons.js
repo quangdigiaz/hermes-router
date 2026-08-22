@@ -25,3 +25,13 @@ export const GEMINI_FINISH = {
   BLOCKLIST: "BLOCKLIST",
   PROHIBITED_CONTENT: "PROHIBITED_CONTENT",
 };
+
+// Cohere v2 finish_reason values (chat v2).
+export const COHERE_FINISH = {
+  COMPLETE: "COMPLETE",
+  MAX_TOKENS: "MAX_TOKENS",
+  STOP_SEQUENCE: "STOP_SEQUENCE",
+  TOOL_CALL: "TOOL_CALL",
+  ERROR: "ERROR",
+  TIMEOUT: "TIMEOUT",
+};
