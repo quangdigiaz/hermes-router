@@ -127,7 +127,7 @@ export async function resolveConnectionProxyConfig(
           connectionProxyUrl: effectiveProxyUrl,
           connectionNoProxy: noProxy,
 
-          strictProxy: proxyPool.strictProxy === true,
+          strictProxy: proxyPool.strictProxy !== false,
         };
       }
     }
@@ -148,6 +148,7 @@ export async function resolveConnectionProxyConfig(
         proxyPool: null,
 
         ...legacy,
+        strictProxy: providerSpecificData?.strictProxy !== false,
       };
     }
 

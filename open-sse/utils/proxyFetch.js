@@ -278,9 +278,11 @@ export async function proxyAwareFetch(url, options = {}, proxyOptions = null) {
   }
 
   if (proxyUrl) {
+    const isStrict = proxyOptions?.strictProxy !== false;
+
     if (isCircuitOpen(proxyUrl)) {
-      if (proxyOptions?.strictProxy === true) {
-        throw new Error(`[ProxyFetch] Proxy circuit is OPEN (proxy is down): ${proxyUrl}`);
+      if (isStrict) {
+        throw new Error(`[ProxyKillSwitch] Proxy circuit is OPEN (proxy is unreachable/down): ${proxyUrl}. Request blocked to protect account.`);
       }
       return originalFetch(url, options);
     }
@@ -288,13 +290,18 @@ export async function proxyAwareFetch(url, options = {}, proxyOptions = null) {
     try {
       const dispatcher = await getDispatcher(proxyUrl);
       const res = await originalFetch(url, { ...options, dispatcher });
+      if (res.status === 407) {
+        recordProxyFailure(proxyUrl);
+        if (isStrict) {
+          throw new Error(`[ProxyKillSwitch] Proxy authentication failed (407 - expired or unpaid proxy): ${proxyUrl}. Request blocked to protect account.`);
+        }
+      }
       recordProxySuccess(proxyUrl);
       return res;
     } catch (proxyError) {
       recordProxyFailure(proxyUrl);
-      // If strictProxy is enabled, fail hard instead of falling back to direct
-      if (proxyOptions?.strictProxy === true) {
-        throw new Error(`[ProxyFetch] Proxy required but failed (strictProxy=true): ${proxyError.message}`);
+      if (isStrict) {
+        throw new Error(`[ProxyKillSwitch] Proxy connection failed (${proxyError.message}): ${proxyUrl}. Direct fallback blocked to protect account.`);
       }
       console.warn(`[ProxyFetch] Proxy failed, falling back to direct: ${proxyError.message}`);
       return originalFetch(url, options);

@@ -169,6 +169,20 @@ export async function GET() {
           link: targetLink,
           actionLabel: "Re-login",
         });
+      } else if (conn.testStatus === "proxy_unreachable" || conn.lastErrorType === "proxy_error") {
+        incidents.push({
+          severity: "warning",
+          type: "proxy_unreachable",
+          provider: conn.provider,
+          providerName: pInfo.name,
+          providerIcon: pInfo.icon,
+          providerColor: pInfo.color,
+          connectionId: conn.id,
+          connectionName: connName,
+          message: conn.lastError || "Proxy connection unreachable — account safely paused to protect IP",
+          link: targetLink,
+          actionLabel: "Check Proxy →",
+        });
       } else if (conn.testStatus === "error" || (conn.lastError && conn.testStatus !== "active" && conn.testStatus !== "success")) {
         incidents.push({
           severity: "warning",

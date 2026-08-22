@@ -500,6 +500,7 @@ async function fetchWithConnectionProxy(url, options = {}, effectiveProxy = null
     connectionProxyEnabled: true,
     connectionProxyUrl: effectiveProxy.connectionProxyUrl,
     connectionNoProxy: effectiveProxy.connectionNoProxy || "",
+    strictProxy: true,
   });
 }
 
@@ -806,11 +807,12 @@ export async function testSingleConnection(id, overrides = null) {
     if (!proxyResult.ok) {
       const proxyError = proxyResult.error || `Proxy test failed with status ${proxyResult.status}`;
       await updateProviderConnection(id, {
-        testStatus: "error",
-        lastError: proxyError,
+        testStatus: "proxy_unreachable",
+        lastError: `[ProxyQuarantine] ${proxyError}. Account safely paused.`,
+        lastErrorType: "proxy_error",
         lastErrorAt: new Date().toISOString(),
       });
-      return { valid: false, error: proxyError, latencyMs: 0, testedAt: new Date().toISOString() };
+      return { valid: false, error: proxyError, errorType: "proxy_error", latencyMs: 0, testedAt: new Date().toISOString() };
     }
   }
 
