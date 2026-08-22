@@ -3,7 +3,6 @@ import p4 from "./anthropic.js";
 import p5 from "./antigravity.js";
 import p6 from "./assemblyai.js";
 import p7 from "./aws-polly.js";
-import p8 from "./azure.js";
 import p9 from "./black-forest-labs.js";
 import p10 from "./blackbox.js";
 import p11 from "./brave-search.js";
@@ -128,7 +127,6 @@ export default [
   p5,
   p6,
   p7,
-  p8,
   p9,
   p10,
   p11,
