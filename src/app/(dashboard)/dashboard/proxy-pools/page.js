@@ -236,18 +236,19 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
   return (
     <Modal isOpen={isOpen} title="CKEY Proxy Gateway" onClose={onClose}>
       <div className="flex flex-col gap-4">
-        {/* Tab Headers */}
-        <div className="flex border-b border-border/50 gap-2">
+        {/* Segmented Pill Tabs */}
+        <div className="grid grid-cols-2 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-border/40 text-xs font-semibold">
           <button
             type="button"
             onClick={() => setActiveTab("rotating")}
-            className={`pb-2 text-sm font-semibold border-b-2 transition-all ${
+            className={`py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
               activeTab === "rotating"
-                ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
-                : "border-transparent text-text-muted hover:text-text-main"
+                ? "bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                : "text-text-muted hover:text-text-main"
             }`}
           >
-            ⚡ {translate("Proxy Xoay (Rotating)")}
+            <span className="material-symbols-outlined text-[16px]">sync_alt</span>
+            <span>{translate("Proxy Xoay (Rotating)")}</span>
           </button>
           <button
             type="button"
@@ -257,34 +258,36 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                 fetchStaticProxies();
               }
             }}
-            className={`pb-2 text-sm font-semibold border-b-2 transition-all ${
+            className={`py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
               activeTab === "static"
-                ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
-                : "border-transparent text-text-muted hover:text-text-main"
+                ? "bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                : "text-text-muted hover:text-text-main"
             }`}
           >
-            🛡️ {translate("Proxy Tĩnh (Dedicated US/Viettel)")}
+            <span className="material-symbols-outlined text-[16px]">shield_lock</span>
+            <span>{translate("Proxy Tĩnh (Dedicated US)")}</span>
           </button>
         </div>
 
         {activeTab === "rotating" ? (
           <>
-            <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-3 flex flex-col gap-1.5">
-              <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">⚡ CKEY Rotating Proxy</p>
-              <p className="text-xs text-text-muted">
-                Automatically fetch rotating proxy IPs from CKEY and save as Proxy Pools. Proxies auto-rotate IP on WAF errors (Cloudflare 403) or timeout.
-              </p>
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300">
+              <span className="material-symbols-outlined text-[18px] text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">bolt</span>
+              <div className="leading-relaxed">
+                <span className="font-semibold block text-emerald-700 dark:text-emerald-300 mb-0.5">CKEY Rotating Proxy Pool</span>
+                Tự động lấy IP xoay theo tỉnh thành / nhà mạng. Hỗ trợ cơ chế tự xoay IP khi timeout hoặc dính Cloudflare WAF.
+              </div>
             </div>
 
             {/* Mode Toggle */}
-            <div className="flex items-center justify-between p-2 rounded-lg bg-black/5 dark:bg-white/5">
+            <div className="flex items-center justify-between p-2 rounded-xl bg-black/5 dark:bg-white/5">
               <span className="text-xs font-medium">{translate("Creation Mode")}</span>
-              <div className="inline-flex rounded-md bg-black/10 dark:bg-white/10 p-0.5 text-xs">
+              <div className="inline-flex rounded-lg bg-black/10 dark:bg-white/10 p-0.5 text-xs">
                 <button
                   type="button"
                   onClick={() => onChange("mode", "batch")}
-                  className={`px-2.5 py-1 rounded transition-colors ${
-                    isBatch ? "bg-primary text-white font-semibold shadow-xs" : "text-text-muted hover:text-text-main"
+                  className={`px-3 py-1 rounded-md transition-colors ${
+                    isBatch ? "bg-emerald-600 text-white font-semibold shadow-xs" : "text-text-muted hover:text-text-main"
                   }`}
                 >
                   ⚡ {translate("Batch Create (Multiple Pools)")}
@@ -292,8 +295,8 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                 <button
                   type="button"
                   onClick={() => onChange("mode", "single")}
-                  className={`px-2.5 py-1 rounded transition-colors ${
-                    !isBatch ? "bg-primary text-white font-semibold shadow-xs" : "text-text-muted hover:text-text-main"
+                  className={`px-3 py-1 rounded-md transition-colors ${
+                    !isBatch ? "bg-emerald-600 text-white font-semibold shadow-xs" : "text-text-muted hover:text-text-main"
                   }`}
                 >
                   {translate("Single Pool")}
@@ -302,7 +305,10 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
             </div>
 
             <div>
-              <label htmlFor="ckey-modal-keyproxy" className="text-xs font-medium mb-1 block">{translate("Rotating Proxy Key")}</label>
+              <div className="flex items-center justify-between mb-1">
+                <label htmlFor="ckey-modal-keyproxy" className="text-xs font-medium text-text-main">{translate("Rotating Proxy Key")}</label>
+                <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline">ckey.vn ↗</a>
+              </div>
               <Input
                 id="ckey-modal-keyproxy"
                 type="password"
@@ -311,13 +317,10 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                 onChange={(e) => onChange("keyproxy", e.target.value)}
                 disabled={saving}
               />
-              <p className="text-[11px] text-text-muted mt-1">
-                Get from <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">ckey.vn</a> → Rotating Proxy → Proxy Key (auto-filled if saved in Settings)
-              </p>
             </div>
 
             {isBatch ? (
-              <div className="flex flex-col gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+              <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="ckey-modal-count" className="text-xs font-medium mb-1 block">
@@ -328,7 +331,7 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                       value={form.count || 5}
                       onChange={(e) => onChange("count", Number(e.target.value))}
                       disabled={saving}
-                      className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50 font-semibold"
+                      className="w-full h-10 px-3 text-sm rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-2 focus:ring-emerald-500/30 font-semibold"
                     >
                       <option value={2}>2 Pools (Random, Hà Nội)</option>
                       <option value={3}>3 Pools (Random, Hà Nội, HCM)</option>
@@ -347,7 +350,7 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                       value={form.nhamang}
                       onChange={(e) => onChange("nhamang", e.target.value)}
                       disabled={saving}
-                      className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      className="w-full h-10 px-3 text-sm rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                     >
                       <option value="random">{translate("Random (All)")}</option>
                       <option value="viettel">Viettel</option>
@@ -364,7 +367,7 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                     checked={form.autoDistribute !== false}
                     onChange={(e) => onChange("autoDistribute", e.target.checked)}
                     disabled={saving}
-                    className="rounded border-border text-primary focus:ring-primary h-4 w-4"
+                    className="rounded border-border text-emerald-600 focus:ring-emerald-500 h-4 w-4"
                   />
                   <span>{translate("Auto-distribute pools across all Provider Accounts (Account 1 → Pool 1, Account 2 → Pool 2...)")}</span>
                 </label>
@@ -379,7 +382,7 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                       value={form.tinhthanh}
                       onChange={(e) => onChange("tinhthanh", Number(e.target.value))}
                       disabled={saving}
-                      className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      className="w-full h-10 px-3 text-sm rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                     >
                       {Object.entries(TINH_THANH_CODES).map(([code, name]) => (
                         <option key={code} value={code}>{name} (Mã {code})</option>
@@ -394,7 +397,7 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                       value={form.nhamang}
                       onChange={(e) => onChange("nhamang", e.target.value)}
                       disabled={saving}
-                      className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      className="w-full h-10 px-3 text-sm rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                     >
                       <option value="random">{translate("Random (All)")}</option>
                       <option value="viettel">Viettel</option>
@@ -434,97 +437,120 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
         ) : (
           /* Static Proxy Tab */
           <div className="flex flex-col gap-3">
-            <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-3 flex flex-col gap-1">
-              <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">🛡️ CKEY Dedicated Static Proxy</p>
-              <p className="text-xs text-text-muted">
-                IP tĩnh cố định (US / Viettel / VNPT / FPT) chuẩn 1 IP/tài khoản. Phù hợp tuyệt đối cho Freebuff, OpenAI, Claude để chống ban tài khoản.
-              </p>
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300">
+              <span className="material-symbols-outlined text-[18px] text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">verified_user</span>
+              <div className="leading-relaxed">
+                <span className="font-semibold block text-emerald-700 dark:text-emerald-300 mb-0.5">IP Tĩnh Riêng Biệt (Dedicated US/Viettel)</span>
+                Cố định 1 IP cho mỗi tài khoản (Freebuff, OpenAI, Claude). Không thay đổi IP giữa chừng, bảo vệ chống ban tài khoản 100%.
+              </div>
             </div>
 
             <div>
-              <label htmlFor="ckey-modal-api-key" className="text-xs font-medium mb-1 block">CKEY API Key</label>
-              <div className="flex gap-2">
-                <Input
-                  id="ckey-modal-api-key"
-                  type="password"
-                  placeholder="ck_xxxxxxxxxxxx"
-                  value={form.ckeyKey || form.ckeyApiKey || ""}
-                  onChange={(e) => {
-                    onChange("ckeyKey", e.target.value);
-                    onChange("ckeyApiKey", e.target.value);
-                  }}
-                  disabled={staticLoading}
-                  className="flex-1"
-                />
-                <Button
-                  variant="primary"
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-text-main">CKEY API Key</label>
+                <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline">ckey.vn → Profile → API Key ↗</a>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="password"
+                    placeholder="ck_xxxxxxxxxxxxxxxxxxxx"
+                    value={form.ckeyKey || form.ckeyApiKey || ""}
+                    onChange={(e) => {
+                      onChange("ckeyKey", e.target.value);
+                      onChange("ckeyApiKey", e.target.value);
+                    }}
+                    disabled={staticLoading}
+                    className="w-full h-10 px-3 text-sm rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900/80 text-text-main focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  />
+                </div>
+                <button
+                  type="button"
                   onClick={fetchStaticProxies}
                   disabled={!(form.ckeyKey || form.ckeyApiKey)?.trim() || staticLoading}
+                  className="h-10 px-4 rounded-xl font-semibold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center gap-1.5 transition-all disabled:opacity-50 shrink-0"
                 >
-                  {staticLoading ? "Đang tải..." : "🔍 Tải danh sách"}
-                </Button>
+                  <span className="material-symbols-outlined text-[16px]">{staticLoading ? "progress_activity" : "refresh"}</span>
+                  <span>{staticLoading ? "Đang tải..." : "Tải danh sách"}</span>
+                </button>
               </div>
-              <p className="text-[11px] text-text-muted mt-1">
-                Lấy từ <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">ckey.vn</a> → Profile → API Key
-              </p>
             </div>
 
             {staticError && (
-              <p className="text-xs text-red-500 bg-red-500/10 p-2 rounded border border-red-500/20">{staticError}</p>
+              <p className="text-xs text-red-500 bg-red-500/10 p-2.5 rounded-xl border border-red-500/20">{staticError}</p>
             )}
 
             {/* List of Static Proxies */}
             {staticProxies.length > 0 ? (
-              <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
-                <p className="text-xs font-semibold text-text-main">
-                  Danh sách Proxy Tĩnh đang sở hữu ({staticProxies.length}):
-                </p>
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                <div className="flex items-center justify-between pb-1">
+                  <span className="text-xs font-semibold text-text-main flex items-center gap-1.5">
+                    <span>Proxy Đang Sở Hữu</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                      {staticProxies.length}
+                    </span>
+                  </span>
+                </div>
+
                 {staticProxies.map((item) => (
                   <div
                     key={item.idproxy}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 rounded-lg border border-border/60 bg-black/5 dark:bg-white/5 gap-2 text-xs"
+                    className="p-3 rounded-xl border border-black/10 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all hover:border-emerald-500/30 shadow-xs"
                   >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 font-mono font-medium text-text-main">
-                        <span>{item.ip}:{item.port}</span>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-sans bg-primary/10 text-primary font-semibold">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-sm font-bold text-text-main">{item.ip}:{item.port}</span>
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                           {item.loaiproxy || "US"}
                         </span>
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-sans font-semibold ${item.is_expired ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-600"}`}>
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                          item.is_expired
+                            ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
+                            : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                        }`}>
                           {item.is_expired ? "Hết hạn" : "Còn hạn"}
                         </span>
                       </div>
-                      <p className="text-[11px] text-text-muted mt-0.5">
-                        User: {item.user} | Pass: {item.password} | Hạn: {item.time_expire_text || "—"}
-                      </p>
+                      <div className="flex items-center gap-2 text-[11px] text-text-muted flex-wrap">
+                        <span className="font-mono">User: <b className="text-text-main">{item.user}</b></span>
+                        <span>•</span>
+                        <span className="font-mono">Pass: <b className="text-text-main">{item.password}</b></span>
+                        <span>•</span>
+                        <span>Hạn: <span className="text-emerald-600 dark:text-emerald-400 font-medium">{item.time_expire_text || "—"}</span></span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <Button
-                        size="sm"
-                        variant="primary"
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
                         onClick={() => handleSyncStaticToPool(item)}
                         disabled={syncingId === item.idproxy}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center gap-1 transition-all disabled:opacity-50"
                       >
-                        {syncingId === item.idproxy ? "Đang thêm..." : "➕ Vào Pool"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
+                        <span className="material-symbols-outlined text-[14px]">add</span>
+                        <span>{syncingId === item.idproxy ? "Đang thêm..." : "Vào Pool"}</span>
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => handleRenewStatic(item)}
                         disabled={renewingId === item.idproxy}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border hover:bg-black/5 dark:hover:bg-white/5 text-text-main flex items-center gap-1 transition-all disabled:opacity-50"
                         title="Gia hạn thêm 30 ngày"
                       >
-                        {renewingId === item.idproxy ? "..." : "🔄 Gia hạn"}
-                      </Button>
+                        <span className="material-symbols-outlined text-[14px]">autorenew</span>
+                        <span>{renewingId === item.idproxy ? "..." : "Gia hạn"}</span>
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             ) : !staticLoading && (
-              <p className="text-xs text-text-muted italic text-center py-2">
-                Chưa có proxy tĩnh nào được tải. Nhập CKEY API Key và bấm &quot;Tải danh sách&quot;.
-              </p>
+              <div className="text-center py-4 px-3 rounded-xl border border-dashed border-border/70 bg-black/[0.02] dark:bg-white/[0.02]">
+                <span className="material-symbols-outlined text-[28px] text-text-muted mb-1 block">vpn_key</span>
+                <p className="text-xs text-text-muted">
+                  Chưa có proxy tĩnh nào được tải. Vui lòng bấm <b>&quot;Tải danh sách&quot;</b> để quét proxy đang sở hữu.
+                </p>
+              </div>
             )}
 
             {/* Buy Static Proxy Section */}
@@ -532,20 +558,21 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
               <button
                 type="button"
                 onClick={() => setShowBuyForm((v) => !v)}
-                className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1.5"
               >
-                <span>{showBuyForm ? "▼ Thu gọn form mua" : "🛒 + Mua Proxy Tĩnh Mới bằng số dư CKEY"}</span>
+                <span className="material-symbols-outlined text-[16px]">{showBuyForm ? "expand_less" : "shopping_cart"}</span>
+                <span>{showBuyForm ? "Thu gọn form mua proxy" : "Mua Proxy Tĩnh Mới bằng số dư CKEY"}</span>
               </button>
 
               {showBuyForm && (
-                <div className="mt-2 p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 flex flex-col gap-2 text-xs">
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="mt-2 p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 flex flex-col gap-2.5 text-xs">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block mb-1 font-medium">Loại Proxy</label>
+                      <label className="block mb-1 font-medium text-text-main">Loại Proxy</label>
                       <select
                         value={buyForm.loaiproxy}
                         onChange={(e) => setBuyForm((p) => ({ ...p, loaiproxy: e.target.value }))}
-                        className="w-full h-8 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900"
+                        className="w-full h-9 px-2.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main"
                       >
                         <option value="US">US (Hoa Kỳ)</option>
                         <option value="Viettel">Viettel</option>
@@ -554,11 +581,11 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                       </select>
                     </div>
                     <div>
-                      <label className="block mb-1 font-medium">Giao thức</label>
+                      <label className="block mb-1 font-medium text-text-main">Giao thức</label>
                       <select
                         value={buyForm.type}
                         onChange={(e) => setBuyForm((p) => ({ ...p, type: e.target.value }))}
-                        className="w-full h-8 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900"
+                        className="w-full h-9 px-2.5 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main"
                       >
                         <option value="HTTP">HTTP</option>
                         <option value="SOCKS5">SOCKS5</option>
@@ -566,9 +593,9 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block mb-1 font-medium">Proxy User</label>
+                      <label className="block mb-1 font-medium text-text-main">Proxy User</label>
                       <Input
                         value={buyForm.user}
                         onChange={(e) => setBuyForm((p) => ({ ...p, user: e.target.value }))}
@@ -576,7 +603,7 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                       />
                     </div>
                     <div>
-                      <label className="block mb-1 font-medium">Proxy Pass</label>
+                      <label className="block mb-1 font-medium text-text-main">Proxy Pass</label>
                       <Input
                         value={buyForm.password}
                         onChange={(e) => setBuyForm((p) => ({ ...p, password: e.target.value }))}
@@ -585,9 +612,9 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block mb-1 font-medium">Số ngày</label>
+                      <label className="block mb-1 font-medium text-text-main">Số ngày thuê</label>
                       <Input
                         type="number"
                         min="1"
@@ -596,14 +623,15 @@ function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onC
                       />
                     </div>
                     <div className="flex items-end">
-                      <Button
-                        fullWidth
-                        variant="primary"
+                      <button
+                        type="button"
                         onClick={handleBuyStatic}
                         disabled={buying || !(form.ckeyKey || form.ckeyApiKey)?.trim()}
+                        className="w-full h-10 px-4 rounded-xl font-semibold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
                       >
-                        {buying ? "Đang mua..." : "Mua ngay"}
-                      </Button>
+                        <span className="material-symbols-outlined text-[16px]">shopping_bag</span>
+                        <span>{buying ? "Đang xử lý..." : "Mua ngay"}</span>
+                      </button>
                     </div>
                   </div>
                 </div>
