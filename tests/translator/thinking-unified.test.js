@@ -149,8 +149,8 @@ describe("applyThinking per provider format", () => {
     const out = apply("openai", "gpt-4o", { reasoning_effort: "high" }, "openai");
     expect(out.reasoning_effort).toBeUndefined();
   });
-  it("aggregator (siliconflow) GLM model → forced openai reasoning_effort", () => {
-    const out = apply("openai", "zai-org/GLM-5", { reasoning_effort: "high" }, "siliconflow");
+  it("aggregator (openrouter) GLM model → forced openai reasoning_effort", () => {
+    const out = apply("openai", "zai-org/GLM-5", { reasoning_effort: "high" }, "openrouter");
     expect(out.reasoning_effort).toBe("high");
     expect(out.enable_thinking).toBeUndefined();
   });

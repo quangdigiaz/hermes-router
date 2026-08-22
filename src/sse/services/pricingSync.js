@@ -137,7 +137,6 @@ function resolveProvider(entry, modelId) {
     mistral: "mistral",
     cohere: "cohere",
     volcengine: "volcengine",
-    siliconflow: "siliconflow",
     alibaba: "qwen",
     azure: "azure",
     nvidia_nim: "nvidia",

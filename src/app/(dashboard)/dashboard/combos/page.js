@@ -84,7 +84,6 @@ const BUILTIN_CATALOG_GROUPS = [
         description: "Cross-provider DeepSeek routing (V4, V3, R1) across all active connections",
         tags: ["DeepSeek Family", "V4/V3/R1", "Multi-Provider", "Zero 429"],
         seedModels: [
-          "siliconflow/deepseek-v4-flash",
           "freebuff/deepseek-v4-flash",
           "deepseek/deepseek-v4-pro",
         ],
@@ -168,7 +167,6 @@ const BUILTIN_CATALOG_GROUPS = [
         description: "24/7 Agent workhorse: ultra-cheap ($0.14/M), fast, immune to 429 rate limits",
         tags: ["Session Sticky", "Prompt Cache", "Tools", "$0.14/M"],
         seedModels: [
-          "siliconflow/deepseek-v4-flash",
           "bazaarlink/mimo-v2.5",
           "freebuff/deepseek-v4-flash",
           "xiaomi/mimo-v2.5",

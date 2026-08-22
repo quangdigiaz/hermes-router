@@ -65,7 +65,7 @@ const POPULAR_PROVIDERS = [
   "openai", "anthropic", "claude", "gemini", "github", "copilot", "cursor",
   "grok-cli", "kiro", "deepseek", "qwen", "mistral", "openrouter",
   "together", "cohere", "ollama", "cerebras", "sambanova",
-  "siliconflow", "vllm", "vertex", "azure", "aws-polly", "deepgram", "elevenlabs",
+  "vllm", "vertex", "azure", "aws-polly", "deepgram", "elevenlabs",
   "searxng", "jina-ai", "tavily", "perplexing", "alicode", "cline", "roo", "kilo", "codex"
 ];
 

@@ -14,7 +14,7 @@ const ALIAS_TOKENS = [
   "el","openai","vercel","vercel-ai-gateway","anthropic","gemini","openrouter","glm","kimi",
   "minimax","minimax-cn","hf","huggingface","ds","deepseek","cmc","commandcode","xai",
   "mistral","together","cerebras","cohere","nvidia",
-  "siliconflow","dg","deepgram","aai","assemblyai","nb","nanobanana","ch",
+  "dg","deepgram","aai","assemblyai","nb","nanobanana","ch",
   "chutes","ark","volcengine-ark","byteplus","bpm","cursor","vx","vertex","vxp","vertex-partner",
   "gw","grok-web","gcli","gb","grok-build","grok-cli","mimo","xiaomi-mimo",
   "xmtp","xiaomi-tokenplan","cf",

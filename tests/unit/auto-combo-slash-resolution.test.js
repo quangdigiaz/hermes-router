@@ -20,7 +20,7 @@ describe("Auto Combo & Slash Resolution", () => {
     const models = await getComboModels("agent/workhorse");
     expect(models).toBeDefined();
     expect(Array.isArray(models)).toBe(true);
-    expect(models).toContain("siliconflow/deepseek-v4-flash");
+    expect(models).toContain("freebuff/deepseek-v4-flash");
   });
 
   it("identifies combo/auto/best-free in getModelInfo as a combo (provider=null)", async () => {

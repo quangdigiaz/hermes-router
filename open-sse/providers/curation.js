@@ -41,7 +41,6 @@ export const CURATION_DATA = {
   sambanova:       { curatedTier: "free", curatedPriority: 80,  badges: ["free"] },
   zenmux:          { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
   bai:             { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
-  siliconflow:     { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
   llm7:            { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },
   teamorouter:     { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },
   teamo:           { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },

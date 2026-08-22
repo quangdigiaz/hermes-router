@@ -381,7 +381,6 @@ export async function POST(request) {
         case "together":
         case "cerebras":
         case "cohere":
-        case "siliconflow":
         case "ollama":
         case "ollama-local":
         case "assemblyai":

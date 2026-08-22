@@ -66,7 +66,6 @@ import p84 from "./sdwebui.js";
 import p85 from "./searchapi.js";
 import p86 from "./searxng.js";
 import p87 from "./serper.js";
-import p88 from "./siliconflow.js";
 import p89 from "./snowflake.js";
 import p90 from "./stability-ai.js";
 import p91 from "./tavily.js";
@@ -174,7 +173,6 @@ export default [
   p85,
   p86,
   p87,
-  p88,
   p89,
   p90,
   p91,
