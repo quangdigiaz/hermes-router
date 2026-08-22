@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-22
 **Research:** `_tasks/research/2026-08-22_alibaba-coding-removal-investigation.md`
-**Status:** Pending
+**Status:** ✅ Completed (2026-08-22, 27d772d3)
 **Issue:** Gỡ 2 lane Coding Plan như đã làm với DashScope Intl
 
 ---
