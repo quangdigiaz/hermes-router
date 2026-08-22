@@ -28,12 +28,23 @@ describe("Freebuff Isolation & Auto-Combo Safeguards", () => {
   });
 
   it("ensures dedicated freebuff family combos are properly defined", () => {
+    expect(AUTO_TEMPLATES["freebuff/mimo"]).toBeDefined();
     expect(AUTO_TEMPLATES["freebuff/deepseek"]).toBeDefined();
     expect(AUTO_TEMPLATES["freebuff/kimi"]).toBeDefined();
     expect(AUTO_TEMPLATES["freebuff/minimax"]).toBeDefined();
+    expect(AUTO_TEMPLATES["freebuff/glm"]).toBeDefined();
+    expect(AUTO_TEMPLATES["freebuff/gemini"]).toBeDefined();
     expect(AUTO_TEMPLATES["freebuff/best"]).toBeDefined();
 
-    for (const key of ["freebuff/deepseek", "freebuff/kimi", "freebuff/minimax", "freebuff/best"]) {
+    for (const key of [
+      "freebuff/mimo",
+      "freebuff/deepseek",
+      "freebuff/kimi",
+      "freebuff/minimax",
+      "freebuff/glm",
+      "freebuff/gemini",
+      "freebuff/best",
+    ]) {
       const t = AUTO_TEMPLATES[key];
       expect(t.sessionAffinity).toBe(true);
       expect(t.models.every((m) => m.startsWith("freebuff/"))).toBe(true);

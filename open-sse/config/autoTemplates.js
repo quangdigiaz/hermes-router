@@ -170,7 +170,17 @@ export const AUTO_TEMPLATES = {
     ],
   },
 
-  // ─── 4 Dedicated Freebuff Family Combos (Session Pinning & Multi-Account Failover) ───
+  // ─── Dedicated Freebuff Family Combos (Session Pinning & Multi-Account Failover) ───
+  "freebuff/mimo": {
+    strategy: "auto",
+    mode: "value",
+    family: "mimo",
+    sessionAffinity: true,
+    description: "Dedicated Freebuff Xiaomi MiMo 2.5: fast, responsive & great for Vietnamese",
+    models: [
+      "freebuff/mimo-v2.5",
+    ],
+  },
   "freebuff/deepseek": {
     strategy: "auto",
     mode: "value",
@@ -203,14 +213,35 @@ export const AUTO_TEMPLATES = {
       "freebuff/minimax-m2.7",
     ],
   },
+  "freebuff/glm": {
+    strategy: "auto",
+    mode: "value",
+    family: "glm",
+    sessionAffinity: true,
+    description: "Dedicated Freebuff Zhipu GLM 5.1: powerful bilingual & reasoning model",
+    models: [
+      "freebuff/glm-5.1",
+    ],
+  },
+  "freebuff/gemini": {
+    strategy: "auto",
+    mode: "balanced",
+    family: "gemini",
+    sessionAffinity: true,
+    description: "Dedicated Freebuff Google Gemini 3.1 Pro Preview",
+    models: [
+      "freebuff/gemini-3.1-pro-preview",
+    ],
+  },
   "freebuff/best": {
     strategy: "auto",
     mode: "balanced",
     sessionAffinity: true,
-    description: "Freebuff top-tier lineup (DeepSeek Pro, Kimi, MiniMax M3) with session affinity",
+    description: "Freebuff top-tier lineup (DeepSeek Pro, Kimi K2.6, MiMo 2.5, MiniMax M3) with session affinity",
     models: [
       "freebuff/deepseek-v4-pro",
       "freebuff/kimi-k2.6",
+      "freebuff/mimo-v2.5",
       "freebuff/minimax-m3",
     ],
   },
