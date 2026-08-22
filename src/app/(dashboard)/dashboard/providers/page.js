@@ -315,9 +315,19 @@ export default function ProvidersPage() {
     if (filterTier === "cheap") {
       return info.curatedTier === "cheap" || info.badges?.includes("cheap") || info.category === "cheap";
     }
-    return filterTier === "all" || filterTier === "custom" || info.curatedTier === filterTier;
+    if (filterTier === "custom") {
+      return info.curatedTier === "custom";
+    }
+    return filterTier === "all" || info.curatedTier === filterTier;
   };
   const isCustomFilter = filterTier === "custom";
+
+  const matchesCustomOrTier = (nodeId) => {
+    if (filterTier === "issues") {
+      return getProviderStats(nodeId, "apikey").error > 0;
+    }
+    return filterTier === "all" || filterTier === "custom";
+  };
 
   const compatibleProviders = providerNodes
     .filter((node) => node.type === "openai-compatible")
@@ -329,7 +339,7 @@ export default function ProvidersPage() {
       apiType: node.apiType,
     }))
     .filter((p) => matchSearch(p.name))
-    .filter((p) => filterTier !== "issues" || getProviderStats(p.id, "apikey").error > 0);
+    .filter((p) => matchesCustomOrTier(p.id));
 
   const anthropicCompatibleProviders = providerNodes
     .filter((node) => node.type === "anthropic-compatible")
@@ -340,7 +350,7 @@ export default function ProvidersPage() {
       textIcon: "AC",
     }))
     .filter((p) => matchSearch(p.name))
-    .filter((p) => filterTier !== "issues" || getProviderStats(p.id, "apikey").error > 0);
+    .filter((p) => matchesCustomOrTier(p.id));
 
   const oauthEntries = sortByPriority(
     Object.entries(OAUTH_PROVIDERS).filter(([key, info]) => !info.hidden && matchSearch(info.name) && matchesTier(info, key, "oauth")),
@@ -463,7 +473,7 @@ export default function ProvidersPage() {
         />
       ) : (
         <>
-          {!hasAnyResult && (
+          {!hasAnyResult && !isCustomFilter && (
             <div className="text-center py-8 border border-dashed border-border rounded-xl">
               <span className="material-symbols-outlined text-[32px] text-text-muted mb-2">
                 search_off
