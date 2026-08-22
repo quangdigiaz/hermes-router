@@ -671,10 +671,6 @@ async function testApiKeyConnection(connection, effectiveProxy = null) {
         const res = await fetchWithConnectionProxy("https://api.deepseek.com/models", { headers: { Authorization: `Bearer ${connection.apiKey}` } }, effectiveProxy);
         return { valid: res.ok, error: res.ok ? null : "Invalid API key" };
       }
-      case "groq": {
-        const res = await fetchWithConnectionProxy("https://api.groq.com/openai/v1/models", { headers: { Authorization: `Bearer ${connection.apiKey}` } }, effectiveProxy);
-        return { valid: res.ok, error: res.ok ? null : "Invalid API key" };
-      }
       case "mistral": {
         const res = await fetchWithConnectionProxy("https://api.mistral.ai/v1/models", { headers: { Authorization: `Bearer ${connection.apiKey}` } }, effectiveProxy);
         return { valid: res.ok, error: res.ok ? null : "Invalid API key" };
@@ -693,10 +689,6 @@ async function testApiKeyConnection(connection, effectiveProxy = null) {
       }
       case "together": {
         const res = await fetchWithConnectionProxy("https://api.together.xyz/v1/models", { headers: { Authorization: `Bearer ${connection.apiKey}` } }, effectiveProxy);
-        return { valid: res.ok, error: res.ok ? null : "Invalid API key" };
-      }
-      case "fireworks": {
-        const res = await fetchWithConnectionProxy("https://api.fireworks.ai/inference/v1/models", { headers: { Authorization: `Bearer ${connection.apiKey}` } }, effectiveProxy);
         return { valid: res.ok, error: res.ok ? null : "Invalid API key" };
       }
       case "cerebras": {

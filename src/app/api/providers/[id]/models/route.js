@@ -249,13 +249,11 @@ const PROVIDER_MODELS_CONFIG = {
 
   // OpenAI-compatible API key providers
   deepseek: createOpenAIModelsConfig("https://api.deepseek.com/models"),
-  groq: createOpenAIModelsConfig("https://api.groq.com/openai/v1/models"),
   xai: createOpenAIModelsConfig("https://api.x.ai/v1/models"),
   mistral: createOpenAIModelsConfig("https://api.mistral.ai/v1/models"),
   perplexity: createOpenAIModelsConfig("https://api.perplexity.ai/v1/models"),
   "perplexity-agent": createOpenAIModelsConfig("https://api.perplexity.ai/v1/models"),
   together: createOpenAIModelsConfig("https://api.together.xyz/v1/models"),
-  fireworks: createOpenAIModelsConfig("https://api.fireworks.ai/inference/v1/models"),
   cerebras: createOpenAIModelsConfig("https://api.cerebras.ai/v1/models"),
   cohere: createOpenAIModelsConfig("https://api.cohere.ai/v1/models"),
   nebius: createOpenAIModelsConfig("https://api.studio.nebius.ai/v1/models"),

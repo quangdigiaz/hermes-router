@@ -36,11 +36,9 @@ export const CURATION_DATA = {
 
   // Free tier / no-auth / budget
   ollama:          { curatedTier: "free", curatedPriority: 95,  badges: ["free", "local"] },
-  groq:            { curatedTier: "free", curatedPriority: 90,  badges: ["free", "fast", "popular"] },
   openrouter:      { curatedTier: "free", curatedPriority: 90,  badges: ["free", "popular"] },
   "cloudflare-ai": { curatedTier: "free", curatedPriority: 85,  badges: ["free"] },
   sambanova:       { curatedTier: "free", curatedPriority: 80,  badges: ["free"] },
-  deepinfra:       { curatedTier: "free", curatedPriority: 75,  badges: ["free", "cheap"] },
   zenmux:          { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
   bai:             { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
   siliconflow:     { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },

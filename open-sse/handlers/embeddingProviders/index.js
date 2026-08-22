@@ -4,7 +4,7 @@ import gemini from "./gemini.js";
 import openaiCompatNode from "./openaiCompatNode.js";
 
 const OPENAI_COMPAT_PROVIDERS = [
-  "openai", "openrouter", "mistral", "voyage-ai", "fireworks",
+  "openai", "openrouter", "mistral", "voyage-ai",
   "together", "nebius", "github", "nvidia", "jina-ai",
   "vercel-ai-gateway",
 ];

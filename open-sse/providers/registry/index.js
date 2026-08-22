@@ -18,14 +18,12 @@ import p23 from "./comfyui.js";
 import p24 from "./commandcode.js";
 import p25 from "./cursor.js";
 import p27 from "./deepgram.js";
-import p28 from "./deepinfra.js";
 import p29 from "./deepseek.js";
 import p30 from "./edge-tts.js";
 import p31 from "./elevenlabs.js";
 import p32 from "./exa.js";
 import p33 from "./fal-ai.js";
 import p34 from "./firecrawl.js";
-import p35 from "./fireworks.js";
 import p36 from "./gemini-cli.js";
 import p37 from "./gemini.js";
 import p38 from "./github.js";
@@ -36,8 +34,6 @@ import p42 from "./google-pse.js";
 import p43 from "./google-tts.js";
 import p44 from "./grok-cli.js";
 import p45 from "./grok-web.js";
-import p46 from "./groq.js";
-import p47 from "./heroku.js";
 import p48 from "./huggingface.js";
 import p49 from "./hyperbolic.js";
 import p50 from "./iflow.js";
@@ -138,14 +134,12 @@ export default [
   p24,
   p25,
   p27,
-  p28,
   p29,
   p30,
   p31,
   p32,
   p33,
   p34,
-  p35,
   p36,
   p37,
   p38,
@@ -156,8 +150,6 @@ export default [
   p43,
   p44,
   p45,
-  p46,
-  p47,
   p48,
   p49,
   p50,

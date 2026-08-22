@@ -42,7 +42,7 @@ export const SKILLS = [
   {
     id: "hermes-router-stt",
     name: "Speech-to-Text",
-    description: "Transcribe audio via OpenAI Whisper, Groq, Gemini, Deepgram, AssemblyAI…",
+    description: "Transcribe audio via OpenAI Whisper, Gemini, Deepgram, AssemblyAI…",
     endpoint: "/v1/audio/transcriptions",
     icon: "mic",
   },

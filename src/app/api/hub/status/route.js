@@ -30,7 +30,6 @@ function extractProvider(text = "") {
   if (lower.includes("freebuff")) return "freebuff";
   if (lower.includes("openrouter")) return "openrouter";
   if (lower.includes("deepseek")) return "deepseek";
-  if (lower.includes("groq")) return "groq";
   if (lower.includes("kiro")) return "kiro";
   return null;
 }
