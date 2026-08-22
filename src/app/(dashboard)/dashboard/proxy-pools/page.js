@@ -673,23 +673,41 @@ function PoolRow({ pool, selected, testing, rotating, onSelect, onToggle, onTest
             <Badge variant="default" size="sm">{pool.boundConnectionCount || 0} bound</Badge>
           </div>
           <p className="text-xs text-text-muted truncate mt-1">{pool.proxyUrl}</p>
-          {pool.time_expire_text && <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">Hạn: {pool.time_expire_text}</p>}
           {pool.noProxy ? <p className="text-xs text-text-muted truncate">No proxy: {pool.noProxy}</p> : null}
-          <p className="text-[11px] text-text-muted mt-1">Last tested: {formatDateTime(pool.lastTestedAt)}{pool.lastError ? ` · ${pool.lastError}` : ""}</p>
+          <p className="text-[11px] text-text-muted mt-1 flex items-center gap-1.5 flex-wrap">
+            {pool.time_expire_text && (
+              <>
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium">Hạn: {pool.time_expire_text}</span>
+                <span>·</span>
+              </>
+            )}
+            <span>Last tested: {formatDateTime(pool.lastTestedAt)}</span>
+            {pool.lastError ? <span>· {pool.lastError}</span> : null}
+          </p>
         </div>
       </div>
-      <div className="flex items-center justify-end gap-1">
-        <Toggle size="sm" checked={pool.isActive === true} onChange={onToggle} title={pool.isActive ? "Disable" : "Enable"} />
-        {pool.type === "ckey" && (
-          <button type="button" onClick={onRotateCkey} className="p-2 rounded hover:bg-emerald-500/10 text-emerald-500"            title="{translate('Rotate CKEY IP')}" disabled={rotating}>
-            <span className="material-symbols-outlined text-[18px]" style={rotating ? { animation: "spin 1s linear infinite" } : undefined}>sync</span>
-          </button>
-        )}
-        <button type="button" onClick={onTest} className="p-2 rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-primary" title="Test proxy" disabled={testing}>
+      <div className="flex items-center justify-end gap-1 shrink-0">
+        <div className="w-11 flex justify-center">
+          <Toggle size="sm" checked={pool.isActive === true} onChange={onToggle} title={pool.isActive ? "Disable" : "Enable"} />
+        </div>
+        <div className="w-8 flex justify-center">
+          {pool.type === "ckey" ? (
+            <button type="button" onClick={onRotateCkey} className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-colors" title={translate("Rotate CKEY IP")} disabled={rotating}>
+              <span className="material-symbols-outlined text-[18px]" style={rotating ? { animation: "spin 1s linear infinite" } : undefined}>sync</span>
+            </button>
+          ) : (
+            <span className="w-8" />
+          )}
+        </div>
+        <button type="button" onClick={onTest} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-primary transition-colors" title="Test proxy" disabled={testing}>
           <span className="material-symbols-outlined text-[18px]" style={testing ? { animation: "spin 1s linear infinite" } : undefined}>{testing ? "progress_activity" : "science"}</span>
         </button>
-        <button type="button" onClick={onEdit} className="p-2 rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-primary" title="Edit"><span className="material-symbols-outlined text-[18px]">edit</span></button>
-        <button type="button" onClick={onDelete} className="p-2 rounded hover:bg-red-500/10 text-red-500" title="Delete"><span className="material-symbols-outlined text-[18px]">delete</span></button>
+        <button type="button" onClick={onEdit} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-primary transition-colors" title="Edit">
+          <span className="material-symbols-outlined text-[18px]">edit</span>
+        </button>
+        <button type="button" onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors" title="Delete">
+          <span className="material-symbols-outlined text-[18px]">delete</span>
+        </button>
       </div>
     </div>
   );
