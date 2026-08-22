@@ -33,82 +33,6 @@ exports[`GOLDEN buildHeaders (default executor providers) > agentrouter → head
 }
 `;
 
-exports[`GOLDEN buildHeaders (default executor providers) > alibaba → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > alicode → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > alicode-intl → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > alims-intl → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
 exports[`GOLDEN buildHeaders (default executor providers) > anthropic → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
@@ -235,25 +159,6 @@ exports[`GOLDEN buildHeaders (default executor providers) > bazaarlink → heade
 }
 `;
 
-exports[`GOLDEN buildHeaders (default executor providers) > blackbox → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
 exports[`GOLDEN buildHeaders (default executor providers) > bluesminds → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
@@ -274,25 +179,6 @@ exports[`GOLDEN buildHeaders (default executor providers) > bluesminds → heade
 `;
 
 exports[`GOLDEN buildHeaders (default executor providers) > byteplus → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > cerebras → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
     "Accept": "text/event-stream",
@@ -379,10 +265,10 @@ exports[`GOLDEN buildHeaders (default executor providers) > cline → headers (a
     "Authorization": "Bearer <TOK>",
     "Content-Type": "application/json",
     "HTTP-Referer": "https://cline.bot",
-    "User-Agent": "HermesRouter/1.4.2",
+    "User-Agent": "HermesRouter/1.4.6",
     "X-CLIENT-TYPE": "hermes-router",
-    "X-CLIENT-VERSION": "1.4.2",
-    "X-CORE-VERSION": "1.4.2",
+    "X-CLIENT-VERSION": "1.4.6",
+    "X-CORE-VERSION": "1.4.6",
     "X-IS-MULTIROOT": "false",
     "X-PLATFORM": "win32",
     "X-PLATFORM-VERSION": "v24.13.0",
@@ -392,10 +278,10 @@ exports[`GOLDEN buildHeaders (default executor providers) > cline → headers (a
     "Authorization": "Bearer <TOK>",
     "Content-Type": "application/json",
     "HTTP-Referer": "https://cline.bot",
-    "User-Agent": "HermesRouter/1.4.2",
+    "User-Agent": "HermesRouter/1.4.6",
     "X-CLIENT-TYPE": "hermes-router",
-    "X-CLIENT-VERSION": "1.4.2",
-    "X-CORE-VERSION": "1.4.2",
+    "X-CLIENT-VERSION": "1.4.6",
+    "X-CORE-VERSION": "1.4.6",
     "X-IS-MULTIROOT": "false",
     "X-PLATFORM": "win32",
     "X-PLATFORM-VERSION": "v24.13.0",
@@ -406,10 +292,10 @@ exports[`GOLDEN buildHeaders (default executor providers) > cline → headers (a
     "Authorization": "Bearer <TOK>",
     "Content-Type": "application/json",
     "HTTP-Referer": "https://cline.bot",
-    "User-Agent": "HermesRouter/1.4.2",
+    "User-Agent": "HermesRouter/1.4.6",
     "X-CLIENT-TYPE": "hermes-router",
-    "X-CLIENT-VERSION": "1.4.2",
-    "X-CORE-VERSION": "1.4.2",
+    "X-CLIENT-VERSION": "1.4.6",
+    "X-CORE-VERSION": "1.4.6",
     "X-IS-MULTIROOT": "false",
     "X-PLATFORM": "win32",
     "X-PLATFORM-VERSION": "v24.13.0",
@@ -469,6 +355,7 @@ exports[`GOLDEN buildHeaders (default executor providers) > codebuddy-cn → hea
     "Authorization": "Bearer <TOK>",
     "Content-Type": "application/json",
     "User-Agent": "CLI/2.108.1 CodeBuddy/2.108.1",
+    "X-Domain": "copilot.tencent.com",
     "X-IDE-Name": "CLI",
     "X-IDE-Type": "CLI",
     "X-Product": "SaaS",
@@ -479,6 +366,7 @@ exports[`GOLDEN buildHeaders (default executor providers) > codebuddy-cn → hea
     "Authorization": "Bearer <TOK>",
     "Content-Type": "application/json",
     "User-Agent": "CLI/2.108.1 CodeBuddy/2.108.1",
+    "X-Domain": "copilot.tencent.com",
     "X-IDE-Name": "CLI",
     "X-IDE-Type": "CLI",
     "X-Product": "SaaS",
@@ -490,6 +378,7 @@ exports[`GOLDEN buildHeaders (default executor providers) > codebuddy-cn → hea
     "Authorization": "Bearer <TOK>",
     "Content-Type": "application/json",
     "User-Agent": "CLI/2.108.1 CodeBuddy/2.108.1",
+    "X-Domain": "copilot.tencent.com",
     "X-IDE-Name": "CLI",
     "X-IDE-Type": "CLI",
     "X-Product": "SaaS",
@@ -539,25 +428,6 @@ exports[`GOLDEN buildHeaders (default executor providers) > codebuddy-intl → h
 }
 `;
 
-exports[`GOLDEN buildHeaders (default executor providers) > codestral → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
 exports[`GOLDEN buildHeaders (default executor providers) > cohere → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
@@ -577,45 +447,7 @@ exports[`GOLDEN buildHeaders (default executor providers) > cohere → headers (
 }
 `;
 
-exports[`GOLDEN buildHeaders (default executor providers) > databricks → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
 exports[`GOLDEN buildHeaders (default executor providers) > deepgram → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > deepinfra → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
     "Accept": "text/event-stream",
@@ -948,7 +780,7 @@ exports[`GOLDEN buildHeaders (default executor providers) > kimi → headers (ap
     "X-Msh-Device-Model": "Windows x64",
     "X-Msh-Device-Name": "Quang-PC",
     "X-Msh-Platform": "hermes-router",
-    "X-Msh-Version": "1.4.2",
+    "X-Msh-Version": "1.4.6",
     "x-api-key": "<CRED>",
   },
   "nonStream": {
@@ -959,7 +791,7 @@ exports[`GOLDEN buildHeaders (default executor providers) > kimi → headers (ap
     "X-Msh-Device-Model": "Windows x64",
     "X-Msh-Device-Name": "Quang-PC",
     "X-Msh-Platform": "hermes-router",
-    "X-Msh-Version": "1.4.2",
+    "X-Msh-Version": "1.4.6",
     "x-api-key": "<CRED>",
   },
   "oauth": {
@@ -971,7 +803,7 @@ exports[`GOLDEN buildHeaders (default executor providers) > kimi → headers (ap
     "X-Msh-Device-Model": "Windows x64",
     "X-Msh-Device-Name": "Quang-PC",
     "X-Msh-Platform": "hermes-router",
-    "X-Msh-Version": "1.4.2",
+    "X-Msh-Version": "1.4.6",
     "x-api-key": "<CRED>",
   },
 }
@@ -1123,6 +955,25 @@ exports[`GOLDEN buildHeaders (default executor providers) > muse-spark-web → h
 `;
 
 exports[`GOLDEN buildHeaders (default executor providers) > nebius → headers (apiKey / oauth) 1`] = `
+{
+  "apiKey": {
+    "Accept": "text/event-stream",
+    "Authorization": "Bearer <TOK>",
+    "Content-Type": "application/json",
+  },
+  "nonStream": {
+    "Authorization": "Bearer <TOK>",
+    "Content-Type": "application/json",
+  },
+  "oauth": {
+    "Accept": "text/event-stream",
+    "Authorization": "Bearer <TOK>",
+    "Content-Type": "application/json",
+  },
+}
+`;
+
+exports[`GOLDEN buildHeaders (default executor providers) > nousresearch → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
     "Accept": "text/event-stream",
@@ -1680,34 +1531,6 @@ exports[`GOLDEN buildUrl (default executor providers) > agentrouter → url (str
 }
 `;
 
-exports[`GOLDEN buildUrl (default executor providers) > alibaba → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
-  "stream": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > alicode → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://coding.dashscope.aliyuncs.com/v1/chat/completions",
-  "stream": "https://coding.dashscope.aliyuncs.com/v1/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > alicode-intl → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://coding-intl.dashscope.aliyuncs.com/v1/chat/completions",
-  "stream": "https://coding-intl.dashscope.aliyuncs.com/v1/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > alims-intl → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
-  "stream": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
-}
-`;
-
 exports[`GOLDEN buildUrl (default executor providers) > anthropic → url (stream + non-stream) 1`] = `
 {
   "nonStream": "https://api.anthropic.com/v1/messages",
@@ -1745,15 +1568,8 @@ exports[`GOLDEN buildUrl (default executor providers) > baidu → url (stream + 
 
 exports[`GOLDEN buildUrl (default executor providers) > bazaarlink → url (stream + non-stream) 1`] = `
 {
-  "nonStream": "https://bazaarlink.ai/api/v1/chat/completions",
-  "stream": "https://bazaarlink.ai/api/v1/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > blackbox → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://api.blackbox.ai/v1/chat/completions",
-  "stream": "https://api.blackbox.ai/v1/chat/completions",
+  "nonStream": "https://api.bazaarlink.ai/v1/chat/completions",
+  "stream": "https://api.bazaarlink.ai/v1/chat/completions",
 }
 `;
 
@@ -1766,15 +1582,8 @@ exports[`GOLDEN buildUrl (default executor providers) > bluesminds → url (stre
 
 exports[`GOLDEN buildUrl (default executor providers) > byteplus → url (stream + non-stream) 1`] = `
 {
-  "nonStream": "https://ark.ap-southeast.bytepluses.com/api/coding/v3/chat/completions",
-  "stream": "https://ark.ap-southeast.bytepluses.com/api/coding/v3/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > cerebras → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://api.cerebras.ai/v1/chat/completions",
-  "stream": "https://api.cerebras.ai/v1/chat/completions",
+  "nonStream": "https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions",
+  "stream": "https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions",
 }
 `;
 
@@ -1820,24 +1629,10 @@ exports[`GOLDEN buildUrl (default executor providers) > codebuddy-intl → url (
 }
 `;
 
-exports[`GOLDEN buildUrl (default executor providers) > codestral → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://codestral.mistral.ai/v1/chat/completions",
-  "stream": "https://codestral.mistral.ai/v1/chat/completions",
-}
-`;
-
 exports[`GOLDEN buildUrl (default executor providers) > cohere → url (stream + non-stream) 1`] = `
 {
-  "nonStream": "https://api.cohere.ai/v1/chat/completions",
-  "stream": "https://api.cohere.ai/v1/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > databricks → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://adb-0000000000000000.0.azuredatabricks.net/serving-endpoints",
-  "stream": "https://adb-0000000000000000.0.azuredatabricks.net/serving-endpoints",
+  "nonStream": "https://api.cohere.com/v2/chat",
+  "stream": "https://api.cohere.com/v2/chat",
 }
 `;
 
@@ -1845,13 +1640,6 @@ exports[`GOLDEN buildUrl (default executor providers) > deepgram → url (stream
 {
   "nonStream": "https://api.deepgram.com/v1/listen",
   "stream": "https://api.deepgram.com/v1/listen",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > deepinfra → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://api.deepinfra.com/v1/openai/chat/completions",
-  "stream": "https://api.deepinfra.com/v1/openai/chat/completions",
 }
 `;
 
@@ -2020,6 +1808,13 @@ exports[`GOLDEN buildUrl (default executor providers) > nebius → url (stream +
 {
   "nonStream": "https://api.studio.nebius.ai/v1/chat/completions",
   "stream": "https://api.studio.nebius.ai/v1/chat/completions",
+}
+`;
+
+exports[`GOLDEN buildUrl (default executor providers) > nousresearch → url (stream + non-stream) 1`] = `
+{
+  "nonStream": "https://inference-api.nousresearch.com/v1/chat/completions",
+  "stream": "https://inference-api.nousresearch.com/v1/chat/completions",
 }
 `;
 

@@ -47,7 +47,6 @@ export const AUTO_TEMPLATES = {
     description: "Cross-provider DeepSeek auto-routing (V4, V3, R1) across all active connections",
     seedModels: [
       "siliconflow/deepseek-v4-flash",
-      "deepinfra/deepseek-v4-flash",
       "freebuff/deepseek-v4-flash",
       "deepseek/deepseek-v4-pro",
     ],
@@ -116,7 +115,6 @@ export const AUTO_TEMPLATES = {
     description: "24/7 Agent workhorse: ultra-cheap ($0.14), fast, 429-resistant",
     models: [
       "siliconflow/deepseek-v4-flash",
-      "deepinfra/deepseek-v4-flash",
       "bazaarlink/mimo-v2.5",
       "freebuff/deepseek-v4-flash",
       "xiaomi/mimo-v2.5",

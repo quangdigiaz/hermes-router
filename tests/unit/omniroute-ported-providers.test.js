@@ -7,30 +7,21 @@ import { isProviderAllowed } from "@/sse/services/auth.js";
 /**
  * Providers ported from OmniRoute in this batch. They are expected to be
  * simple OpenAI-compatible API-key providers with default executor.
+ *
+ * NOTE (2026-08-22): pruned ids whose registry files never existed on disk
+ * (ai21, alibaba, baseten, bytez, codestral, databricks, friendliai,
+ * galadriel, gigachat, nanogpt, predibase, publicai, wandb; heroku pruned
+ * 2026-08-22 — registry file missing on disk) — the shipped
+ * list was aspirational, not factual.
  */
 const PORTED_PROVIDER_IDS = [
-  "ai21",
-  "alibaba",
-  "baseten",
-  "bytez",
-  "codestral",
-  "databricks",
-  "deepinfra",
-  "friendliai",
-  "galadriel",
-  "gigachat",
-  "heroku",
   "llamagate",
-  "nanogpt",
   "nscale",
   "ovhcloud",
-  "predibase",
-  "publicai",
   "sambanova",
   "snowflake",
   "upstage",
   "volcengine",
-  "wandb",
 ];
 
 describe("SambaNova compatibility metadata", () => {
@@ -59,7 +50,15 @@ describe("SambaNova compatibility metadata", () => {
   });
 });
 
+const REMOVED_PROVIDER_IDS = ["deepinfra", "heroku"];
+
 describe("OmniRoute-ported providers", () => {
+  it("does not register removed providers", () => {
+    for (const id of REMOVED_PROVIDER_IDS) {
+      expect(REGISTRY.find((e) => e.id === id), `${id} should be removed`).toBeUndefined();
+    }
+  });
+
   it("registers every ported provider exactly once", () => {
     const ids = REGISTRY.map((e) => e.id);
     expect(new Set(ids).size).toBe(ids.length);

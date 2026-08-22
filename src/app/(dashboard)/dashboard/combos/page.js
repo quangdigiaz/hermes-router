@@ -85,7 +85,6 @@ const BUILTIN_CATALOG_GROUPS = [
         tags: ["DeepSeek Family", "V4/V3/R1", "Multi-Provider", "Zero 429"],
         seedModels: [
           "siliconflow/deepseek-v4-flash",
-          "deepinfra/deepseek-v4-flash",
           "freebuff/deepseek-v4-flash",
           "deepseek/deepseek-v4-pro",
         ],
@@ -170,7 +169,6 @@ const BUILTIN_CATALOG_GROUPS = [
         tags: ["Session Sticky", "Prompt Cache", "Tools", "$0.14/M"],
         seedModels: [
           "siliconflow/deepseek-v4-flash",
-          "deepinfra/deepseek-v4-flash",
           "bazaarlink/mimo-v2.5",
           "freebuff/deepseek-v4-flash",
           "xiaomi/mimo-v2.5",
