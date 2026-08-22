@@ -131,7 +131,15 @@ export default function IncidentAlerts({ data: propData, loading: propLoading })
   const [internalData, setInternalData] = useState(null);
   const [internalLoading, setInternalLoading] = useState(true);
   const [expanded, setExpanded] = useState(true);
-  const [dismissedKeys, setDismissedKeys] = useState(() => new Set());
+  const [dismissedKeys, setDismissedKeys] = useState(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const saved = localStorage.getItem("hermes_dismissed_incidents");
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
 
   const isControlled = propData !== undefined;
   const data = isControlled ? propData : internalData;
@@ -168,8 +176,8 @@ export default function IncidentAlerts({ data: propData, loading: propLoading })
   }
 
   const rawIncidents = data?.incidents || [];
-  const incidents = rawIncidents.filter((issue, i) => {
-    const key = `${issue.type}-${issue.provider || ""}-${issue.connectionId || ""}-${i}`;
+  const incidents = rawIncidents.filter((issue) => {
+    const key = `${issue.type}-${issue.provider || ""}-${issue.connectionId || ""}-${issue.message || ""}`;
     return !dismissedKeys.has(key);
   });
 
@@ -187,7 +195,13 @@ export default function IncidentAlerts({ data: propData, loading: propLoading })
   }
 
   const handleDismiss = (key) => {
-    setDismissedKeys((prev) => new Set(prev).add(key));
+    setDismissedKeys((prev) => {
+      const updated = new Set(prev).add(key);
+      try {
+        localStorage.setItem("hermes_dismissed_incidents", JSON.stringify(Array.from(updated)));
+      } catch {}
+      return updated;
+    });
   };
 
   return (
@@ -228,8 +242,8 @@ export default function IncidentAlerts({ data: propData, loading: propLoading })
 
       {expanded && (
         <div className="px-4 pb-3 space-y-1.5">
-          {incidents.map((issue, i) => {
-            const key = `${issue.type}-${issue.provider || ""}-${issue.connectionId || ""}-${i}`;
+          {incidents.map((issue) => {
+            const key = `${issue.type}-${issue.provider || ""}-${issue.connectionId || ""}-${issue.message || ""}`;
             return (
               <IssueRow
                 key={key}

@@ -5,6 +5,7 @@ import {
   getProviderNodeById,
   getProviderNodes,
   getProxyPoolById,
+  deleteProviderConnection,
 } from "@/models";
 import { APIKEY_PROVIDERS } from "@/shared/constants/config";
 import { AI_PROVIDERS, FREE_TIER_PROVIDERS, WEB_COOKIE_PROVIDERS, isOpenAICompatibleProvider, isAnthropicCompatibleProvider, isCustomEmbeddingProvider } from "@/shared/constants/providers";
@@ -61,14 +62,22 @@ export async function GET() {
       }
     } catch { }
 
-    // Hide sensitive fields, enrich name for compatible providers
-    const safeConnections = connections.map(c => {
+    // Hide sensitive fields, enrich name for compatible providers, and purge orphaned connections
+    const safeConnections = [];
+    for (const c of connections) {
       const isCompatible = isOpenAICompatibleProvider(c.provider) || isAnthropicCompatibleProvider(c.provider);
+      const isRegistered = isCompatible || !!AI_PROVIDERS[c.provider] || !!nodeNameMap[c.provider];
+      if (!isRegistered) {
+        // Provider was deleted from codebase — purge orphaned row from DB
+        deleteProviderConnection(c.id).catch(() => {});
+        continue;
+      }
+
       const name = isCompatible
         ? (c.name || nodeNameMap[c.provider] || c.providerSpecificData?.nodeName || c.provider)
         : c.name;
       const providerDef = AI_PROVIDERS[c.provider];
-      return {
+      safeConnections.push({
         ...c,
         name,
         alias: providerDef?.alias || null,
@@ -77,8 +86,8 @@ export async function GET() {
         accessToken: undefined,
         refreshToken: undefined,
         idToken: undefined,
-      };
-    });
+      });
+    }
 
     // Build alias → provider ID map for frontend ACL resolution
     const aliasMap = {};

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getProviderConnections, getProviderNodes } from "@/models";
+import { getProviderConnections, getProviderNodes, deleteProviderConnection } from "@/models";
 import { getDisabledModels, enableModels } from "@/lib/disabledModelsDb";
 import { getCustomModels } from "@/lib/db";
 import { getProviderModels } from "open-sse/config/providerModels.js";
@@ -103,6 +103,14 @@ export async function GET() {
 
     for (const conn of connections) {
       if (conn.isActive === false) continue;
+
+      // Filter out orphaned connections from providers that were removed from codebase
+      const isRegistered = !!AI_PROVIDERS[conn.provider] || nodesMap.has(conn.provider);
+      if (!isRegistered) {
+        // Auto-purge orphaned DB connection asynchronously
+        deleteProviderConnection(conn.id).catch(() => {});
+        continue;
+      }
 
       const pInfo = providerInfoCache.get(conn.provider) || (() => {
         const info = resolveProviderInfo(conn.provider, nodesMap);
