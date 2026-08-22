@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getProviderConnections, getProviderNodes, deleteProviderConnection } from "@/models";
+import { getProviderConnections, getProviderNodes, getProxyPools, deleteProviderConnection } from "@/models";
 import { getDisabledModels, enableModels } from "@/lib/disabledModelsDb";
 import { getCustomModels } from "@/lib/db";
 import { getProviderModels } from "open-sse/config/providerModels.js";
@@ -84,12 +84,13 @@ export async function GET() {
   }
 
   try {
-    const [connections, providerNodes, disabledModels, customModels, proxyFitness, freebuffState, stats] =
+    const [connections, providerNodes, disabledModels, customModels, proxyPoolsList, proxyFitness, freebuffState, stats] =
       await Promise.all([
         getProviderConnections().catch(() => []),
         getProviderNodes().catch(() => []),
         getDisabledModels().catch(() => ({})),
         getCustomModels().catch(() => []),
+        getProxyPools().catch(() => []),
         poolFitnessSnapshot().catch(() => ({ pools: [] })),
         Promise.resolve(sessionStateSize()).catch(() => ({})),
         getUsageStats("today").catch(() => null),
@@ -338,8 +339,9 @@ export async function GET() {
       }
     }
 
-    const totalPools = proxyFitness.pools?.length || 0;
-    const healthyPools = proxyFitness.pools?.filter((p) => !p.unfit?.length).length || 0;
+    const totalPools = (proxyPoolsList || []).length;
+    const activePools = (proxyPoolsList || []).filter((p) => p.isActive !== false);
+    const healthyPools = activePools.filter((p) => p.testStatus !== "error" && p.testStatus !== "unreachable").length;
     const proxyHealthPercent = totalPools > 0 ? Math.round((healthyPools / totalPools) * 100) : 100;
 
     let connModelLocks = 0;

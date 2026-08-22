@@ -140,15 +140,15 @@ export default function LiveQuotaTracker({ data: propData, loading: propLoading 
       <QuotaRow
         icon="🛡️"
         label={translate("Proxy Pools")}
-        value={proxy.healthy || 0}
-        max={proxy.total || 1}
+        value={proxy.healthy ?? 0}
+        max={proxy.total ?? 0}
         sub={
-          proxy.total > 0
-            ? `${proxy.percent ?? 100}% ${translate("fitness")}`
+          (proxy.total ?? 0) > 0
+            ? `${proxy.healthy ?? 0}/${proxy.total} ${translate("pools active")} (${proxy.percent ?? 100}% ${translate("fitness")})`
             : translate("No pools configured")
         }
         color="brand"
-        mode={proxy.total > 0 ? "health" : "usage"}
+        mode={(proxy.total ?? 0) > 0 ? "health" : "usage"}
       />
 
       {activeCooldowns > 0 && (
