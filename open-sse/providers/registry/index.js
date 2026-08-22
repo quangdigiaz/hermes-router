@@ -124,6 +124,7 @@ import p123 from "./fastrouter.js";
 import p124 from "./tokenharbor.js";
 import p125 from "./teamorouter.js";
 import p126 from "./bai.js";
+import p127 from "./nousresearch.js";
 
 export default [
   p0,
@@ -251,5 +252,6 @@ export default [
   p123,
   p124,
   p125,
-  p126
+  p126,
+  p127
 ];

@@ -94,6 +94,11 @@ export const MODEL_LIMITS = {
   "deepseek-reasoner":    { maxContext: 64000,   maxOutput: 8192,  vision: false, audio: false },
   "mimo-v2.5":            { maxContext: 64000,   maxOutput: 4096,  vision: false, audio: false },
   "MiniMax-M3":           { maxContext: 1000000, maxOutput: 8192,  vision: false, audio: false },
+
+  // Nous Research Hermes 4
+  "Hermes-4-405B":        { maxContext: 131072,  maxOutput: 16384, vision: false, audio: false },
+  "Hermes-4-70B":         { maxContext: 131072,  maxOutput: 16384, vision: false, audio: false },
+  "Hermes-4.3-36B":       { maxContext: 131072,  maxOutput: 16384, vision: false, audio: false },
 };
 
 export function getModelLimits(model) {
