@@ -840,45 +840,7 @@ exports[`GOLDEN buildHeaders (default executor providers) > muse-spark-web → h
 }
 `;
 
-exports[`GOLDEN buildHeaders (default executor providers) > nebius → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
 exports[`GOLDEN buildHeaders (default executor providers) > nousresearch → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > nscale → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
     "Accept": "text/event-stream",
@@ -980,44 +942,6 @@ exports[`GOLDEN buildHeaders (default executor providers) > openrouter → heade
 `;
 
 exports[`GOLDEN buildHeaders (default executor providers) > orcarouter → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > ovhcloud → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > perplexity → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
     "Accept": "text/event-stream",
@@ -1648,24 +1572,10 @@ exports[`GOLDEN buildUrl (default executor providers) > muse-spark-web → url (
 }
 `;
 
-exports[`GOLDEN buildUrl (default executor providers) > nebius → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://api.studio.nebius.ai/v1/chat/completions",
-  "stream": "https://api.studio.nebius.ai/v1/chat/completions",
-}
-`;
-
 exports[`GOLDEN buildUrl (default executor providers) > nousresearch → url (stream + non-stream) 1`] = `
 {
   "nonStream": "https://inference-api.nousresearch.com/v1/chat/completions",
   "stream": "https://inference-api.nousresearch.com/v1/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > nscale → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://inference.api.nscale.com/v1/chat/completions",
-  "stream": "https://inference.api.nscale.com/v1/chat/completions",
 }
 `;
 
@@ -1701,20 +1611,6 @@ exports[`GOLDEN buildUrl (default executor providers) > orcarouter → url (stre
 {
   "nonStream": "https://api.orcarouter.ai/v1/chat/completions",
   "stream": "https://api.orcarouter.ai/v1/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > ovhcloud → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions",
-  "stream": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > perplexity → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://api.perplexity.ai/chat/completions",
-  "stream": "https://api.perplexity.ai/chat/completions",
 }
 `;
 

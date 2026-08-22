@@ -8,6 +8,7 @@
 
 | Phase / Feature | Status | Document References |
 |---|---|---|
+| **Remove Perplexity (thường) + Perplexity Web + OVHcloud + Nscale + Nebius** | ✅ **Completed & Verified — build OK, server restart 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_perplexity-ovhcloud-nscale-nebius-provider-removal.md`<br>Plan: `playbooks/plan-remove-perplexity-ovhcloud-nscale-nebius.md` ✅ Closed |
 | **Remove LlamaGate + Hyperbolic + Morph Providers** | ✅ **Completed & Verified — build OK, server restart 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_llamagate-hyperbolic-morph-provider-removal.md`<br>Plan: `playbooks/plan-remove-llamagate-hyperbolic-morph.md` ✅ Closed |
 | **Remove Heroku AI Provider** | ✅ **Completed & Verified — build OK, server restart 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_heroku-ai-provider-removal.md`<br>Plan: `playbooks/plan-remove-heroku-provider.md` ✅ Closed |
 | **Remove DeepInfra Provider (free-label sai + model list fabricate)** | ✅ **Completed & Verified — build OK, server restarted 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_deepinfra-free-tier-label-investigation.md`<br>Plan: `playbooks/plan-remove-deepinfra-provider.md` ✅ Closed |

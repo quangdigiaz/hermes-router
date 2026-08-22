@@ -433,16 +433,6 @@
     "format": "grok-web",
     "authType": "cookie"
   },
-  "heroku": {
-    "baseUrl": "https://us.inference.heroku.com/v1/chat/completions",
-    "validateUrl": "https://us.inference.heroku.com/v1/models",
-    "format": "openai"
-  },
-  "hyperbolic": {
-    "baseUrl": "https://api.hyperbolic.xyz/v1/chat/completions",
-    "validateUrl": "https://api.hyperbolic.xyz/v1/models",
-    "format": "openai"
-  },
   "iflow": {
     "baseUrl": "https://apis.iflow.cn/v1/chat/completions",
     "thinkingFormat": "openai",
@@ -543,11 +533,6 @@
       "qHost": "https://q.us-east-1.amazonaws.com",
       "limitsPath": "/getUsageLimits"
     }
-  },
-  "llamagate": {
-    "baseUrl": "https://llamagate.ai/v1/chat/completions",
-    "validateUrl": "https://llamagate.ai/v1/models",
-    "format": "openai"
   },
   "minimax-cn": {
     "baseUrl": "https://api.minimaxi.com/anthropic/v1/messages",
@@ -659,16 +644,6 @@
     },
     "format": "openai"
   },
-  "nebius": {
-    "baseUrl": "https://api.studio.nebius.ai/v1/chat/completions",
-    "validateUrl": "https://api.studio.nebius.ai/v1/models",
-    "format": "openai"
-  },
-  "nscale": {
-    "baseUrl": "https://inference.api.nscale.com/v1/chat/completions",
-    "validateUrl": "https://inference.api.nscale.com/v1/models",
-    "format": "openai"
-  },
   "nvidia": {
     "baseUrl": "https://integrate.api.nvidia.com/v1/chat/completions",
     "validateUrl": "https://integrate.api.nvidia.com/v1/models",
@@ -714,25 +689,10 @@
     "forceStream": true,
     "format": "openai"
   },
-  "ovhcloud": {
-    "baseUrl": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions",
-    "validateUrl": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/models",
-    "format": "openai"
-  },
   "perplexity-agent": {
     "baseUrl": "https://api.perplexity.ai/v1/responses",
     "validateUrl": "https://api.perplexity.ai/v1/models",
     "format": "openai-responses"
-  },
-  "perplexity-web": {
-    "baseUrl": "https://www.perplexity.ai/rest/sse/perplexity_ask",
-    "format": "perplexity-web",
-    "authType": "cookie"
-  },
-  "perplexity": {
-    "baseUrl": "https://api.perplexity.ai/chat/completions",
-    "validateUrl": "https://api.perplexity.ai/models",
-    "format": "openai"
   },
   "qoder": {
     "baseUrl": "https://api3.qoder.sh/algo/api/v2/service/pro/sse/agent_chat_generation",
@@ -979,11 +939,6 @@
   "llm7": {
     "baseUrl": "https://api.llm7.io/v1/chat/completions",
     "validateUrl": "https://api.llm7.io/v1/models",
-    "format": "openai"
-  },
-  "morph": {
-    "baseUrl": "https://api.morphllm.com/v1/chat/completions",
-    "validateUrl": "https://api.morphllm.com/v1/models",
     "format": "openai"
   },
   "tencent": {

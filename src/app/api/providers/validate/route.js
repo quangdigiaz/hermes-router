@@ -378,11 +378,9 @@ export async function POST(request) {
         case "deepseek":
         case "xai":
         case "mistral":
-        case "perplexity":
         case "together":
         case "cerebras":
         case "cohere":
-        case "nebius":
         case "siliconflow":
         case "ollama":
         case "ollama-local":
@@ -556,41 +554,6 @@ export async function POST(request) {
           if (res.status === 401 || res.status === 403) {
             isValid = false;
             error = "Invalid SSO cookie — re-paste from grok.com DevTools → Cookies → sso";
-          } else {
-            isValid = true;
-          }
-          break;
-        }
-
-        case "perplexity-web": {
-          const sessionToken = cleanCookie(apiKey, "__Secure-next-auth.session-token");
-          const tz = typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "UTC";
-          const res = await fetch("https://www.perplexity.ai/rest/sse/perplexity_ask", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "text/event-stream",
-              Origin: "https://www.perplexity.ai",
-              Referer: "https://www.perplexity.ai/",
-              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-              "X-App-ApiClient": "default",
-              "X-App-ApiVersion": "2.18",
-              Cookie: `__Secure-next-auth.session-token=${sessionToken}`,
-            },
-            body: JSON.stringify({
-              query_str: "ping",
-              params: {
-                query_str: "ping", search_focus: "internet", mode: "concise", model_preference: "pplx_pro",
-                sources: ["web"], attachments: [],
-                frontend_uuid: crypto.randomUUID(), frontend_context_uuid: crypto.randomUUID(),
-                version: "2.18", language: "en-US", timezone: tz,
-                search_recency_filter: null, is_incognito: true, use_schematized_api: true, last_backend_uuid: null,
-              },
-            }),
-          });
-          if (res.status === 401 || res.status === 403) {
-            isValid = false;
-            error = "Invalid session cookie — re-paste __Secure-next-auth.session-token from perplexity.ai";
           } else {
             isValid = true;
           }

@@ -47,8 +47,6 @@ import p59 from "./local-device.js";
 import p61 from "./minimax-cn.js";
 import p62 from "./minimax.js";
 import p63 from "./mistral.js";
-import p64 from "./nebius.js";
-import p65 from "./nscale.js";
 import p66 from "./nvidia.js";
 import p67 from "./ollama-local.js";
 import p68 from "./ollama.js";
@@ -57,10 +55,7 @@ import p70 from "./opencode-go.js";
 import p71 from "./opencode.js";
 import p72 from "./openrouter.js";
 import p73 from "./orcarouter.js";
-import p74 from "./ovhcloud.js";
 import p75 from "./perplexity-agent.js";
-import p76 from "./perplexity-web.js";
-import p77 from "./perplexity.js";
 import p78 from "./playht.js";
 import p79 from "./qoder.js";
 import p80 from "./qwen.js";
@@ -160,8 +155,6 @@ export default [
   p61,
   p62,
   p63,
-  p64,
-  p65,
   p66,
   p67,
   p68,
@@ -170,10 +163,7 @@ export default [
   p71,
   p72,
   p73,
-  p74,
   p75,
-  p76,
-  p77,
   p78,
   p79,
   p80,

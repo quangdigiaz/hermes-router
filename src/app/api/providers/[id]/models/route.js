@@ -251,12 +251,10 @@ const PROVIDER_MODELS_CONFIG = {
   deepseek: createOpenAIModelsConfig("https://api.deepseek.com/models"),
   xai: createOpenAIModelsConfig("https://api.x.ai/v1/models"),
   mistral: createOpenAIModelsConfig("https://api.mistral.ai/v1/models"),
-  perplexity: createOpenAIModelsConfig("https://api.perplexity.ai/v1/models"),
-  "perplexity-agent": createOpenAIModelsConfig("https://api.perplexity.ai/v1/models"),
+        "perplexity-agent": createOpenAIModelsConfig("https://api.perplexity.ai/v1/models"),
   together: createOpenAIModelsConfig("https://api.together.xyz/v1/models"),
   cerebras: createOpenAIModelsConfig("https://api.cerebras.ai/v1/models"),
   cohere: createOpenAIModelsConfig("https://api.cohere.ai/v1/models"),
-  nebius: createOpenAIModelsConfig("https://api.studio.nebius.ai/v1/models"),
   siliconflow: createOpenAIModelsConfig("https://api.siliconflow.com/v1/models"),
   ollama: createOpenAIModelsConfig("https://ollama.com/api/tags"),
   // ollama-local: url resolved dynamically below via providerSpecificData.baseUrl

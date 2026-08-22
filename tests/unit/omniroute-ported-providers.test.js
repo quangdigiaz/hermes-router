@@ -15,8 +15,6 @@ import { isProviderAllowed } from "@/sse/services/auth.js";
  * list was aspirational, not factual.
  */
 const PORTED_PROVIDER_IDS = [
-  "nscale",
-  "ovhcloud",
   "sambanova",
   "snowflake",
   "upstage",
@@ -49,7 +47,7 @@ describe("SambaNova compatibility metadata", () => {
   });
 });
 
-const REMOVED_PROVIDER_IDS = ["deepinfra", "heroku", "llamagate", "hyperbolic", "morph"];
+const REMOVED_PROVIDER_IDS = ["deepinfra", "heroku", "llamagate", "hyperbolic", "morph", "ovhcloud", "nscale", "nebius", "perplexity", "perplexity-web"];
 
 describe("OmniRoute-ported providers", () => {
   it("does not register removed providers", () => {
