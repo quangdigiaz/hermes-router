@@ -3,7 +3,7 @@
 **Date:** 2026-08-22
 **Mode:** `--hard` (translator 2 chiều + 11 SSE event types)
 **Research:** `_tasks/research/2026-08-22_cohere-v2-chat-api-investigation.md`
-**Status:** ✅ Completed (2026-08-22, --auto) — 11/11 tests pass, build pass
+**Status:** ✅ Completed & Closed (2026-08-22, --auto, pushed bba78366) — 11/11 tests pass, build pass
 **Estimated Effort:** ~0.5-1 ngày
 **Cook Command:** `/cook playbooks/plans/cohere-v2-native/plan.md --auto`
 
