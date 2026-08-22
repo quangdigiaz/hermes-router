@@ -523,25 +523,6 @@ exports[`GOLDEN buildHeaders (default executor providers) > fastrouter → heade
 }
 `;
 
-exports[`GOLDEN buildHeaders (default executor providers) > fireworks → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
 exports[`GOLDEN buildHeaders (default executor providers) > freebuff → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
@@ -670,44 +651,6 @@ exports[`GOLDEN buildHeaders (default executor providers) > grok-cli → headers
     "User-Agent": "grok-shell/0.2.99 (linux; x86_64)",
     "x-grok-client-identifier": "grok-shell",
     "x-grok-client-version": "0.2.99",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > groq → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > heroku → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
   },
 }
 `;
@@ -1664,13 +1607,6 @@ exports[`GOLDEN buildUrl (default executor providers) > fastrouter → url (stre
 }
 `;
 
-exports[`GOLDEN buildUrl (default executor providers) > fireworks → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://api.fireworks.ai/inference/v1/chat/completions",
-  "stream": "https://api.fireworks.ai/inference/v1/chat/completions",
-}
-`;
-
 exports[`GOLDEN buildUrl (default executor providers) > freebuff → url (stream + non-stream) 1`] = `
 {
   "nonStream": "https://www.codebuff.com/api/v1/chat/completions",
@@ -1710,20 +1646,6 @@ exports[`GOLDEN buildUrl (default executor providers) > grok-cli → url (stream
 {
   "nonStream": "https://cli-chat-proxy.grok.com/v1/responses",
   "stream": "https://cli-chat-proxy.grok.com/v1/responses",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > groq → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://api.groq.com/openai/v1/chat/completions",
-  "stream": "https://api.groq.com/openai/v1/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > heroku → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://us.inference.heroku.com/v1/chat/completions",
-  "stream": "https://us.inference.heroku.com/v1/chat/completions",
 }
 `;
 
