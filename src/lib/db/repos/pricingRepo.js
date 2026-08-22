@@ -99,6 +99,7 @@ export async function updatePricing(pricingData) {
     }
   });
   invalidate();
+  try { const { invalidateComboPricingCache } = await import("open-sse/services/combo.js"); invalidateComboPricingCache(); } catch {}
   return await getUserPricing();
 }
 
@@ -129,12 +130,14 @@ export async function resetPricing(provider, model) {
 export async function resetAllPricing() {
   await pricingKv.clear();
   invalidate();
+  try { const { invalidateComboPricingCache } = await import("open-sse/services/combo.js"); invalidateComboPricingCache(); } catch {}
   return {};
 }
 
 export async function resetSyncedPricing() {
   await syncedPricingKv.clear();
   invalidate();
+  try { const { invalidateComboPricingCache } = await import("open-sse/services/combo.js"); invalidateComboPricingCache(); } catch {}
   return {};
 }
 

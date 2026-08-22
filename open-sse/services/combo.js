@@ -12,6 +12,7 @@ import { isFreeModel, getBenchmarkForModel, getPromoPriceSync, getModelLimits } 
 import { detectModelFamily } from "../config/modelFamilies.js";
 import { emitNotification } from "@/lib/notificationBus.js";
 import { getFreeCustomModelsMap } from "@/lib/customModelFreeCache.js";
+import { canonicalModelBase } from "../utils/canonicalModelBase.js";
 
 let getPricingBulk = null;
 
@@ -231,27 +232,44 @@ export function detectRequiredCapabilities(body) {
  * @param {string[]} models - Array of model strings (provider/model format)
  * @returns {Promise<string[]>} Sorted models (cheapest first)
  */
+function blendedCostFromPricing(pricing) {
+  if (!pricing) return Infinity;
+  const input = typeof pricing.input === "number" ? pricing.input : Infinity;
+  const output = typeof pricing.output === "number" ? pricing.output : input;
+  if (!Number.isFinite(input) || !Number.isFinite(output)) return Infinity;
+  return input * 0.3 + output * 0.7;
+}
+
 export async function sortModelsByCost(models) {
   if (!models || models.length <= 1) return models;
 
   const { table: pricingTable, freeMap } = await getCachedPricing();
 
-  const withCost = models.map((m) => {
-    const slash = typeof m === "string" ? m.indexOf("/") : -1;
-    const provider = slash > 0 ? m.slice(0, slash) : "";
-    const model = slash > 0 ? m.slice(slash + 1) : m;
+  const withCost = models
+    .map((m) => {
+      const slash = typeof m === "string" ? m.indexOf("/") : -1;
+      const provider = slash > 0 ? m.slice(0, slash) : "";
+      const model = slash > 0 ? m.slice(slash + 1) : m;
 
-    // Check promo first
-    const promo = getPromoPriceSync(model);
-    if (promo) {
-      return { model: m, cost: promo.promoInput };
-    }
+      if (freeMap.get(provider)?.has(model) || isFreeModel(model, provider)) {
+        return { model: m, cost: 0, free: true };
+      }
+      const promo = getPromoPriceSync(model);
+      if (promo) {
+        const promoCost = (promo.promoInput ?? 0) * 0.3 + (promo.promoOutput ?? promo.promoInput ?? 0) * 0.7;
+        return { model: m, cost: promoCost, free: promo.promoInput === 0 };
+      }
 
-    const cost = (freeMap.get(provider)?.has(model) ? 0 : pricingTable?.[provider]?.[model]?.input) ?? Infinity;
-    return { model: m, cost };
-  });
+      const pr = pricingTable?.[provider]?.[model];
+      const cost = pr ? blendedCostFromPricing(pr) : Infinity;
+      return { model: m, cost, free: false };
+    })
+    .filter((x) => !(x.cost === 0 && !x.free)); // drop unpriced placeholder (Orca: blended==0 → not free)
 
-  return withCost
+  // If filter removed all, fallback to original (avoid empty sort)
+  const effective = withCost.length > 0 ? withCost : models.map((m) => ({ model: m, cost: Infinity }));
+
+  return effective
     .sort((a, b) => a.cost - b.cost)
     .map((x) => x.model);
 }
@@ -325,10 +343,16 @@ async function selectAutoModels(models, options = {}) {
     } else {
       const promo = getPromoPriceSync(model);
       if (promo) {
-        cost = promo.promoInput;
+        cost = (promo.promoInput ?? 0) * 0.3 + (promo.promoOutput ?? promo.promoInput ?? 0) * 0.7;
       } else {
-        cost = pricingTable?.[provider]?.[model]?.input ?? Infinity;
+        const pr = pricingTable?.[provider]?.[model];
+        cost = pr ? blendedCostFromPricing(pr) : Infinity;
       }
+    }
+
+    // Drop unpriced placeholder (Orca: blended==0 not free → exclude)
+    if (!free && cost === 0) {
+      return null;
     }
 
     const bench = getBenchmarkForModel(model);
@@ -372,9 +396,32 @@ async function selectAutoModels(models, options = {}) {
     return memoHit.value;
   }
 
+  // Strict coverage for balanced: needs BOTH quality and cost (Orca)
+  let scoringPool = validCandidates;
+  if (autoMode === "balanced") {
+    const scored = validCandidates.filter((c) => c.benchmark && typeof c.benchmark.quality === "number");
+    if (scored.length > 0) scoringPool = scored; // drop unscored entirely, fallback keeps eligible
+    else {
+      // No quality data at all → fallback to cheapest within eligible (Orca)
+      scoringPool.sort((a, b) => a.cost - b.cost);
+      const fallback = scoringPool.map((c) => c.model);
+      // Dedup sibling versions before return
+      const seenBases = new Set();
+      const deduped = [];
+      for (const id of fallback) {
+        const base = canonicalModelBase(id.split("/").pop() || id);
+        if (seenBases.has(base)) continue;
+        seenBases.add(base);
+        deduped.push(id);
+      }
+      scoreMemo.set(memoKey, { value: deduped, ts: Date.now() });
+      return deduped;
+    }
+  }
+
   // Group by baseModel to pick best provider per model
   const modelGroups = {};
-  for (const c of validCandidates) {
+  for (const c of scoringPool) {
     const key = c.baseModel;
     if (!modelGroups[key]) modelGroups[key] = [];
     modelGroups[key].push(c);
@@ -404,8 +451,16 @@ async function selectAutoModels(models, options = {}) {
     });
   }
 
-  // Always return string[]
-  const result = bestCandidates.map((c) => c.model);
+  // Dedup sibling versions (Orca: canonical_model_base)
+  const rawResult = bestCandidates.map((c) => c.model);
+  const seenBases = new Set();
+  const result = [];
+  for (const id of rawResult) {
+    const base = canonicalModelBase(id.split("/").pop() || id);
+    if (seenBases.has(base)) continue;
+    seenBases.add(base);
+    result.push(id);
+  }
   scoreMemo.set(memoKey, { value: result, ts: Date.now() });
   return result;
 }

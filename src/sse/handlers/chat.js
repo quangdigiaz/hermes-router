@@ -165,6 +165,27 @@ export async function handleChat(request, clientRawRequest = null) {
     return errorResponse(HTTP_STATUS.FORBIDDEN, "Chat/LLM requests are not allowed for this API key");
   }
 
+  // Cross-provider prompt cache (Orca): deterministic requests (temp 0 or seed) exact-match HIT $0
+  // Only for non-streaming; streaming body is piped, not JSON-serializable for cache
+  let promptCacheKey = null;
+  let promptCacheHit = false;
+  if (!body.stream) {
+    try {
+      const { isCacheable, getPromptCacheKey, getPromptCache } = await import("open-sse/services/promptCache.js");
+      if (isCacheable(body)) {
+        promptCacheKey = getPromptCacheKey(body);
+        const cached = getPromptCache(promptCacheKey);
+        if (cached) {
+          log.info("CACHE", `PROMPT HIT ${modelStr} key=${String(promptCacheKey).slice(0, 32)}`);
+          const headers = { "Content-Type": "application/json", "x-orca-cache": "HIT", "x-orca-resolved-model": cached._resolvedModel || modelStr };
+          promptCacheHit = true;
+          // Return cached JSON directly (already OpenAI shape)
+          return new Response(JSON.stringify(cached), { status: 200, headers });
+        }
+      }
+    } catch {}
+  }
+
   // Bypass naming/warmup requests before combo rotation to avoid wasting rotation slots
   const userAgent = request?.headers?.get("user-agent") || "";
   const bypassResponse = handleBypassRequest(body, modelStr, userAgent, !!settings.ccFilterNaming);
@@ -185,7 +206,7 @@ export async function handleChat(request, clientRawRequest = null) {
 
     if (comboStrategy === "fusion") {
       log.info("CHAT", `Combo "${modelStr}" with ${comboModels.length} models (strategy: fusion)`);
-      return handleFusionChat({
+      const fusionResult = await handleFusionChat({
         body,
         models: comboModels,
         handleSingleModel: (b, m, isPanel) => {
@@ -201,11 +222,19 @@ export async function handleChat(request, clientRawRequest = null) {
         judgeModel: comboStrategies[modelStr]?.judgeModel,
         tuning: comboStrategies[modelStr]?.fusionTuning,
       });
+      if (promptCacheKey && fusionResult?.ok) {
+        try {
+          const { setPromptCache } = await import("open-sse/services/promptCache.js");
+          const data = await fusionResult.clone().json().catch(() => null);
+          if (data) { data._resolvedModel = modelStr; setPromptCache(promptCacheKey, data); fusionResult.headers.set("x-orca-cache", "MISS"); }
+        } catch {}
+      }
+      return fusionResult;
     }
 
     const comboStickyLimit = settings.comboStickyRoundRobinLimit;
     log.info("CHAT", `Combo "${modelStr}" with ${comboModels.length} models (strategy: ${comboStrategy}, sticky: ${comboStickyLimit})`);
-    return handleComboChat({
+    const comboResult = await handleComboChat({
       body,
       models: comboModels,
       handleSingleModel: (b, m, opts) => handleSingleModelChat(b, m, clientRawRequest, request, apiKey, apiKeyInfo, opts, modelStr),
@@ -217,10 +246,36 @@ export async function handleChat(request, clientRawRequest = null) {
       timeoutMs: comboStrategies[modelStr]?.targetTimeoutMs ?? null,
       queueDepth: comboStrategies[modelStr]?.queueDepth ?? null,
     });
+    if (promptCacheKey && comboResult?.ok) {
+      try {
+        const { setPromptCache } = await import("open-sse/services/promptCache.js");
+        const data = await comboResult.clone().json().catch(() => null);
+        if (data) { data._resolvedModel = modelStr; setPromptCache(promptCacheKey, data); }
+        try { comboResult.headers.set("x-orca-cache", "MISS"); comboResult.headers.set("x-orca-resolved-model", modelStr); } catch {}
+      } catch {}
+    }
+    return comboResult;
   }
 
-  // Single model request
-  return handleSingleModelChat(body, modelStr, clientRawRequest, request, apiKey, apiKeyInfo);
+  // Single model request (with prompt cache store)
+  const singleResult = await handleSingleModelChat(body, modelStr, clientRawRequest, request, apiKey, apiKeyInfo);
+  if (promptCacheKey && singleResult?.ok && !singleResult.headers?.get?.("x-orca-cache")) {
+    try {
+      const { setPromptCache } = await import("open-sse/services/promptCache.js");
+      const cloned = singleResult.clone();
+      const data = await cloned.json().catch(() => null);
+      if (data) {
+        data._resolvedModel = modelStr;
+        setPromptCache(promptCacheKey, data);
+        const headers = new Headers(singleResult.headers);
+        headers.set("x-orca-cache", "MISS");
+        headers.set("x-orca-resolved-model", modelStr);
+        return new Response(JSON.stringify(data), { status: singleResult.status, headers });
+      }
+      singleResult.headers.set("x-orca-cache", "MISS");
+    } catch {}
+  }
+  return singleResult;
 }
 
 /**
