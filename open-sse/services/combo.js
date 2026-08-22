@@ -9,6 +9,7 @@ import { getCapabilitiesForModel } from "../providers/capabilities.js";
 import { extractTextContent } from "../translator/formats/gemini.js";
 import { resolveTemplate } from "../config/autoTemplates.js";
 import { isFreeModel, getBenchmarkForModel, getPromoPriceSync, getModelLimits } from "../config/benchmarks.js";
+import { PROVIDERS } from "../providers/index.js";
 import { detectModelFamily } from "../config/modelFamilies.js";
 import { emitNotification } from "@/lib/notificationBus.js";
 import { getFreeCustomModelsMap } from "@/lib/customModelFreeCache.js";
@@ -252,7 +253,7 @@ export async function sortModelsByCost(models) {
       const provider = slash > 0 ? m.slice(0, slash) : "";
       const model = slash > 0 ? m.slice(slash + 1) : m;
 
-      if (freeMap.get(provider)?.has(model) || isFreeModel(model, provider)) {
+      if (freeMap.get(provider)?.has(model) || isFreeModel(model, provider, PROVIDERS)) {
         return { model: m, cost: 0, free: true };
       }
       // Live Command Code pricing (deals 2×/5× auto-applied) — no hardcode
@@ -260,7 +261,7 @@ export async function sortModelsByCost(models) {
       if (live) {
         return { model: m, cost: blendedCostFromPricing(live), free: false };
       }
-      const promo = getPromoPriceSync(model);
+      const promo = getPromoPriceSync(model, provider);
       if (promo) {
         const promoCost = (promo.promoInput ?? 0) * 0.3 + (promo.promoOutput ?? promo.promoInput ?? 0) * 0.7;
         return { model: m, cost: promoCost, free: promo.promoInput === 0 };
@@ -341,7 +342,7 @@ async function selectAutoModels(models, options = {}) {
     }
 
     // Manual free tag on custom models takes priority over benchmark pricing
-    const free = (freeMap.get(provider)?.has(model)) || isFreeModel(model, provider);
+    const free = (freeMap.get(provider)?.has(model)) || isFreeModel(model, provider, PROVIDERS);
     let cost = Infinity;
 
     if (free) {
@@ -351,7 +352,7 @@ async function selectAutoModels(models, options = {}) {
       if (live) {
         cost = blendedCostFromPricing(live);
       } else {
-        const promo = getPromoPriceSync(model);
+        const promo = getPromoPriceSync(model, provider);
         if (promo) {
           cost = (promo.promoInput ?? 0) * 0.3 + (promo.promoOutput ?? promo.promoInput ?? 0) * 0.7;
         } else {
@@ -504,7 +505,7 @@ export async function getRotatedModels(models, comboName, strategy, stickyLimit 
         const slash = m.indexOf("/");
         const provider = slash > 0 ? m.slice(0, slash) : "";
         const model = slash > 0 ? m.slice(slash + 1) : m;
-        return freeCustomMap.get(provider)?.has(model) || isFreeModel(model, provider);
+        return freeCustomMap.get(provider)?.has(model) || isFreeModel(model, provider, PROVIDERS);
       });
       if (freeModels.length > 0) candidatePool = freeModels;
     }

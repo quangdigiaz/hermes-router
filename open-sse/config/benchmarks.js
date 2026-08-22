@@ -122,40 +122,24 @@ export const PROMO_PRICING = [
   { model: "mimo-v2.5-pro",          promoInput: 0.435, promoOutput: 0.87,  validUntil: null },
   { model: "MiniMax-M3",             promoInput: 0.30,  promoOutput: 1.20,  validUntil: null },
   { model: "gemini-3.7-flash",       promoInput: 0.75, promoOutput: 3.75, validUntil: "2026-12-31T23:59:59Z" },
-  // BytePlus ModelArk / Volcengine Ark — Free Credits Only (500K tokens per model)
-  { model: "DeepSeek-V4-Flash-GA",   promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "DeepSeek-V4-Flash",      promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "DeepSeek-V4-Pro",        promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Doubao-Seed-2.1-turbo",  promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Doubao-Seed-2.0-Code",   promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Doubao-Seed-2.0-pro",    promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Doubao-Seed-2.0-lite",   promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Doubao-Seed-2.0-mini",   promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Doubao-Seed-Code",       promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "GLM-5.2",                promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "GLM-5.1",                promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "MiniMax-M2.7",           promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Kimi-K2.6",              promoInput: 0, promoOutput: 0, validUntil: null },
-  // BytePlus ModelArk (international) — Free Credits Only (500K tokens/model)
-  { model: "DeepSeek-V4-Flash-GA",    promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "DeepSeek-V4-Pro-GA",      promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "DeepSeek-V4-flash",       promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "DeepSeek-V4-pro",         promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Dola-Seed-2.1-turbo",     promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Dola-Seed-2.0-Code",      promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Dola-Seed-2.0-pro",       promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Dola-Seed-2.0-mini",      promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "Dola-Seed-2.0-lite",      promoInput: 0, promoOutput: 0, validUntil: null },
-  { model: "GLM-5.2",                 promoInput: 0, promoOutput: 0, validUntil: null },
+  // NOTE (2026-08-22): removed BytePlus ModelArk / Volcengine Ark "free credits" rows
+  // (DeepSeek-V4-*, Doubao/Dola-Seed-*, GLM-5.x, Kimi-K2.6, MiniMax-M2.7 @ 0).
+  // Those were one-time trial credits (~500K tokens/model), NOT permanent free.
+  // Name-only matching leaked "free" onto PAID endpoints of other providers hosting
+  // same-named models. New promo rows MUST carry a `provider` field.
 ];
 
-export function getPromoPriceSync(model) {
+export function getPromoPriceSync(model, provider = "") {
   if (!model) return null;
   const base = model.includes("/") ? model.split("/").pop() : model;
   const now = Date.now();
 
   for (const promo of PROMO_PRICING) {
     if (promo.model === base || promo.model === model) {
+      // Provider-scoped entry: only matches the provider it was attributed to
+      // (conservative-money — a trial promo on one provider must not flag
+      // same-named paid models on other providers as free).
+      if (promo.provider && promo.provider !== provider) continue;
       if (promo.validUntil && now >= Date.parse(promo.validUntil)) continue;
       return promo;
     }
@@ -168,7 +152,7 @@ export function getPromoPriceSync(model) {
 export function isFreeModel(model, provider = "", providerRegistry = null, rawModelData = null) {
   if (rawModelData?.isFree === true || rawModelData?.tier === "free") return true;
 
-  const promo = getPromoPriceSync(model);
+  const promo = getPromoPriceSync(model, provider);
   if (promo && promo.promoInput === 0) return true;
 
   const base = model.includes("/") ? model.split("/").pop() : model;

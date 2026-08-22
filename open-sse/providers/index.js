@@ -34,6 +34,8 @@ export const PROVIDER_MEDIA = {};
 for (const entry of REGISTRY) {
   if (entry.transport) {
     PROVIDERS[entry.id] = buildTransport(entry.transport, entry.oauth);
+    // category is consumed by free-model classification (benchmarks.isFreeModel)
+    if (entry.category !== undefined) PROVIDERS[entry.id].category = entry.category;
     if (entry.transports) PROVIDERS[entry.id].transports = entry.transports;
   }
   if (entry.models !== undefined) PROVIDER_MODELS[entry.alias || entry.id] = entry.models.map(normalizeModel);
