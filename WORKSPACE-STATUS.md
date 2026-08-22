@@ -8,6 +8,7 @@
 
 | Phase / Feature | Status | Document References |
 |---|---|---|
+| **Remove LlamaGate + Hyperbolic + Morph Providers** | ✅ **Completed & Verified — build OK, server restart 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_llamagate-hyperbolic-morph-provider-removal.md`<br>Plan: `playbooks/plan-remove-llamagate-hyperbolic-morph.md` ✅ Closed |
 | **Remove Heroku AI Provider** | ✅ **Completed & Verified — build OK, server restart 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_heroku-ai-provider-removal.md`<br>Plan: `playbooks/plan-remove-heroku-provider.md` ✅ Closed |
 | **Remove DeepInfra Provider (free-label sai + model list fabricate)** | ✅ **Completed & Verified — build OK, server restarted 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_deepinfra-free-tier-label-investigation.md`<br>Plan: `playbooks/plan-remove-deepinfra-provider.md` ✅ Closed |
 | **Credential Cache (connections list TTL 3s)** | ✅ **Completed (code+tests) — runtime verify pending sau deploy** | Research: `_tasks/archive/DONE-2026-08-22_token-cache-audit-combo-hot-path.md`<br>Plan: `_tasks/archive/DONE-2026-08-22_credential-cache-hot-path.md` |

@@ -36,7 +36,6 @@ const PNG_PROVIDERS = new Set([
   "vercel",
   "venice",
   "perplexity-agent",
-  "morph",
   "novita",
   "agentrouter",
   "grok-cli",

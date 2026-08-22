@@ -655,25 +655,6 @@ exports[`GOLDEN buildHeaders (default executor providers) > grok-cli → headers
 }
 `;
 
-exports[`GOLDEN buildHeaders (default executor providers) > hyperbolic → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
 exports[`GOLDEN buildHeaders (default executor providers) > kilo-gateway → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
@@ -752,25 +733,6 @@ exports[`GOLDEN buildHeaders (default executor providers) > kimi → headers (ap
 }
 `;
 
-exports[`GOLDEN buildHeaders (default executor providers) > llamagate → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
 exports[`GOLDEN buildHeaders (default executor providers) > llm7 → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
@@ -841,25 +803,6 @@ exports[`GOLDEN buildHeaders (default executor providers) > minimax-cn → heade
 `;
 
 exports[`GOLDEN buildHeaders (default executor providers) > mistral → headers (apiKey / oauth) 1`] = `
-{
-  "apiKey": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "nonStream": {
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-  "oauth": {
-    "Accept": "text/event-stream",
-    "Authorization": "Bearer <TOK>",
-    "Content-Type": "application/json",
-  },
-}
-`;
-
-exports[`GOLDEN buildHeaders (default executor providers) > morph → headers (apiKey / oauth) 1`] = `
 {
   "apiKey": {
     "Accept": "text/event-stream",
@@ -1649,13 +1592,6 @@ exports[`GOLDEN buildUrl (default executor providers) > grok-cli → url (stream
 }
 `;
 
-exports[`GOLDEN buildUrl (default executor providers) > hyperbolic → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://api.hyperbolic.xyz/v1/chat/completions",
-  "stream": "https://api.hyperbolic.xyz/v1/chat/completions",
-}
-`;
-
 exports[`GOLDEN buildUrl (default executor providers) > kilo-gateway → url (stream + non-stream) 1`] = `
 {
   "nonStream": "https://api.kilo.ai/api/gateway/chat/completions",
@@ -1674,13 +1610,6 @@ exports[`GOLDEN buildUrl (default executor providers) > kimi → url (stream + n
 {
   "nonStream": "https://api.kimi.com/coding/v1/messages?beta=true",
   "stream": "https://api.kimi.com/coding/v1/messages?beta=true",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > llamagate → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://llamagate.ai/v1/chat/completions",
-  "stream": "https://llamagate.ai/v1/chat/completions",
 }
 `;
 
@@ -1709,13 +1638,6 @@ exports[`GOLDEN buildUrl (default executor providers) > mistral → url (stream 
 {
   "nonStream": "https://api.mistral.ai/v1/chat/completions",
   "stream": "https://api.mistral.ai/v1/chat/completions",
-}
-`;
-
-exports[`GOLDEN buildUrl (default executor providers) > morph → url (stream + non-stream) 1`] = `
-{
-  "nonStream": "https://api.morphllm.com/v1/chat/completions",
-  "stream": "https://api.morphllm.com/v1/chat/completions",
 }
 `;
 

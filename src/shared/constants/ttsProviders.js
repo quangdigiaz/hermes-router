@@ -55,11 +55,6 @@ export const TTS_PROVIDER_CONFIG = {
     hasVoiceIdInput: true,
     voiceSource: "config",
   },
-  "hyperbolic": {
-    hasModelSelector: true,
-    hasBrowseButton: false,
-    voiceSource: "config",
-  },
   "deepgram": {
     hasModelSelector: false,
     hasBrowseButton: true,

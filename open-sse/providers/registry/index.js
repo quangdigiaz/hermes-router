@@ -35,7 +35,6 @@ import p43 from "./google-tts.js";
 import p44 from "./grok-cli.js";
 import p45 from "./grok-web.js";
 import p48 from "./huggingface.js";
-import p49 from "./hyperbolic.js";
 import p50 from "./iflow.js";
 import p51 from "./inworld.js";
 import p52 from "./jina-ai.js";
@@ -44,7 +43,6 @@ import p54 from "./kilocode.js";
 import p55 from "./kimi.js";
 import p56 from "./kiro.js";
 import p57 from "./linkup.js";
-import p58 from "./llamagate.js";
 import p59 from "./local-device.js";
 import p61 from "./minimax-cn.js";
 import p62 from "./minimax.js";
@@ -104,7 +102,6 @@ import p116 from "./bazaarlink.js";
 import p117 from "./bluesminds.js";
 import p118 from "./kilo-gateway.js";
 import p119 from "./llm7.js";
-import p120 from "./morph.js";
 import p121 from "./tencent.js";
 import p122 from "./freebuff.js";
 import p123 from "./fastrouter.js";
@@ -151,7 +148,6 @@ export default [
   p44,
   p45,
   p48,
-  p49,
   p50,
   p51,
   p52,
@@ -160,7 +156,6 @@ export default [
   p55,
   p56,
   p57,
-  p58,
   p59,
   p61,
   p62,
@@ -220,7 +215,6 @@ export default [
   p117,
   p118,
   p119,
-  p120,
   p121,
   p122,
   p123,

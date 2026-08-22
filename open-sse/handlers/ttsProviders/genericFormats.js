@@ -3,18 +3,6 @@
 import { responseToBase64, throwUpstreamError } from "./_base.js";
 import minimaxTts from "./minimax.js";
 
-// Hyperbolic: POST { text } → { audio: base64 }
-async function hyperbolic({ baseUrl, apiKey, text }) {
-  const res = await fetch(baseUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-    body: JSON.stringify({ text }),
-  });
-  if (!res.ok) await throwUpstreamError(res);
-  const data = await res.json();
-  return { base64: data.audio, format: "mp3" };
-}
-
 // Deepgram: model via query, Token auth, returns binary
 async function deepgram({ baseUrl, apiKey, text, modelId }) {
   const url = new URL(baseUrl);
@@ -133,7 +121,6 @@ async function openaiCompat({ baseUrl, apiKey, text, modelId, voiceId }) {
 
 // format → handler dispatcher
 export const FORMAT_HANDLERS = {
-  hyperbolic,
   deepgram,
   "nvidia-tts": nvidia,
   "huggingface-tts": huggingface,
