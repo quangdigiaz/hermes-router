@@ -72,6 +72,12 @@ class RingBuffer {
  */
 const store = new Map();
 
+// p95 memo (key → { value, expires }) — the sort is cheap but runs per
+// candidate per request; short TTL with invalidation on new samples keeps
+// values fresh while making burst reads free.
+const P95_CACHE_TTL_MS = 2000;
+const p95Cache = new Map();
+
 const DEFAULT_BUFFER_SIZE = 100;
 const DEFAULT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -94,6 +100,7 @@ export function recordLatency(provider, model, latencyMs) {
   }
 
   buffer.push({ latencyMs, timestamp: Date.now() });
+  p95Cache.delete(key);
 }
 
 /**
@@ -107,25 +114,32 @@ export function getP95Latency(provider, model, windowMs = DEFAULT_WINDOW_MS) {
   if (!provider || !model) return DEFAULT_P95_MS.default;
 
   const key = `${provider}/${model}`;
+  const cached = p95Cache.get(key);
+  if (cached && cached.expires > Date.now()) return cached.value;
+
   const buffer = store.get(key);
+  let p95;
   if (!buffer || buffer.length === 0) {
-    return getDefaultP95(model);
+    p95 = getDefaultP95(model);
+  } else {
+    const cutoff = Date.now() - windowMs;
+    const samples = buffer.toArray()
+      .filter(s => s.timestamp >= cutoff)
+      .map(s => s.latencyMs);
+
+    // Need at least 10 samples for meaningful p95
+    if (samples.length < 10) {
+      p95 = getDefaultP95(model);
+    } else {
+      // Sort and pick 95th percentile
+      samples.sort((a, b) => a - b);
+      const p95Index = Math.floor(samples.length * 0.95);
+      p95 = samples[p95Index];
+    }
   }
 
-  const cutoff = Date.now() - windowMs;
-  const samples = buffer.toArray()
-    .filter(s => s.timestamp >= cutoff)
-    .map(s => s.latencyMs);
-
-  // Need at least 10 samples for meaningful p95
-  if (samples.length < 10) {
-    return getDefaultP95(model);
-  }
-
-  // Sort and pick 95th percentile
-  samples.sort((a, b) => a - b);
-  const p95Index = Math.floor(samples.length * 0.95);
-  return samples[p95Index];
+  p95Cache.set(key, { value: p95, expires: Date.now() + P95_CACHE_TTL_MS });
+  return p95;
 }
 
 /**
@@ -171,6 +185,7 @@ export function getSampleCount(provider, model) {
  */
 export function clearLatencyData() {
   store.clear();
+  p95Cache.clear();
 }
 
 /**

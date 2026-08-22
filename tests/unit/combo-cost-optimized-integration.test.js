@@ -1,16 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("../../src/lib/db/repos/pricingRepo.js", () => ({
-  getPricingForModel: vi.fn().mockImplementation(async (provider, model) => {
-    const pricing = {
-      "anthropic/claude-3-opus": { input: 15.0, output: 75.0 },
-      "anthropic/claude-3-sonnet": { input: 3.0, output: 15.0 },
-      "openai/gpt-4o": { input: 2.5, output: 10.0 },
-      "openai/gpt-4o-mini": { input: 0.15, output: 0.6 },
-      "google/gemini-pro": { input: 1.25, output: 5.0 },
-    };
-    return pricing[`${provider}/${model}`] || null;
-  }),
+  getPricing: vi.fn().mockImplementation(async () => ({
+    anthropic: {
+      "claude-3-opus": { input: 15.0, output: 75.0 },
+      "claude-3-sonnet": { input: 3.0, output: 15.0 },
+    },
+    openai: {
+      "gpt-4o": { input: 2.5, output: 10.0 },
+      "gpt-4o-mini": { input: 0.15, output: 0.6 },
+    },
+    google: {
+      "gemini-pro": { input: 1.25, output: 5.0 },
+    },
+  })),
 }));
 
 import { handleComboChat, resetComboRotation } from "../../open-sse/services/combo.js";

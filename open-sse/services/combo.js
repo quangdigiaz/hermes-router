@@ -11,21 +11,49 @@ import { resolveTemplate } from "../config/autoTemplates.js";
 import { isFreeModel, getBenchmarkForModel, getPromoPriceSync, getModelLimits } from "../config/benchmarks.js";
 import { detectModelFamily } from "../config/modelFamilies.js";
 import { emitNotification } from "@/lib/notificationBus.js";
-import { isCustomModelFree, getFreeCustomModelsMap } from "@/lib/customModelFreeCache.js";
+import { getFreeCustomModelsMap } from "@/lib/customModelFreeCache.js";
 
-let getPricingForModel = null;
+let getPricingBulk = null;
 
 async function loadPricing() {
-  if (!getPricingForModel) {
+  if (!getPricingBulk) {
     const mod = await import("../../src/lib/db/repos/pricingRepo.js");
-    getPricingForModel = mod.getPricingForModel;
+    getPricingBulk = mod.getPricing;
   }
-  return getPricingForModel;
+  return getPricingBulk;
 }
 
 // Lazy-load autoCombo to avoid circular deps
 let autoCombo = null;
 let latencyTracker = null;
+
+// ─── Pricing batch cache ────────────────────────────────────────────────────
+// getPricing() already caches 5s; this coalesces pricing + free-custom-model
+// map into one read per TTL window so selectAutoModels never reads per-model.
+
+const PRICING_CACHE_TTL_MS = 5000;
+let pricingCache = { table: null, freeMap: null, expires: 0 };
+
+async function getCachedPricing() {
+  if (pricingCache.table && Date.now() < pricingCache.expires) return pricingCache;
+  const getPricing = await loadPricing();
+  const [table, freeMap] = await Promise.all([getPricing(), getFreeCustomModelsMap()]);
+  pricingCache = { table, freeMap, expires: Date.now() + PRICING_CACHE_TTL_MS };
+  return pricingCache;
+}
+
+/** Drop the cached pricing snapshot (e.g. after pricing writes). */
+export function invalidateComboPricingCache() {
+  pricingCache = { table: null, freeMap: null, expires: 0 };
+}
+
+// ─── Score memo ─────────────────────────────────────────────────────────────
+// Scoring inputs (pricing, p95, health) barely change within a second, so
+// bursts on the same pool reuse the computed ordering. TTL is short by design;
+// health is NOT memoized anywhere — the candidate list is rebuilt on miss.
+
+const SCORE_MEMO_TTL_MS = 1500;
+const scoreMemo = new Map(); // key → { value: string[], ts: number }
 
 async function loadAutoCombo() {
   if (!autoCombo) {
@@ -206,31 +234,22 @@ export function detectRequiredCapabilities(body) {
 export async function sortModelsByCost(models) {
   if (!models || models.length <= 1) return models;
 
-  const getPricing = await loadPricing();
+  const { table: pricingTable, freeMap } = await getCachedPricing();
 
-  const withCost = await Promise.all(
-    models.map(async (m) => {
-      const slash = typeof m === "string" ? m.indexOf("/") : -1;
-      const provider = slash > 0 ? m.slice(0, slash) : "";
-      const model = slash > 0 ? m.slice(slash + 1) : m;
+  const withCost = models.map((m) => {
+    const slash = typeof m === "string" ? m.indexOf("/") : -1;
+    const provider = slash > 0 ? m.slice(0, slash) : "";
+    const model = slash > 0 ? m.slice(slash + 1) : m;
 
-      // Check promo first
-      const promo = getPromoPriceSync(model);
-      if (promo) {
-        return { model: m, cost: promo.promoInput };
-      }
+    // Check promo first
+    const promo = getPromoPriceSync(model);
+    if (promo) {
+      return { model: m, cost: promo.promoInput };
+    }
 
-      let cost = Infinity;
-      try {
-        const pricing = await getPricing(provider, model);
-        cost = pricing?.input ?? Infinity;
-      } catch {
-        cost = Infinity;
-      }
-
-      return { model: m, cost };
-    })
-  );
+    const cost = (freeMap.get(provider)?.has(model) ? 0 : pricingTable?.[provider]?.[model]?.input) ?? Infinity;
+    return { model: m, cost };
+  });
 
   return withCost
     .sort((a, b) => a.cost - b.cost)
@@ -260,7 +279,6 @@ function rotateModelsFromIndex(models, currentIndex) {
  */
 async function selectAutoModels(models, options = {}) {
   const { selectProvider } = await loadAutoCombo();
-  const getPricing = await loadPricing();
   const { getP95Latency } = await loadLatencyTracker();
 
   const {
@@ -272,68 +290,69 @@ async function selectAutoModels(models, options = {}) {
     sessionAffinity = false,
   } = options;
 
-  // Build candidates with guard rails
-  const candidates = await Promise.all(
-    models.map(async (modelStr) => {
-      const slash = typeof modelStr === "string" ? modelStr.indexOf("/") : -1;
-      const provider = slash > 0 ? modelStr.slice(0, slash) : "";
-      const model = slash > 0 ? modelStr.slice(slash + 1) : modelStr;
+  // Session Affinity with Latency Guard (checked before scoring so a sticky
+  // provider wins regardless of memo state)
+  const affinityKey = sessionId && sessionAffinity ? sessionProviderMap.get(sessionId) : null;
+  const memoKey = `${[...models].slice().sort().join(",")}|${autoMode}|${hasImages}|${Math.floor(promptTokens / 4000)}`;
+  const memoHit = scoreMemo.get(memoKey);
 
-      const limits = getModelLimits(model);
+  // Build candidates with guard rails — pricing/free lookups are batch reads
+  const { table: pricingTable, freeMap } = await getCachedPricing();
 
-      // Vision Guard: filter text-only models when request has images
-      if (hasImages && !limits.vision) {
-        return null;
-      }
+  const candidates = models.map((modelStr) => {
+    const slash = typeof modelStr === "string" ? modelStr.indexOf("/") : -1;
+    const provider = slash > 0 ? modelStr.slice(0, slash) : "";
+    const model = slash > 0 ? modelStr.slice(slash + 1) : modelStr;
 
-      // Context Length Guard: filter models if prompt exceeds context window
-      if (promptTokens > 0 && limits.maxContext > 0 && promptTokens > limits.maxContext) {
-        return null;
-      }
+    const limits = getModelLimits(model);
 
-      // Manual free tag on custom models takes priority over benchmark pricing
-      const free = (await isCustomModelFree(provider, model)) || isFreeModel(model, provider);
-      let cost = Infinity;
+    // Vision Guard: filter text-only models when request has images
+    if (hasImages && !limits.vision) {
+      return null;
+    }
 
-      if (free) {
-        cost = 0;
+    // Context Length Guard: filter models if prompt exceeds context window
+    if (promptTokens > 0 && limits.maxContext > 0 && promptTokens > limits.maxContext) {
+      return null;
+    }
+
+    // Manual free tag on custom models takes priority over benchmark pricing
+    const free = (freeMap.get(provider)?.has(model)) || isFreeModel(model, provider);
+    let cost = Infinity;
+
+    if (free) {
+      cost = 0;
+    } else {
+      const promo = getPromoPriceSync(model);
+      if (promo) {
+        cost = promo.promoInput;
       } else {
-        const promo = getPromoPriceSync(model);
-        if (promo) {
-          cost = promo.promoInput;
-        } else {
-          try {
-            const pricing = await getPricing(provider, model);
-            cost = pricing?.input ?? Infinity;
-          } catch {
-            cost = Infinity;
-          }
-        }
+        cost = pricingTable?.[provider]?.[model]?.input ?? Infinity;
       }
+    }
 
-      const bench = getBenchmarkForModel(model);
-      const p95 = getP95Latency(provider, model);
-      const family = detectModelFamily(model);
+    const bench = getBenchmarkForModel(model);
+    const p95 = getP95Latency(provider, model);
+    const family = detectModelFamily(model);
 
-      return {
-        model: modelStr,
-        baseModel: model,
-        provider,
-        health: "CLOSED",
-        cost,
-        p95,
-        isFree: free,
-        benchmark: bench,
-        family,
-      };
-    })
-  );
+    return {
+      model: modelStr,
+      baseModel: model,
+      provider,
+      health: "CLOSED",
+      cost,
+      p95,
+      isFree: free,
+      benchmark: bench,
+      family,
+    };
+  });
 
   const validCandidates = candidates.filter(Boolean);
   if (validCandidates.length === 0) return models;
 
   // Session Affinity with Latency Guard
-  if (sessionId && sessionAffinity && sessionProviderMap.has(sessionId)) {
+  if (affinityKey) {
     const session = sessionProviderMap.get(sessionId);
     const stickyCandidate = validCandidates.find((c) => c.provider === session.provider);
 
@@ -347,6 +366,10 @@ async function selectAutoModels(models, options = {}) {
     } else {
       sessionProviderMap.delete(sessionId);
     }
+  }
+
+  if (memoHit && Date.now() - memoHit.ts < SCORE_MEMO_TTL_MS) {
+    return memoHit.value;
   }
 
   // Group by baseModel to pick best provider per model
@@ -382,7 +405,9 @@ async function selectAutoModels(models, options = {}) {
   }
 
   // Always return string[]
-  return bestCandidates.map((c) => c.model);
+  const result = bestCandidates.map((c) => c.model);
+  scoreMemo.set(memoKey, { value: result, ts: Date.now() });
+  return result;
 }
 
 /**
@@ -593,9 +618,13 @@ export async function handleComboChat({ body, models, handleSingleModel, log, co
       );
     }
 
-    log.info("COMBO", `Trying model ${i + 1}/${rotatedModels.length}: ${modelStr}`);
+      log.info("COMBO", `Trying model ${i + 1}/${rotatedModels.length}: ${modelStr}`);
 
-    try {
+      // Feed the auto-combo latency factor with real per-target durations
+      // (time-to-response-headers, matching the combo timeout semantics).
+      const attemptStart = Date.now();
+
+      try {
       let result;
       if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
         result = await handleSingleModel(body, modelStr);
@@ -644,6 +673,13 @@ export async function handleComboChat({ body, models, handleSingleModel, log, co
       // Success (2xx) - return response
       if (result.ok) {
         log.info("COMBO", `Model ${modelStr} succeeded`);
+        try {
+          const { recordLatency } = await loadLatencyTracker();
+          const [latProvider, ...latModelParts] = modelStr.split("/");
+          recordLatency(latProvider, latModelParts.join("/"), Date.now() - attemptStart);
+        } catch {
+          // Latency tracking must never break the response path
+        }
         return result;
       }
 
