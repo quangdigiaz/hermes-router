@@ -1,5 +1,4 @@
 import p0 from "./agentrouter.js";
-import p1 from "./alibaba.js";
 import p2 from "./alicode-intl.js";
 import p3 from "./alicode.js";
 import p4 from "./anthropic.js";
@@ -105,7 +104,6 @@ import p104 from "./youcom.js";
 import p105 from "./zcode.js";
 import p106 from "./muse-spark-web.js";
 import p107 from "./a6api.js";
-import p108 from "./alims-intl.js";
 import p109 from "./zenmux.js";
 import p110 from "./tokenrouter.js";
 import p111 from "./poolside.js";
@@ -128,7 +126,6 @@ import p127 from "./nousresearch.js";
 
 export default [
   p0,
-  p1,
   p2,
   p3,
   p4,
@@ -234,7 +231,6 @@ export default [
   p105,
   p106,
   p107,
-  p108,
   p109,
   p110,
   p111,
