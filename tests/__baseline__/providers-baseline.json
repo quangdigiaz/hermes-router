@@ -451,12 +451,6 @@
     "tokenUrl": "https://auth.x.ai/oauth2/token",
     "category": "oauth"
   },
-  "grok-web": {
-    "baseUrl": "https://grok.com/rest/app-chat/conversations/new",
-    "format": "grok-web",
-    "authType": "cookie",
-    "category": "webCookie"
-  },
   "iflow": {
     "baseUrl": "https://apis.iflow.cn/v1/chat/completions",
     "thinkingFormat": "openai",
@@ -869,12 +863,6 @@
     "clientId": "client_P8X5CMWmlaRO9gyO-KSqtg",
     "tokenUrl": "https://zcode.z.ai/api/v1/oauth/token",
     "category": "apikey"
-  },
-  "muse-spark-web": {
-    "baseUrl": "https://www.meta.ai/api/graphql",
-    "format": "muse-spark-web",
-    "authType": "cookie",
-    "category": "webCookie"
   },
   "a6api": {
     "baseUrl": "https://a6api.com/v1/chat/completions",

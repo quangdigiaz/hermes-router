@@ -6,8 +6,6 @@ import { resolveOllamaLocalHost, resolveXiaomiTokenplanBaseUrl, PROVIDERS, PROVI
 import { openaiToCommandCodeRequest } from "open-sse/translator/request/openai-to-commandcode.js";
 import { resolveQoderCredentials, resolveQoderModels } from "open-sse/services/qoderModels.js";
 import { normalizeProviderId } from "@/lib/providerNormalization";
-import { cleanCookie } from "open-sse/utils/cookie.js";
-import { validateMuseSparkConnection } from "open-sse/executors/muse-spark-web.js";
 import { validateAgentRouterConnection } from "open-sse/executors/agentrouter.js";
 
 // Probe a webSearch/webFetch provider using its searchConfig/fetchConfig.

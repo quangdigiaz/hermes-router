@@ -19,7 +19,7 @@ const SPECIAL_CRED = {
 const SPECIALIZED = new Set([
   "antigravity", "azure", "gemini-cli", "github", "iflow", "qoder", "kiro",
   "codex", "cursor", "vertex", "qwen", "opencode",
-  "opencode-go", "grok-web", "ollama-local", "commandcode",
+  "opencode-go", "ollama-local", "commandcode",
   "xiaomi-tokenplan",
 ]);
 

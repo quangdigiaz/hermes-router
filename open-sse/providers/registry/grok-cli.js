@@ -6,7 +6,6 @@
  *
  * Distinct from:
  *  - `xai`      → api.x.ai (API key / xAI API OAuth PKCE)
- *  - `grok-web` → grok.com web SSO cookie
  */
 import {
   GROK_CLI_BASE_URL,

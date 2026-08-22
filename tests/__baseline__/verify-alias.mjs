@@ -16,7 +16,7 @@ const ALIAS_TOKENS = [
   "mistral","cerebras","cohere","nvidia",
   "dg","deepgram","aai","assemblyai","nb","nanobanana","ch",
   "chutes","ark","volcengine-ark","byteplus","bpm","cursor","vx","vertex",
-  "gw","grok-web","gcli","gb","grok-build","grok-cli","mimo","xiaomi-mimo",
+  "gcli","gb","grok-build","grok-cli","mimo","xiaomi-mimo",
   "xmtp","xiaomi-tokenplan","cf",
   "cloudflare-ai","fal","fal-ai","stability","stability-ai","bfl","black-forest-labs","recraft",
   "topaz","runway","runwayml","jina","jina-ai","polly","aws-polly","bb","blackbox",

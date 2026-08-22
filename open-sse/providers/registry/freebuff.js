@@ -39,7 +39,7 @@ export default {
   },
   category: "free",
   authType: "oauth",
-  authModes: ["oauth"],
+  authModes: ["oauth", "apikey"],
   hasOAuth: true,
   transport: {
     baseUrl: "https://www.codebuff.com/api/v1/chat/completions",

@@ -715,24 +715,6 @@ async function testApiKeyConnection(connection, effectiveProxy = null) {
         return { valid, error: valid ? null : "Invalid API key" };
       }
 
-      case "grok-web": {
-        const token = connection.apiKey.startsWith("sso=") ? connection.apiKey.slice(4) : connection.apiKey;
-        const randomHex = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => b.toString(16).padStart(2, "0")).join("");
-        const statsigId = Buffer.from("e:TypeError: Cannot read properties of null (reading 'children')").toString("base64");
-        const res = await fetchWithConnectionProxy("https://grok.com/rest/app-chat/conversations/new", {
-          method: "POST",
-          headers: {
-            Accept: "*/*", "Content-Type": "application/json",
-            Cookie: `sso=${token}`, Origin: "https://grok.com", Referer: "https://grok.com/",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-            "x-statsig-id": statsigId, "x-xai-request-id": crypto.randomUUID(),
-            traceparent: `00-${randomHex(16)}-${randomHex(8)}-00`,
-          },
-          body: JSON.stringify({ temporary: true, modelName: "grok-4", message: "ping", fileAttachments: [], imageAttachments: [], disableSearch: false, enableImageGeneration: false, sendFinalMetadata: true }),
-        }, effectiveProxy);
-        const valid = res.status !== 401 && res.status !== 403;
-        return { valid, error: valid ? null : "Invalid SSO cookie" };
-      }
       case "qoder": {
         const raw = connection.apiKey || "";
         const pat = raw.startsWith("pt-") ? raw : `pt-${raw}`;

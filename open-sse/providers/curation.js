@@ -50,7 +50,6 @@ export const CURATION_DATA = {
 
   // Experimental
   antigravity:      { curatedTier: "experimental", curatedPriority: 50, badges: ["new"] },
-  "muse-spark-web": { curatedTier: "experimental", curatedPriority: 40, badges: [] },
 };
 
 /**

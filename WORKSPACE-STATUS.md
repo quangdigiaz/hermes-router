@@ -8,6 +8,7 @@
 
 | Phase / Feature | Status | Document References |
 |---|---|---|
+| **Remove Web Cookie Providers: Grok Web + Muse Spark Web** | ✅ **Completed & Verified — build OK, server restart 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_webcookie-grokweb-musespark-removal.md`<br>Plan: `playbooks/plan-remove-webcookie-providers.md` ✅ Closed |
 | **Remove Vertex Partner (trùng lặp Vertex AI)** | ✅ **Completed & Verified — build OK, server restart 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_vertex-partner-duplicate-removal.md`<br>Plan: `playbooks/plan-remove-vertex-partner.md` ✅ Closed |
 | **Remove 6 Providers: Venice + Upstage + Together + Tencent Hunyuan + Snowflake + SambaNova** | ✅ **Completed & Verified — build OK, server restart 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_six-provider-batch-removal.md`<br>Plan: `playbooks/plan-remove-six-providers-batch2.md` ✅ Closed |
 | **Fix isFreeModel — chặn promo cross-provider + kích hoạt registry signal (money-safety)** | ✅ **Completed & Verified — code-review PASS sau 1 vòng fix, build OK, server 3003 HTTP 200** | Research: `_tasks/research/_closed/2026-08-22_bestfree-dynamic-pool-isfreemodel-audit.md`<br>Plan: `playbooks/plan-fix-isfreemodel-promo-scoping.md` ✅ Closed |

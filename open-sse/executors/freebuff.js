@@ -505,9 +505,9 @@ export class FreebuffExecutor extends BaseExecutor {
   }
 
   async execute({ model, body, stream, credentials, signal, log, proxyOptions = null }) {
-    const token = credentials?.accessToken;
+    const token = credentials?.accessToken || credentials?.apiKey;
     if (!token) {
-      throw new Error("Freebuff requires a connected Freebuff login (no access token found)");
+      throw new Error("Freebuff requires a connected Freebuff login (no access token or API key found)");
     }
 
     // Fail fast while a known-dead (account,model) / (proxy,model) pair is in
