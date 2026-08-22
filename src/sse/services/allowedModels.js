@@ -176,6 +176,13 @@ export async function fetchModelsFetcherIds(providerId, providerInfo) {
       rawModels = data;
     } else if (Array.isArray(data?.data)) {
       rawModels = data.data;
+    } else if (Array.isArray(data?.models)) {
+      // Cohere v1/models shape: { models: [{name, endpoints, is_deprecated}] }
+      rawModels = data.models.filter((m) => {
+        if (!m || m.is_deprecated === true) return false;
+        if (Array.isArray(m.endpoints) && m.endpoints.length > 0 && !m.endpoints.includes("chat")) return false;
+        return true;
+      });
     } else if (data?.models && typeof data.models === "object" && !Array.isArray(data.models)) {
       rawModels = Object.values(data.models);
     } else if (data && typeof data === "object") {
