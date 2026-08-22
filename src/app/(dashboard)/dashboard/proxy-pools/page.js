@@ -106,173 +106,517 @@ const TINH_THANH_CODES = {
   26: "Quảng Ninh", 27: "Cà Mau", 28: "Kiên Giang", 29: "Bắc Liêu", 30: "Sóc Trăng", 31: "Hậu Giang",
 };
 
-function CkeyModal({ isOpen, form, saving, onChange, onSync, onClose }) {
+function CkeyModal({ isOpen, form, saving, onChange, onSync, onRefreshPools, onClose }) {
+  const [activeTab, setActiveTab] = useState("rotating"); // "rotating" | "static"
+  const [staticProxies, setStaticProxies] = useState([]);
+  const [staticLoading, setStaticLoading] = useState(false);
+  const [staticError, setStaticError] = useState("");
+  const [syncingId, setSyncingId] = useState(null);
+  const [renewingId, setRenewingId] = useState(null);
+  const [showBuyForm, setShowBuyForm] = useState(false);
+  const [buyForm, setBuyForm] = useState({
+    loaiproxy: "US",
+    type: "HTTP",
+    user: "u1",
+    password: "p1",
+    ngay: 30,
+    soluong: 1,
+  });
+  const [buying, setBuying] = useState(false);
   const isBatch = form.mode !== "single";
 
+  const fetchStaticProxies = async () => {
+    const key = form.ckeyKey || form.ckeyApiKey || "";
+    if (!key.trim()) {
+      setStaticError(translate("Please enter CKEY API Key to fetch static proxies"));
+      return;
+    }
+    setStaticLoading(true);
+    setStaticError("");
+    try {
+      const res = await fetch(`/api/ckey/static-proxy?key=${encodeURIComponent(key.trim())}`);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStaticProxies(data?.data?.items || []);
+      } else {
+        setStaticError(data.error || "Không thể tải danh sách proxy tĩnh");
+      }
+    } catch (err) {
+      setStaticError(err.message || "Lỗi kết nối CKEY");
+    } finally {
+      setStaticLoading(false);
+    }
+  };
+
+  const handleSyncStaticToPool = async (item) => {
+    setSyncingId(item.idproxy);
+    try {
+      const key = form.ckeyKey || form.ckeyApiKey || "";
+      const res = await fetch("/api/ckey/static-proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "sync-pool",
+          key,
+          ...item,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        await onRefreshPools?.();
+      } else {
+        alert(data.error || "Lỗi đồng bộ vào Proxy Pool");
+      }
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setSyncingId(null);
+    }
+  };
+
+  const handleRenewStatic = async (item) => {
+    if (!confirm(`Gia hạn 30 ngày cho proxy ${item.ip} (Loại: ${item.loaiproxy || "US"})?`)) return;
+    setRenewingId(item.idproxy);
+    try {
+      const key = form.ckeyKey || form.ckeyApiKey || "";
+      const res = await fetch("/api/ckey/static-proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "renew",
+          key,
+          idproxy: item.idproxy,
+          loaiproxy: item.loaiproxy || "US",
+          ngay: 30,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert("Gia hạn proxy thành công!");
+        fetchStaticProxies();
+      } else {
+        alert(data.error || "Không thể gia hạn proxy");
+      }
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setRenewingId(null);
+    }
+  };
+
+  const handleBuyStatic = async () => {
+    setBuying(true);
+    try {
+      const key = form.ckeyKey || form.ckeyApiKey || "";
+      const res = await fetch("/api/ckey/static-proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "buy",
+          key,
+          ...buyForm,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert("Mua proxy tĩnh thành công!");
+        setShowBuyForm(false);
+        fetchStaticProxies();
+        await onRefreshPools?.();
+      } else {
+        alert(data.error || "Mua proxy thất bại");
+      }
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setBuying(false);
+    }
+  };
+
   return (
-    <Modal isOpen={isOpen} title={translate("CKEY Rotating Proxy")} onClose={onClose}>
+    <Modal isOpen={isOpen} title="CKEY Proxy Gateway" onClose={onClose}>
       <div className="flex flex-col gap-4">
-        <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-3 flex flex-col gap-1.5">
-          <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">⚡ CKEY Rotating Proxy</p>
-          <p className="text-xs text-text-muted">
-            Automatically fetch rotating proxy IPs from CKEY and save as Proxy Pools. Proxies auto-rotate IP on WAF errors (Cloudflare 403) or timeout.
-          </p>
+        {/* Tab Headers */}
+        <div className="flex border-b border-border/50 gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("rotating")}
+            className={`pb-2 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === "rotating"
+                ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                : "border-transparent text-text-muted hover:text-text-main"
+            }`}
+          >
+            ⚡ {translate("Proxy Xoay (Rotating)")}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("static");
+              if ((form.ckeyKey || form.ckeyApiKey) && staticProxies.length === 0) {
+                fetchStaticProxies();
+              }
+            }}
+            className={`pb-2 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === "static"
+                ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                : "border-transparent text-text-muted hover:text-text-main"
+            }`}
+          >
+            🛡️ {translate("Proxy Tĩnh (Dedicated US/Viettel)")}
+          </button>
         </div>
 
-        {/* Mode Toggle */}
-        <div className="flex items-center justify-between p-2 rounded-lg bg-black/5 dark:bg-white/5">
-          <span className="text-xs font-medium">{translate("Creation Mode")}</span>
-          <div className="inline-flex rounded-md bg-black/10 dark:bg-white/10 p-0.5 text-xs">
-            <button
-              type="button"
-              onClick={() => onChange("mode", "batch")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                isBatch ? "bg-primary text-white font-semibold shadow-xs" : "text-text-muted hover:text-text-main"
-              }`}
-            >
-              ⚡ {translate("Batch Create (Multiple Pools)")}
-            </button>
-            <button
-              type="button"
-              onClick={() => onChange("mode", "single")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                !isBatch ? "bg-primary text-white font-semibold shadow-xs" : "text-text-muted hover:text-text-main"
-              }`}
-            >
-              {translate("Single Pool")}
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="ckey-modal-keyproxy" className="text-xs font-medium mb-1 block">{translate("Rotating Proxy Key")}</label>
-          <Input
-            id="ckey-modal-keyproxy"
-            type="password"
-            placeholder="keyproxy_xxxxxxxxxxxx"
-            value={form.keyproxy}
-            onChange={(e) => onChange("keyproxy", e.target.value)}
-            disabled={saving}
-          />
-          <p className="text-[11px] text-text-muted mt-1">
-            Get from <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">ckey.vn</a> → Rotating Proxy → Proxy Key (auto-filled if saved in Settings)
-          </p>
-        </div>
-
-        {isBatch ? (
-          <div className="flex flex-col gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="ckey-modal-count" className="text-xs font-medium mb-1 block">
-                  {translate("Number of Pools to Create")}
-                </label>
-                <select
-                  id="ckey-modal-count"
-                  value={form.count || 5}
-                  onChange={(e) => onChange("count", Number(e.target.value))}
-                  disabled={saving}
-                  className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50 font-semibold"
-                >
-                  <option value={2}>2 Pools (Random, Hà Nội)</option>
-                  <option value={3}>3 Pools (Random, Hà Nội, HCM)</option>
-                  <option value={4}>4 Pools (+ Đà Nẵng)</option>
-                  <option value={5}>5 Pools (+ Hải Phòng)</option>
-                  <option value={6}>6 Pools (+ Bình Dương)</option>
-                  <option value={8}>8 Pools (+ Đồng Nai, Nghệ An)</option>
-                  <option value={10}>10 Pools (10 Provinces)</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="ckey-modal-nhamang" className="text-xs font-medium mb-1 block">{translate("ISP")}</label>
-                <select
-                  id="ckey-modal-nhamang"
-                  value={form.nhamang}
-                  onChange={(e) => onChange("nhamang", e.target.value)}
-                  disabled={saving}
-                  className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
-                >
-                  <option value="random">{translate("Random (All)")}</option>
-                  <option value="viettel">Viettel</option>
-                  <option value="vinaphone">Vinaphone</option>
-                  <option value="vnpt">VNPT</option>
-                  <option value="fpt">FPT</option>
-                </select>
-              </div>
+        {activeTab === "rotating" ? (
+          <>
+            <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-3 flex flex-col gap-1.5">
+              <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">⚡ CKEY Rotating Proxy</p>
+              <p className="text-xs text-text-muted">
+                Automatically fetch rotating proxy IPs from CKEY and save as Proxy Pools. Proxies auto-rotate IP on WAF errors (Cloudflare 403) or timeout.
+              </p>
             </div>
 
-            <label className="flex items-center gap-2 text-xs font-medium cursor-pointer pt-1">
-              <input
-                type="checkbox"
-                checked={form.autoDistribute !== false}
-                onChange={(e) => onChange("autoDistribute", e.target.checked)}
-                disabled={saving}
-                className="rounded border-border text-primary focus:ring-primary h-4 w-4"
-              />
-              <span>{translate("Auto-distribute pools across all Provider Accounts (Account 1 → Pool 1, Account 2 → Pool 2...)")}</span>
-            </label>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="ckey-modal-tinhthanh" className="text-xs font-medium mb-1 block">{translate("Province / City")}</label>
-                <select
-                  id="ckey-modal-tinhthanh"
-                  value={form.tinhthanh}
-                  onChange={(e) => onChange("tinhthanh", Number(e.target.value))}
-                  disabled={saving}
-                  className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+            {/* Mode Toggle */}
+            <div className="flex items-center justify-between p-2 rounded-lg bg-black/5 dark:bg-white/5">
+              <span className="text-xs font-medium">{translate("Creation Mode")}</span>
+              <div className="inline-flex rounded-md bg-black/10 dark:bg-white/10 p-0.5 text-xs">
+                <button
+                  type="button"
+                  onClick={() => onChange("mode", "batch")}
+                  className={`px-2.5 py-1 rounded transition-colors ${
+                    isBatch ? "bg-primary text-white font-semibold shadow-xs" : "text-text-muted hover:text-text-main"
+                  }`}
                 >
-                  {Object.entries(TINH_THANH_CODES).map(([code, name]) => (
-                    <option key={code} value={code}>{name} (Mã {code})</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="ckey-modal-nhamang" className="text-xs font-medium mb-1 block">{translate("ISP")}</label>
-                <select
-                  id="ckey-modal-nhamang"
-                  value={form.nhamang}
-                  onChange={(e) => onChange("nhamang", e.target.value)}
-                  disabled={saving}
-                  className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  ⚡ {translate("Batch Create (Multiple Pools)")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChange("mode", "single")}
+                  className={`px-2.5 py-1 rounded transition-colors ${
+                    !isBatch ? "bg-primary text-white font-semibold shadow-xs" : "text-text-muted hover:text-text-main"
+                  }`}
                 >
-                  <option value="random">{translate("Random (All)")}</option>
-                  <option value="viettel">Viettel</option>
-                  <option value="vinaphone">Vinaphone</option>
-                  <option value="vnpt">VNPT</option>
-                  <option value="fpt">FPT</option>
-                </select>
+                  {translate("Single Pool")}
+                </button>
               </div>
             </div>
 
             <div>
-              <label htmlFor="ckey-modal-poolname" className="text-xs font-medium mb-1 block">{translate("Pool Name (Optional)")}</label>
+              <label htmlFor="ckey-modal-keyproxy" className="text-xs font-medium mb-1 block">{translate("Rotating Proxy Key")}</label>
               <Input
-                id="ckey-modal-poolname"
-                placeholder={`CKEY Xoay - ${TINH_THANH_CODES[form.tinhthanh] || "Random"}`}
-                value={form.poolName}
-                onChange={(e) => onChange("poolName", e.target.value)}
+                id="ckey-modal-keyproxy"
+                type="password"
+                placeholder="keyproxy_xxxxxxxxxxxx"
+                value={form.keyproxy}
+                onChange={(e) => onChange("keyproxy", e.target.value)}
                 disabled={saving}
               />
+              <p className="text-[11px] text-text-muted mt-1">
+                Get from <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">ckey.vn</a> → Rotating Proxy → Proxy Key (auto-filled if saved in Settings)
+              </p>
+            </div>
+
+            {isBatch ? (
+              <div className="flex flex-col gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="ckey-modal-count" className="text-xs font-medium mb-1 block">
+                      {translate("Number of Pools to Create")}
+                    </label>
+                    <select
+                      id="ckey-modal-count"
+                      value={form.count || 5}
+                      onChange={(e) => onChange("count", Number(e.target.value))}
+                      disabled={saving}
+                      className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50 font-semibold"
+                    >
+                      <option value={2}>2 Pools (Random, Hà Nội)</option>
+                      <option value={3}>3 Pools (Random, Hà Nội, HCM)</option>
+                      <option value={4}>4 Pools (+ Đà Nẵng)</option>
+                      <option value={5}>5 Pools (+ Hải Phòng)</option>
+                      <option value={6}>6 Pools (+ Bình Dương)</option>
+                      <option value={8}>8 Pools (+ Đồng Nai, Nghệ An)</option>
+                      <option value={10}>10 Pools (10 Provinces)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="ckey-modal-nhamang" className="text-xs font-medium mb-1 block">{translate("ISP")}</label>
+                    <select
+                      id="ckey-modal-nhamang"
+                      value={form.nhamang}
+                      onChange={(e) => onChange("nhamang", e.target.value)}
+                      disabled={saving}
+                      className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    >
+                      <option value="random">{translate("Random (All)")}</option>
+                      <option value="viettel">Viettel</option>
+                      <option value="vinaphone">Vinaphone</option>
+                      <option value="vnpt">VNPT</option>
+                      <option value="fpt">FPT</option>
+                    </select>
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-2 text-xs font-medium cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={form.autoDistribute !== false}
+                    onChange={(e) => onChange("autoDistribute", e.target.checked)}
+                    disabled={saving}
+                    className="rounded border-border text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <span>{translate("Auto-distribute pools across all Provider Accounts (Account 1 → Pool 1, Account 2 → Pool 2...)")}</span>
+                </label>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="ckey-modal-tinhthanh" className="text-xs font-medium mb-1 block">{translate("Province / City")}</label>
+                    <select
+                      id="ckey-modal-tinhthanh"
+                      value={form.tinhthanh}
+                      onChange={(e) => onChange("tinhthanh", Number(e.target.value))}
+                      disabled={saving}
+                      className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    >
+                      {Object.entries(TINH_THANH_CODES).map(([code, name]) => (
+                        <option key={code} value={code}>{name} (Mã {code})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="ckey-modal-nhamang" className="text-xs font-medium mb-1 block">{translate("ISP")}</label>
+                    <select
+                      id="ckey-modal-nhamang"
+                      value={form.nhamang}
+                      onChange={(e) => onChange("nhamang", e.target.value)}
+                      disabled={saving}
+                      className="w-full h-10 px-3 text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900 text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    >
+                      <option value="random">{translate("Random (All)")}</option>
+                      <option value="viettel">Viettel</option>
+                      <option value="vinaphone">Vinaphone</option>
+                      <option value="vnpt">VNPT</option>
+                      <option value="fpt">FPT</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="ckey-modal-poolname" className="text-xs font-medium mb-1 block">{translate("Pool Name (Optional)")}</label>
+                  <Input
+                    id="ckey-modal-poolname"
+                    placeholder={`CKEY Xoay - ${TINH_THANH_CODES[form.tinhthanh] || "Random"}`}
+                    value={form.poolName}
+                    onChange={(e) => onChange("poolName", e.target.value)}
+                    disabled={saving}
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 pt-2">
+              <Button fullWidth variant="primary" onClick={onSync} disabled={!form.keyproxy.trim() || saving}>
+                {saving
+                  ? translate("Creating Pools...")
+                  : isBatch
+                  ? `⚡ ${translate("Auto Create")} ${form.count || 5} Pools`
+                  : translate("Fetch IP & Save to Pool")}
+              </Button>
+              <Button fullWidth variant="ghost" onClick={onClose} disabled={saving}>
+                {translate("Close")}
+              </Button>
             </div>
           </>
-        )}
+        ) : (
+          /* Static Proxy Tab */
+          <div className="flex flex-col gap-3">
+            <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-3 flex flex-col gap-1">
+              <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">🛡️ CKEY Dedicated Static Proxy</p>
+              <p className="text-xs text-text-muted">
+                IP tĩnh cố định (US / Viettel / VNPT / FPT) chuẩn 1 IP/tài khoản. Phù hợp tuyệt đối cho Freebuff, OpenAI, Claude để chống ban tài khoản.
+              </p>
+            </div>
 
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 pt-2">
-          <Button fullWidth variant="primary" onClick={onSync} disabled={!form.keyproxy.trim() || saving}>
-            {saving
-              ? translate("Creating Pools...")
-              : isBatch
-              ? `⚡ ${translate("Auto Create")} ${form.count || 5} Pools`
-              : translate("Fetch IP & Save to Pool")}
-          </Button>
-          <Button fullWidth variant="ghost" onClick={onClose} disabled={saving}>
-            {translate("Close")}
-          </Button>
-        </div>
+            <div>
+              <label htmlFor="ckey-modal-api-key" className="text-xs font-medium mb-1 block">CKEY API Key</label>
+              <div className="flex gap-2">
+                <Input
+                  id="ckey-modal-api-key"
+                  type="password"
+                  placeholder="ck_xxxxxxxxxxxx"
+                  value={form.ckeyKey || form.ckeyApiKey || ""}
+                  onChange={(e) => {
+                    onChange("ckeyKey", e.target.value);
+                    onChange("ckeyApiKey", e.target.value);
+                  }}
+                  disabled={staticLoading}
+                  className="flex-1"
+                />
+                <Button
+                  variant="primary"
+                  onClick={fetchStaticProxies}
+                  disabled={!(form.ckeyKey || form.ckeyApiKey)?.trim() || staticLoading}
+                >
+                  {staticLoading ? "Đang tải..." : "🔍 Tải danh sách"}
+                </Button>
+              </div>
+              <p className="text-[11px] text-text-muted mt-1">
+                Lấy từ <a href="https://ckey.vn" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">ckey.vn</a> → Profile → API Key
+              </p>
+            </div>
+
+            {staticError && (
+              <p className="text-xs text-red-500 bg-red-500/10 p-2 rounded border border-red-500/20">{staticError}</p>
+            )}
+
+            {/* List of Static Proxies */}
+            {staticProxies.length > 0 ? (
+              <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
+                <p className="text-xs font-semibold text-text-main">
+                  Danh sách Proxy Tĩnh đang sở hữu ({staticProxies.length}):
+                </p>
+                {staticProxies.map((item) => (
+                  <div
+                    key={item.idproxy}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 rounded-lg border border-border/60 bg-black/5 dark:bg-white/5 gap-2 text-xs"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 font-mono font-medium text-text-main">
+                        <span>{item.ip}:{item.port}</span>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-sans bg-primary/10 text-primary font-semibold">
+                          {item.loaiproxy || "US"}
+                        </span>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-sans font-semibold ${item.is_expired ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-600"}`}>
+                          {item.is_expired ? "Hết hạn" : "Còn hạn"}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-text-muted mt-0.5">
+                        User: {item.user} | Pass: {item.password} | Hạn: {item.time_expire_text || "—"}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => handleSyncStaticToPool(item)}
+                        disabled={syncingId === item.idproxy}
+                      >
+                        {syncingId === item.idproxy ? "Đang thêm..." : "➕ Vào Pool"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleRenewStatic(item)}
+                        disabled={renewingId === item.idproxy}
+                        title="Gia hạn thêm 30 ngày"
+                      >
+                        {renewingId === item.idproxy ? "..." : "🔄 Gia hạn"}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : !staticLoading && (
+              <p className="text-xs text-text-muted italic text-center py-2">
+                Chưa có proxy tĩnh nào được tải. Nhập CKEY API Key và bấm &quot;Tải danh sách&quot;.
+              </p>
+            )}
+
+            {/* Buy Static Proxy Section */}
+            <div className="pt-2 border-t border-border/50">
+              <button
+                type="button"
+                onClick={() => setShowBuyForm((v) => !v)}
+                className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              >
+                <span>{showBuyForm ? "▼ Thu gọn form mua" : "🛒 + Mua Proxy Tĩnh Mới bằng số dư CKEY"}</span>
+              </button>
+
+              {showBuyForm && (
+                <div className="mt-2 p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 flex flex-col gap-2 text-xs">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block mb-1 font-medium">Loại Proxy</label>
+                      <select
+                        value={buyForm.loaiproxy}
+                        onChange={(e) => setBuyForm((p) => ({ ...p, loaiproxy: e.target.value }))}
+                        className="w-full h-8 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900"
+                      >
+                        <option value="US">US (Hoa Kỳ)</option>
+                        <option value="Viettel">Viettel</option>
+                        <option value="FPT">FPT</option>
+                        <option value="VNPT">VNPT</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block mb-1 font-medium">Giao thức</label>
+                      <select
+                        value={buyForm.type}
+                        onChange={(e) => setBuyForm((p) => ({ ...p, type: e.target.value }))}
+                        className="w-full h-8 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-zinc-900"
+                      >
+                        <option value="HTTP">HTTP</option>
+                        <option value="SOCKS5">SOCKS5</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block mb-1 font-medium">Proxy User</label>
+                      <Input
+                        value={buyForm.user}
+                        onChange={(e) => setBuyForm((p) => ({ ...p, user: e.target.value }))}
+                        placeholder="u1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-1 font-medium">Proxy Pass</label>
+                      <Input
+                        value={buyForm.password}
+                        onChange={(e) => setBuyForm((p) => ({ ...p, password: e.target.value }))}
+                        placeholder="p1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block mb-1 font-medium">Số ngày</label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={buyForm.ngay}
+                        onChange={(e) => setBuyForm((p) => ({ ...p, ngay: Number(e.target.value) }))}
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <Button
+                        fullWidth
+                        variant="primary"
+                        onClick={handleBuyStatic}
+                        disabled={buying || !(form.ckeyKey || form.ckeyApiKey)?.trim()}
+                      >
+                        {buying ? "Đang mua..." : "Mua ngay"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-border/50">
+              <Button fullWidth variant="ghost" onClick={onClose}>
+                {translate("Close")}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </Modal>
   );
@@ -293,6 +637,7 @@ function PoolRow({ pool, selected, testing, rotating, onSelect, onToggle, onTest
             <Badge variant={getStatusVariant(pool.testStatus)} size="sm" dot>{pool.testStatus || "unknown"}</Badge>
             <Badge variant={pool.isActive ? "success" : "default"} size="sm">{pool.isActive ? "active" : "inactive"}</Badge>
             {pool.type === "ckey" && <Badge variant="success" size="sm">{translate("ckey rotating")}</Badge>}
+            {pool.type === "ckey-static" && <Badge variant="success" size="sm">ckey static {pool.loaiproxy || "US"}</Badge>}
             {pool.type === "vercel" && <Badge variant="default" size="sm">vercel relay</Badge>}
             {pool.type === "cloudflare" && <Badge variant="default" size="sm">cloudflare relay</Badge>}
             {pool.type === "deno" && <Badge variant="default" size="sm">deno relay</Badge>}
@@ -300,6 +645,7 @@ function PoolRow({ pool, selected, testing, rotating, onSelect, onToggle, onTest
             <Badge variant="default" size="sm">{pool.boundConnectionCount || 0} bound</Badge>
           </div>
           <p className="text-xs text-text-muted truncate mt-1">{pool.proxyUrl}</p>
+          {pool.time_expire_text && <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">Hạn: {pool.time_expire_text}</p>}
           {pool.noProxy ? <p className="text-xs text-text-muted truncate">No proxy: {pool.noProxy}</p> : null}
           <p className="text-[11px] text-text-muted mt-1">Last tested: {formatDateTime(pool.lastTestedAt)}{pool.lastError ? ` · ${pool.lastError}` : ""}</p>
         </div>
@@ -680,10 +1026,12 @@ export default function ProxyPoolsPage() {
     try {
       const res = await fetch("/api/settings", { cache: "no-store" });
       const settings = await res.json();
-      if (settings?.ckeyKeyproxy) {
+      if (settings) {
         setCkeyForm((prev) => ({
           ...prev,
-          keyproxy: prev.keyproxy || settings.ckeyKeyproxy,
+          keyproxy: prev.keyproxy || settings.ckeyKeyproxy || "",
+          ckeyKey: prev.ckeyKey || settings.ckeyApiKey || settings.ckeyKey || "",
+          ckeyApiKey: prev.ckeyApiKey || settings.ckeyApiKey || settings.ckeyKey || "",
         }));
       }
     } catch {
@@ -1282,6 +1630,7 @@ export default function ProxyPoolsPage() {
         saving={ckeySyncing}
         onChange={(field, value) => setCkeyForm((prev) => ({ ...prev, [field]: value }))}
         onSync={handleCkeySync}
+        onRefreshPools={fetchProxyPools}
         onClose={closeCkeyModal}
       />
 
