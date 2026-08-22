@@ -1,6 +1,4 @@
 import p0 from "./agentrouter.js";
-import p2 from "./alicode-intl.js";
-import p3 from "./alicode.js";
 import p4 from "./anthropic.js";
 import p5 from "./antigravity.js";
 import p6 from "./assemblyai.js";
@@ -126,8 +124,6 @@ import p127 from "./nousresearch.js";
 
 export default [
   p0,
-  p2,
-  p3,
   p4,
   p5,
   p6,
