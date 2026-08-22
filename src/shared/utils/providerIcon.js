@@ -34,7 +34,6 @@ const SVG_PROVIDERS = new Set([
 const PNG_PROVIDERS = new Set([
   "devin-cli",
   "vercel",
-  "venice",
   "perplexity-agent",
   "novita",
   "agentrouter",
@@ -64,7 +63,7 @@ export function markProviderIconMissing(providerId) {
 const POPULAR_PROVIDERS = [
   "openai", "anthropic", "claude", "gemini", "github", "copilot", "cursor",
   "grok-cli", "kiro", "deepseek", "qwen", "mistral", "openrouter",
-  "together", "cohere", "ollama", "cerebras", "sambanova",
+  "cohere", "ollama", "cerebras",
   "vllm", "vertex", "azure", "aws-polly", "deepgram", "elevenlabs",
   "searxng", "jina-ai", "tavily", "perplexing", "alicode", "cline", "roo", "kilo", "codex"
 ];

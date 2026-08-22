@@ -61,17 +61,12 @@ import p79 from "./qoder.js";
 import p80 from "./qwen.js";
 import p81 from "./recraft.js";
 import p82 from "./runwayml.js";
-import p83 from "./sambanova.js";
 import p84 from "./sdwebui.js";
 import p85 from "./searchapi.js";
 import p86 from "./searxng.js";
 import p87 from "./serper.js";
-import p89 from "./snowflake.js";
 import p90 from "./stability-ai.js";
 import p91 from "./tavily.js";
-import p92 from "./together.js";
-import p93 from "./upstage.js";
-import p94 from "./venice.js";
 import p95 from "./vercel-ai-gateway.js";
 import p96 from "./vertex-partner.js";
 import p97 from "./vertex.js";
@@ -96,7 +91,6 @@ import p116 from "./bazaarlink.js";
 import p117 from "./bluesminds.js";
 import p118 from "./kilo-gateway.js";
 import p119 from "./llm7.js";
-import p121 from "./tencent.js";
 import p122 from "./freebuff.js";
 import p123 from "./fastrouter.js";
 import p124 from "./tokenharbor.js";
@@ -168,17 +162,12 @@ export default [
   p80,
   p81,
   p82,
-  p83,
   p84,
   p85,
   p86,
   p87,
-  p89,
   p90,
   p91,
-  p92,
-  p93,
-  p94,
   p95,
   p96,
   p97,
@@ -203,7 +192,6 @@ export default [
   p117,
   p118,
   p119,
-  p121,
   p122,
   p123,
   p124,

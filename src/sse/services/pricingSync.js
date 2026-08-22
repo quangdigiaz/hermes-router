@@ -132,7 +132,6 @@ function resolveProvider(entry, modelId) {
     bedrock: "bedrock",
     deepseek: "deepseek",
     openrouter: "openrouter",
-    together_ai: "together",
     deepgram: "deepgram",
     mistral: "mistral",
     cohere: "cohere",

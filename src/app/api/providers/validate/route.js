@@ -378,7 +378,6 @@ export async function POST(request) {
         case "deepseek":
         case "xai":
         case "mistral":
-        case "together":
         case "cerebras":
         case "cohere":
         case "ollama":

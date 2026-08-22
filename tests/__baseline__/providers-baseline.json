@@ -752,37 +752,6 @@
     "tokenUrl": "https://chat.qwen.ai/api/v1/oauth2/token",
     "category": "oauth"
   },
-  "sambanova": {
-    "baseUrl": "https://api.sambanova.ai/v1/chat/completions",
-    "validateUrl": "https://api.sambanova.ai/v1/models",
-    "format": "openai",
-    "category": "apikey"
-  },
-  "snowflake": {
-    "baseUrl": "https://{account}.snowflakecomputing.com/api/v2",
-    "validateUrl": "https://{account}.snowflakecomputing.com/api/v2",
-    "format": "openai",
-    "category": "apikey"
-  },
-  "together": {
-    "baseUrl": "https://api.together.xyz/v1/chat/completions",
-    "validateUrl": "https://api.together.xyz/v1/models",
-    "format": "openai",
-    "category": "apikey"
-  },
-  "upstage": {
-    "baseUrl": "https://api.upstage.ai/v1/chat/completions",
-    "validateUrl": "https://api.upstage.ai/v1/models",
-    "format": "openai",
-    "category": "apikey"
-  },
-  "venice": {
-    "baseUrl": "https://api.venice.ai/api/v1/chat/completions",
-    "validateUrl": "https://api.venice.ai/api/v1/models",
-    "thinkingFormat": "openai",
-    "format": "openai",
-    "category": "apikey"
-  },
   "vercel-ai-gateway": {
     "baseUrl": "https://ai-gateway.vercel.sh/v1/chat/completions",
     "thinkingFormat": "openai",
@@ -1003,12 +972,6 @@
     "validateUrl": "https://api.llm7.io/v1/models",
     "format": "openai",
     "category": "freeTier"
-  },
-  "tencent": {
-    "baseUrl": "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
-    "validateUrl": "https://api.hunyuan.cloud.tencent.com/v1/models",
-    "format": "openai",
-    "category": "apikey"
   },
   "freebuff": {
     "baseUrl": "https://www.codebuff.com/api/v1/chat/completions",

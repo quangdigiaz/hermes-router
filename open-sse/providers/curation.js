@@ -38,7 +38,6 @@ export const CURATION_DATA = {
   ollama:          { curatedTier: "free", curatedPriority: 95,  badges: ["free", "local"] },
   openrouter:      { curatedTier: "free", curatedPriority: 90,  badges: ["free", "popular"] },
   "cloudflare-ai": { curatedTier: "free", curatedPriority: 85,  badges: ["free"] },
-  sambanova:       { curatedTier: "free", curatedPriority: 80,  badges: ["free"] },
   zenmux:          { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
   bai:             { curatedTier: "free", curatedPriority: 75,  badges: ["free", "popular", "cheap"] },
   llm7:            { curatedTier: "free", curatedPriority: 85,  badges: ["free", "cheap", "popular"] },

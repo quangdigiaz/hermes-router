@@ -90,17 +90,6 @@ const PROTECTED = {
       "gpt-5.6-luna-thinking-agentic",
     ],
   },
-  sambanova: {
-    category: "apikey",
-    authType: "apikey",
-    modelIds: [
-      "MiniMax-M2.7",
-      "DeepSeek-V3.2",
-      "Llama-4-Maverick-17B-128E-Instruct",
-      "Meta-Llama-3.3-70B-Instruct",
-      "gpt-oss-120b",
-    ],
-  },
 };
 
 function lookupTokens(entry) {

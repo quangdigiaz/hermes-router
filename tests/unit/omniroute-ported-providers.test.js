@@ -15,39 +15,10 @@ import { isProviderAllowed } from "@/sse/services/auth.js";
  * list was aspirational, not factual.
  */
 const PORTED_PROVIDER_IDS = [
-  "sambanova",
-  "snowflake",
-  "upstage",
   "volcengine",
 ];
 
-describe("SambaNova compatibility metadata", () => {
-  const sambanova = REGISTRY.find((entry) => entry.id === "sambanova");
-
-  it("preserves the visible alias and curated model catalog", () => {
-    expect(sambanova.alias).toBe("samba");
-    expect(sambanova.uiAlias).toBe("samba");
-    expect(sambanova.models.map((model) => model.id)).toEqual([
-      "MiniMax-M2.7",
-      "DeepSeek-V3.2",
-      "Llama-4-Maverick-17B-128E-Instruct",
-      "Meta-Llama-3.3-70B-Instruct",
-      "gpt-oss-120b",
-    ]);
-  });
-
-  it("resolves the additive alias without hiding SambaNova from ACL", async () => {
-    expect(sambanova.aliases).toEqual(["sambanova-ai"]);
-    expect(sambanova.authModes).toEqual(["apikey"]);
-    expect(resolveProviderId("sambanova-ai")).toBe("sambanova");
-    expect(ALIAS_TO_ID["sambanova-ai"]).toBe("sambanova");
-    expect(AI_PROVIDERS.sambanova.alias).toBe("samba");
-    expect(getAclProviderList().some((provider) => provider.alias === "samba")).toBe(true);
-    expect(await isProviderAllowed({ allowedProviders: ["sambanova-ai"] }, "sambanova-ai")).toBe(true);
-  });
-});
-
-const REMOVED_PROVIDER_IDS = ["deepinfra", "heroku", "llamagate", "hyperbolic", "morph", "ovhcloud", "nscale", "nebius", "perplexity", "perplexity-web", "siliconflow"];
+const REMOVED_PROVIDER_IDS = ["deepinfra", "heroku", "llamagate", "hyperbolic", "morph", "ovhcloud", "nscale", "nebius", "perplexity", "perplexity-web", "siliconflow", "venice", "upstage", "together", "tencent", "snowflake", "sambanova"];
 
 describe("OmniRoute-ported providers", () => {
   it("does not register removed providers", () => {
