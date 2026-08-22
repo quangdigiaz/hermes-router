@@ -116,24 +116,65 @@ export async function getLlmKeys(ckeyKey) {
   return ckeyFetch(buildUrl("/api/llm/keys", { key: ckeyKey }));
 }
 
-// ── Proxy tĩnh ─────────────────────────────────────────────
+// ── Proxy tĩnh (Static Dedicated Proxy) ────────────────────
 export async function listProxyStatic(ckeyKey) {
-  return ckeyFetch(buildUrl("/api/proxy-static/list", { key: ckeyKey }));
+  if (!ckeyKey) throw new Error("CKEY_API_KEY required");
+  const res = await ckeyFetch(buildUrl("/api/proxy-static/list", { key: ckeyKey }));
+  if (!res.ok || !res.json) return res;
+
+  const items = res.json?.data?.items;
+  if (Array.isArray(items)) {
+    res.json.data.items = items.map((item) => {
+      const { ip, port, user, password, type } = item;
+      const protocol = (type || "").toLowerCase() === "socks5" ? "socks5" : "http";
+      let proxyUrl = "";
+      if (user && password) {
+        proxyUrl = `${protocol}://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${ip}:${port}`;
+      } else {
+        proxyUrl = `${protocol}://${ip}:${port}`;
+      }
+      return {
+        ...item,
+        proxyUrl,
+      };
+    });
+  }
+  return res;
 }
 
-export async function buyProxyStatic(ckeyKey, opts) {
+export async function buyProxyStatic(ckeyKey, { loaiproxy = "US", type = "HTTP", user, password, ngay = 30, soluong = 1 } = {}) {
+  if (!ckeyKey) throw new Error("CKEY_API_KEY required");
   return ckeyFetch(buildUrl("/api/proxy-static/buy"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key: ckeyKey, ...opts }),
+    body: JSON.stringify({ key: ckeyKey, loaiproxy, type, user, password, ngay, soluong }),
   });
 }
 
-export async function changeProxyStaticIp(ckeyKey, opts) {
+export async function renewProxyStatic(ckeyKey, { idproxy, loaiproxy = "US", ngay = 30 } = {}) {
+  if (!ckeyKey) throw new Error("CKEY_API_KEY required");
+  return ckeyFetch(buildUrl("/api/proxy-static/renew"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key: ckeyKey, idproxy, loaiproxy, ngay }),
+  });
+}
+
+export async function changeProxyStaticAuth(ckeyKey, { idproxy, loaiproxy = "US", type = "HTTP", user, password } = {}) {
+  if (!ckeyKey) throw new Error("CKEY_API_KEY required");
+  return ckeyFetch(buildUrl("/api/proxy-static/change-auth"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key: ckeyKey, idproxy, loaiproxy, type, user, password }),
+  });
+}
+
+export async function changeProxyStaticIp(ckeyKey, { idproxy, loaiproxy = "US", loaiproxynhan = "US", type = "HTTP", user, password } = {}) {
+  if (!ckeyKey) throw new Error("CKEY_API_KEY required");
   return ckeyFetch(buildUrl("/api/proxy-static/change-ip"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key: ckeyKey, ...opts }),
+    body: JSON.stringify({ key: ckeyKey, idproxy, loaiproxy, loaiproxynhan, type, user, password }),
   });
 }
 
