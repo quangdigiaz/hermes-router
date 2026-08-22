@@ -3,9 +3,6 @@ import { PROVIDERS } from "../config/providers.js";
 import { parseVertexSaJson, refreshVertexToken, refreshGoogleToken } from "../services/tokenRefresh.js";
 import { proxyAwareFetch } from "../utils/proxyFetch.js";
 
-// Cache project IDs resolved from raw API keys { apiKey → projectId }
-const projectIdCache = new Map();
-
 /**
  * Parse Google ADC user credential JSON from apiKey string.
  * This is the format produced by `gcloud auth application-default login`.
@@ -29,31 +26,9 @@ function parseVertexAdcJson(apiKey) {
 }
 
 /**
- * Resolve GCP project ID from a raw Vertex API key.
- * Sends a dummy 404 request and parses "projects/{id}" from the error message.
- */
-async function resolveProjectId(apiKey) {
-  if (projectIdCache.has(apiKey)) return projectIdCache.get(apiKey);
-
-  const res = await fetch(
-    `https://aiplatform.googleapis.com/v1/publishers/google/models/__probe__:generateContent?key=${apiKey}`,
-    { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }
-  );
-  const json = await res.json().catch(() => null);
-  const msg = json?.[0]?.error?.message || json?.error?.message || "";
-  const match = msg.match(/projects\/([^/]+)\//);
-  const projectId = match?.[1] || null;
-
-  if (projectId) projectIdCache.set(apiKey, projectId);
-  return projectId;
-}
-
-/**
  * VertexExecutor - Google Cloud Vertex AI
  *
- * "vertex"         → Gemini models via regional/global Vertex endpoint
- * "vertex-partner" → Partner models (Llama, Mistral, GLM, DeepSeek, Qwen)
- *                    via global OpenAI-compatible endpoint
+ * "vertex" → Gemini models via regional/global Vertex endpoint
  *
  * Auth: SA JSON (stored as apiKey) → JWT assertion → Bearer token (via jose)
  * Token is minted/cached in tokenRefresh.js, not here.
@@ -72,13 +47,6 @@ export class VertexExecutor extends BaseExecutor {
       saJson?.project_id ||
       adcJson?.quota_project_id ||
       credentials?.providerSpecificData?.projectId;
-
-    if (this.provider === "vertex-partner") {
-      // Partner models require project_id in path regardless of auth method
-      if (!projectId) throw new Error("Vertex partner models require a project_id. Add it in providerSpecificData or use Service Account JSON.");
-      const url = `https://aiplatform.googleapis.com/v1/projects/${projectId}/locations/global/endpoints/openapi/chat/completions`;
-      return rawKey ? `${url}?key=${rawKey}` : url;
-    }
 
     // Gemini on Vertex
     const action = stream ? "streamGenerateContent" : "generateContent";
@@ -151,14 +119,7 @@ export class VertexExecutor extends BaseExecutor {
       credentials.accessToken = result.accessToken;
     }
 
-    // vertex-partner with raw key: auto-resolve project_id if not provided
-    if (this.provider === "vertex-partner" && !saJson && !adcJson && !credentials?.providerSpecificData?.projectId) {
-      const projectId = await resolveProjectId(credentials.apiKey);
-      if (!projectId) throw new Error("Vertex: could not resolve project_id from API key. Please add it manually in provider settings.");
-      log?.debug?.("VERTEX", `Resolved project_id: ${projectId}`);
-      credentials.providerSpecificData = { ...credentials.providerSpecificData, projectId };
-    }
-
+    // Raw API key: use global publishers endpoint with ?key= param
     const url = this.buildUrl(model, stream, 0, credentials);
     const headers = this.buildHeaders(credentials, stream);
     const transformedBody = this.transformRequest(model, body, stream, credentials);

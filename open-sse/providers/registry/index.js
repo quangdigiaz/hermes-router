@@ -68,7 +68,6 @@ import p87 from "./serper.js";
 import p90 from "./stability-ai.js";
 import p91 from "./tavily.js";
 import p95 from "./vercel-ai-gateway.js";
-import p96 from "./vertex-partner.js";
 import p97 from "./vertex.js";
 import p98 from "./volcengine-ark.js";
 import p99 from "./volcengine.js";
@@ -169,7 +168,6 @@ export default [
   p90,
   p91,
   p95,
-  p96,
   p97,
   p98,
   p99,

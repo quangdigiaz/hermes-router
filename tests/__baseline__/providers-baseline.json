@@ -764,11 +764,6 @@
     "format": "openai",
     "category": "apikey"
   },
-  "vertex-partner": {
-    "baseUrl": "https://aiplatform.googleapis.com",
-    "format": "openai",
-    "category": "apikey"
-  },
   "vertex": {
     "baseUrl": "https://aiplatform.googleapis.com",
     "format": "vertex",

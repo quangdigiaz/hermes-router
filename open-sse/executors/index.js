@@ -37,7 +37,6 @@ const executors = {
   cursor: new CursorExecutor(),
   cu: new CursorExecutor(), // Alias for cursor
   vertex: new VertexExecutor("vertex"),
-  "vertex-partner": new VertexExecutor("vertex-partner"),
   qwen: new QwenExecutor(),
   opencode: new OpenCodeExecutor(),
   "opencode-go": new OpenCodeGoExecutor(),

@@ -490,20 +490,6 @@ export async function POST(request) {
           break;
         }
 
-        case "vertex-partner": {
-          const saJson = (() => { try { const p = JSON.parse(apiKey); return p.type === "service_account" ? p : null; } catch { return null; } })();
-          if (saJson) {
-            isValid = !!(saJson.client_email && saJson.private_key && saJson.project_id);
-          } else {
-            const probeRes = await fetch(
-              `https://aiplatform.googleapis.com/v1/publishers/google/models/__probe__:generateContent?key=${apiKey}`,
-              { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }
-            );
-            isValid = probeRes.status !== 401 && probeRes.status !== 403;
-          }
-          break;
-        }
-
         case "grok-web": {
           const token = cleanCookie(apiKey, "sso");
           // Cloudflare-bypass: send POST with same browser fingerprint headers as GrokWebExecutor

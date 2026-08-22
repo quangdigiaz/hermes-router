@@ -144,8 +144,7 @@ const REFRESH_HANDLERS = {
   // Kimi Code OAuth (merged into id `kimi`); legacy id still routes here
   kimi: (c, log) => refreshKimiToken(c.refreshToken, c, log),
   "kimi-coding": (c, log) => refreshKimiToken(c.refreshToken, c, log),
-  vertex: vertexRefreshHandler,
-  "vertex-partner": vertexRefreshHandler
+  vertex: vertexRefreshHandler
 };
 
 export async function getAccessToken(provider, credentials, log) {
